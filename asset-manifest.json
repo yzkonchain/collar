@@ -1,23 +1,42 @@
 {
   "files": {
     "main.css": "/rebuild/static/css/main.79e932c8.chunk.css",
-    "main.js": "/rebuild/static/js/main.c7ea0685.chunk.js",
-    "main.js.map": "/rebuild/static/js/main.c7ea0685.chunk.js.map",
+    "main.js": "/rebuild/static/js/main.c51d3ed8.chunk.js",
+    "main.js.map": "/rebuild/static/js/main.c51d3ed8.chunk.js.map",
     "runtime-main.js": "/rebuild/static/js/runtime-main.44ab179c.js",
     "runtime-main.js.map": "/rebuild/static/js/runtime-main.44ab179c.js.map",
-    "static/js/2.495609f1.chunk.js": "/rebuild/static/js/2.495609f1.chunk.js",
-    "static/js/2.495609f1.chunk.js.map": "/rebuild/static/js/2.495609f1.chunk.js.map",
+    "static/js/2.3c30a48f.chunk.js": "/rebuild/static/js/2.3c30a48f.chunk.js",
+    "static/js/2.3c30a48f.chunk.js.map": "/rebuild/static/js/2.3c30a48f.chunk.js.map",
     "index.html": "/rebuild/index.html",
     "static/css/main.79e932c8.chunk.css.map": "/rebuild/static/css/main.79e932c8.chunk.css.map",
-    "static/js/2.495609f1.chunk.js.LICENSE.txt": "/rebuild/static/js/2.495609f1.chunk.js.LICENSE.txt",
+    "static/js/2.3c30a48f.chunk.js.LICENSE.txt": "/rebuild/static/js/2.3c30a48f.chunk.js.LICENSE.txt",
     "static/media/index.css": "/rebuild/static/media/helvetica.0796970a.ttf",
     "static/media/USDC.f08e02b1.svg": "/rebuild/static/media/USDC.f08e02b1.svg",
-    "static/media/USDT.6dc09781.svg": "/rebuild/static/media/USDT.6dc09781.svg"
+    "static/media/USDT.6dc09781.svg": "/rebuild/static/media/USDT.6dc09781.svg",
+    "static/media/arrowForwardIosIcon.3a03ef61.svg": "/rebuild/static/media/arrowForwardIosIcon.3a03ef61.svg",
+    "static/media/buttonAble.81d585e8.svg": "/rebuild/static/media/buttonAble.81d585e8.svg",
+    "static/media/buttonDisabled.73e4eb6d.svg": "/rebuild/static/media/buttonDisabled.73e4eb6d.svg",
+    "static/media/buttonWhite.fc4b11a8.svg": "/rebuild/static/media/buttonWhite.fc4b11a8.svg",
+    "static/media/buttonWhiteHover.b17273db.svg": "/rebuild/static/media/buttonWhiteHover.b17273db.svg",
+    "static/media/closeMenu.1dada3f4.svg": "/rebuild/static/media/closeMenu.1dada3f4.svg",
+    "static/media/global.a578a28b.svg": "/rebuild/static/media/global.a578a28b.svg",
+    "static/media/iconInfo.dc65a086.svg": "/rebuild/static/media/iconInfo.dc65a086.svg",
+    "static/media/liteIcon.2b04ba2f.svg": "/rebuild/static/media/liteIcon.2b04ba2f.svg",
+    "static/media/mypageIcon.29a313b9.svg": "/rebuild/static/media/mypageIcon.29a313b9.svg",
+    "static/media/proIcon.734a82c9.svg": "/rebuild/static/media/proIcon.734a82c9.svg",
+    "static/media/statusAny.fbcbea3c.svg": "/rebuild/static/media/statusAny.fbcbea3c.svg",
+    "static/media/statusApproved.08d2c60d.svg": "/rebuild/static/media/statusApproved.08d2c60d.svg",
+    "static/media/statusConnectError.a14be159.svg": "/rebuild/static/media/statusConnectError.a14be159.svg",
+    "static/media/statusNewroundLeft.50a3e7fa.svg": "/rebuild/static/media/statusNewroundLeft.50a3e7fa.svg",
+    "static/media/statusNewroundRight.c2e8c251.svg": "/rebuild/static/media/statusNewroundRight.c2e8c251.svg",
+    "static/media/statusUnapproved.920a5006.svg": "/rebuild/static/media/statusUnapproved.920a5006.svg",
+    "static/media/termIcon.a6bf4fd7.svg": "/rebuild/static/media/termIcon.a6bf4fd7.svg",
+    "static/media/totalValue.6d208828.svg": "/rebuild/static/media/totalValue.6d208828.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.44ab179c.js",
-    "static/js/2.495609f1.chunk.js",
+    "static/js/2.3c30a48f.chunk.js",
     "static/css/main.79e932c8.chunk.css",
-    "static/js/main.c7ea0685.chunk.js"
+    "static/js/main.c51d3ed8.chunk.js"
   ]
 }

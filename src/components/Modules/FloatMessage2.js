@@ -15,8 +15,6 @@ const useStyles = makeStyles((theme) => ({
       color: '#495EB6',
       padding: '10px',
       width: 'auto',
-      // width: '80vw',
-      // maxWidth: '500px',
     },
   },
 }))
@@ -33,11 +31,11 @@ export default function FloatMessage2({ anchorEl, info }) {
       anchorEl={anchorEl}
       anchorOrigin={{
         vertical: 'bottom',
-        horizontal: 'right',
+        horizontal: 'left',
       }}
       transformOrigin={{
         vertical: 'top',
-        horizontal: 'right',
+        horizontal: 'left',
       }}
     >
       <div style={{ fontsize: 'Helvetica', whiteSpace: 'pre-line' }}>{info}</div>

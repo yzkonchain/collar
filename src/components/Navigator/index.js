@@ -11,7 +11,10 @@ import KeyboardIcon from '@material-ui/icons/Keyboard'
 import PersonIcon from '@material-ui/icons/Person'
 
 import Lite from '@/views/Lite'
+import MyPage from '@/views/MyPage'
 import Faucet from '@/views/Faucet'
+import Term from '@/views/Term'
+import Pro from '@/views/Pro'
 
 import { LiteIcon, TermIcon, ProIcon, MypageIcon, CloseMenuIcon } from '@/assets/svg'
 
@@ -112,6 +115,8 @@ export default function Navigator() {
             <MyListItem onClick={() => changePage('lite')} item="Lite" icon={LiteIcon} cur={curpage} />
             <MyListItem onClick={() => changePage('mypage')} item="MyPage" icon={MypageIcon} cur={curpage} />
             <MyListItem onClick={() => changePage('faucet')} item="Faucet" icon={LiteIcon} cur={curpage} />
+            <MyListItem onClick={() => changePage('term')} item="Term" icon={TermIcon} cur={curpage} />
+            <MyListItem onClick={() => changePage('pro')} item="Pro" icon={ProIcon} cur={curpage} />
             <MyListItemUrl url="https://collar.org" item="Home" icon={LiteIcon} />
           </List>
         </Box>
@@ -125,6 +130,15 @@ export default function Navigator() {
         <Switch>
           <Route path="/lite">
             <Lite />
+          </Route>
+          <Route path="/pro">
+            <Pro />
+          </Route>
+          <Route path="/term">
+            <Term />
+          </Route>
+          <Route path="/mypage">
+            <MyPage />
           </Route>
           <Route path="/faucet">
             <Faucet />

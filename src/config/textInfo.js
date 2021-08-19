@@ -17,6 +17,7 @@ const textInfo = {
           A nominal 0.01% fee is charged for each lending order.`,
   Exit: `Lenders can exit at any time before the current round ends. 
           The interest earned may differ from the originally quoted APY.`,
+  TotalValueLocked: 'TotalValueLocked',
 }
 
 export default textInfo

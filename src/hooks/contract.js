@@ -1,13 +1,27 @@
 import { ethers } from 'ethers'
 import { abi as collar, pools, poolList } from '@/config'
 import { useSnackbar } from 'notistack'
+import { Price } from '@/hooks'
 
 const ZERO = ethers.constants.Zero
+const abiToken = [
+  'function transfer(address, uint256) external',
+  'function approve(address, uint256) external',
+  'function balanceOf(address) external view returns (uint256)',
+  'function allowance(address, address) external view returns (uint256)',
+]
+const abiPool = [
+  'function earned(address) external view returns (uint256)',
+  'function sx() external view returns (uint256)',
+  'function sy() external view returns (uint256)',
+  'function sk() external view returns (uint256)',
+  'function swap_fee() public pure returns (uint256)',
+]
 
 const controller = (address, signer, abi) => {
   return new ethers.Contract(address, abi || collar, signer)
 }
-
+const formatEther = (num, n) => parseFloat(ethers.utils.formatEther(num)).toFixed(n || 3)
 const with_loss = (x) => x.mul(995).div(1000)
 
 const fetch_state = async (pool, signer) => {
@@ -33,19 +47,6 @@ const fetch_state = async (pool, signer) => {
       sk: ZERO,
     },
   }
-  const abiToken = [
-    'function transfer(address, uint256) external',
-    'function approve(address, uint256) external',
-    'function balanceOf(address) external view returns (uint256)',
-    'function allowance(address, address) external view returns (uint256)',
-  ]
-  const abiPool = [
-    'function earned(address) external view returns (uint256)',
-    'function sx() external view returns (uint256)',
-    'function sy() external view returns (uint256)',
-    'function sk() external view returns (uint256)',
-    'function swap_fee() public pure returns (uint256)',
-  ]
   const p = poolList[pool]
   const me = await signer.getAddress()
   const bond = controller(p['bond'].addr, signer, abiToken)
@@ -97,6 +98,49 @@ const fetch_state = async (pool, signer) => {
       3155692600000) /
     (p.expiry_time * 1000 - new Date())
   return init
+}
+
+const mypage_data = async (signer) => {
+  const me = await signer.getAddress()
+  const res = []
+  for (let item of pools) {
+    const data = {}
+    const ct = {
+      pool: controller(item.pool, signer),
+      bond: controller(poolList[item.pool].bond.addr, signer, abiToken),
+      want: controller(poolList[item.pool].want.addr, signer, abiToken),
+      call: controller(poolList[item.pool].call.addr, signer, abiToken),
+      coll: controller(poolList[item.pool].coll.addr, signer, abiToken),
+    }
+    ;[data.sx, data.sy, data.sk, data.bond, data.earned, data.clpt, data.call, data.coll] = await Promise.all([
+      ct.pool.sx(),
+      ct.pool.sy(),
+      ct.pool.sk(),
+      ct.bond.balanceOf(item.pool),
+      ct.pool.earned(me),
+      ct.pool.balanceOf(me),
+      ct.call.balanceOf(me),
+      ct.coll.balanceOf(me),
+    ])
+    ;[data.clpt_coll, data.clpt_want] = await ct.pool.get_dxdy(data.clpt)
+    res.push({
+      pool: item.pool,
+      coll_total: formatEther(data.sx),
+      want_total: formatEther(data.sy),
+      bond_total: formatEther(data.bond),
+      clpt: formatEther(data.clpt),
+      call: formatEther(data.call),
+      coll: formatEther(data.coll),
+      earned: formatEther(data.earned),
+      receivables:
+        formatEther(data.clpt_coll.add(data.coll)) * Price[poolList[item.pool].coll.addr] +
+        formatEther(data.clpt_want) * Price[poolList[item.pool].want.addr],
+      shareOfPoll: ((formatEther(data.clpt) / formatEther(data.sk)) * 100).toFixed(2),
+      apr: '0.00',
+      apy: '0.00',
+    })
+  }
+  return res
 }
 
 const callbackInfo = (method, status) => {
@@ -238,6 +282,7 @@ export default function contract() {
   }
   return {
     fetch_state,
+    mypage_data,
     ct: (address, signer) => controller(address, signer),
     approve: async (coin, pool, signer) => {
       await controller(coin, signer, ['function approve(address, uint256) external'])

@@ -21,6 +21,7 @@ const collar = [
   'function swap_fee() public pure returns (uint256)',
   'function burn_and_claim(uint256) public',
   'function mint_dual(uint256) public',
+  'function balanceOf(address) external view returns (uint256)',
 ]
 
 export default collar

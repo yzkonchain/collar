@@ -161,7 +161,7 @@ export default function PC({ pool, val, handleClick }) {
               </TableCell>
               <TableCell align="center">
                 <div>{parseFloat(val.clpt).toFixed(dec.balance)}</div>
-                <div className={classes.price}>~${parseFloat(val.coll * Price['COLL']).toFixed(dec.price)}</div>
+                <div className={classes.price}>~${parseFloat(val.receivables).toFixed(dec.price)}</div>
               </TableCell>
               <TableCell align="center">{parseFloat(val.clpt_apy).toFixed(dec.apy)}%</TableCell>
               <TableCell align="center">{parseFloat(val.clpt_apr).toFixed(dec.apr)}%</TableCell>

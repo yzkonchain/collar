@@ -118,7 +118,7 @@ const MyTabs = withStyles({
   return (
     <div className={classes.root}>
       <div className={classes.button}>
-        <Switch checked={round} onChange={() => setRound(!round)} className={classes.switch} disabled />
+        <Switch checked={round} onChange={() => setRound(!round)} className={classes.switch} />
         <div className={classes.switchInfo}>
           <span>NewRound</span>
           <img

@@ -51,15 +51,16 @@ export default function DetailTable({ pools }) {
     state: { signer },
   } = useContext(context)
   const { setUpdate } = useContext(mypageContext)
-  const controller = contract()
+  const CT = contract()
   const handleClick = async (type, pool) => {
+    const controller = CT(signer)
     switch (type) {
       case 'redeemAll':
       case 'repayAll':
       case 'withdrawAll':
       case 'claim':
       case 'settle':
-        if (await controller[type](pool, signer)) {
+        if (await controller[type](pool)) {
           setUpdate({})
         }
         break

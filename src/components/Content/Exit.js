@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
-import { useContext, useReducer, useMemo, useEffect, useState } from 'react'
-import { context, liteContext, tokenList } from '@/config'
+import { useContext, useReducer, useMemo, useEffect } from 'react'
+import { context, liteContext, tokenList, poolList } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 import { makeStyles } from '@material-ui/core/styles'
@@ -34,6 +34,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 const ZERO = ethers.constants.Zero
+const INIT = {
+  input: {
+    coll: ZERO,
+  },
+  output: {
+    want: ZERO,
+  },
+  tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
+  I: { coll: '' },
+  old: { coll: '' },
+}
+const format = (num) => ethers.utils.formatEther(num)
 
 export default function Exit(props) {
   const classes = useStyles()
@@ -41,36 +53,28 @@ export default function Exit(props) {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { forceUpdate, bond, want, pool, poolList, data, controller },
+    liteState: { bond, want, pool, data, controller },
     setLiteState,
+    handleClick,
   } = useContext(liteContext)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), {
-    input: {
-      coll: ZERO,
-    },
-    output: {
-      want: ZERO,
-    },
-    tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
-    I: { coll: '' },
-    old: { coll: '' },
-  })
 
+  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+  useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const _coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
-      const _want = await controller.ct(pool, signer).get_dy(_coll)
-      const fee = (ethers.utils.formatEther(_want) * (1 - ethers.utils.formatEther(data.swap.fee))).toFixed(4)
-      const min = (ethers.utils.formatEther(_want) * 0.995).toFixed(3)
+      const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
+      const want = await controller.ct(pool, signer).get_dy(coll)
+      const fee = (format(want) * (1 - format(data.swap.fee))).toFixed(4)
+      const min = (format(want) * 0.995).toFixed(3)
       const slip = (
         (parseFloat(
-          ethers.utils.formatEther(
+          format(
             data.swap.sx
               .add(data.swap.sk)
               .mul(ethers.utils.parseEther('1'))
               .div(
-                data.swap.sy.add(_want).add(data.swap.sk.mul(poolList[pool].swap_sqp).div(ethers.BigNumber.from(1e9))),
+                data.swap.sy.add(want).add(data.swap.sk.mul(poolList[pool].swap_sqp).div(ethers.BigNumber.from(1e9))),
               )
               .sub(ethers.utils.parseEther('1')),
           ),
@@ -79,24 +83,12 @@ export default function Exit(props) {
           (poolList[pool].expiry_time * 1000 - new Date()) -
         data.apy
       ).toPrecision(3)
-      if (_coll.eq(state.input.coll) === false) {
-        setState({
-          input: { coll: _coll },
-          output: { want: _want },
-          tip: { fee, min, slip },
-        })
+      if (!coll.eq(state.input.coll)) {
+        setState({ input: { coll }, output: { want }, tip: { fee, min, slip } })
         return
       }
     })()
   }, [state])
-
-  useEffect(() => {
-    setState({
-      tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
-      I: { coll: '' },
-      old: { coll: '' },
-    })
-  }, [pool])
 
   return useMemo(
     () => (
@@ -109,7 +101,7 @@ export default function Exit(props) {
                 state,
                 setState,
                 token: poolList[pool].coll.addr,
-                max: parseFloat(ethers.utils.formatEther(data.balance.coll)),
+                max: parseFloat(format(data.balance.coll)),
                 maxCondition: () => data.balance.coll.gt('0'),
               }}
               style={{ height: '90px' }}
@@ -123,32 +115,18 @@ export default function Exit(props) {
         <ApyFloatMessage
           APY={data.apy ? data.apy.toPrecision(3) : '0.00'}
           info={[
-            {
-              'Slippage tolerance': `${state.tip.slip} %`,
-            },
-            {
-              'Minimum recieved': `${state.tip.min} ${tokenList[want].symbol}`,
-            },
+            { 'Slippage tolerance': `${state.tip.slip} %` },
+            { 'Minimum recieved': `${state.tip.min} ${tokenList[want].symbol}` },
             { Route: `COLL -> ${tokenList[want].symbol}` },
-            {
-              'Nominal swap fee': `${state.tip.fee} ${tokenList[want].symbol} `,
-            },
+            { 'Nominal swap fee': `${state.tip.fee} ${tokenList[want].symbol} ` },
           ]}
         />
         <div className={classes.button}>
           <div>
-            <MyButton
-              name="Approve"
-              onClick={() => {
-                console.log('Approve')
-              }}
-            />
+            <MyButton name="Approve" onClick={() => console.log('Approve')} />
             <MyButton
               name="Exit"
-              onClick={async () => {
-                await controller.redeem(state.output.want, state.input.coll, pool, signer)
-                setLiteState({ forceUpdate: {} })
-              }}
+              onClick={async () => handleClick('redeem')(state.output.want, state.input.coll, pool)}
             />
           </div>
         </div>

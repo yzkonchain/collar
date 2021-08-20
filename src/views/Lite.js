@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
-import { useContext, useReducer, useEffect } from 'react'
+import { useContext, useReducer, useEffect, useMemo } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { context, liteContext, pools, poolList, bondList } from '@/config'
+import { context, liteContext, pools, poolList, bondList, wantList, poolSelect } from '@/config'
 import { contract } from '@/hooks'
 
 import { MyTabs, MyTabsChild } from '@/components/Modules'
@@ -61,10 +61,32 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 const ZERO = ethers.constants.Zero
+const data_zero = {
+  balance: {
+    bond: ZERO,
+    want: ZERO,
+    call: ZERO,
+    coll: ZERO,
+    clpt: ZERO,
+    collar: ZERO,
+  },
+  allowance: {
+    bond: ZERO,
+    want: ZERO,
+  },
+  earned: {
+    collar: ZERO,
+  },
+  swap: {
+    sx: ZERO,
+    sy: ZERO,
+    sk: ZERO,
+  },
+}
 
 export default function Lite() {
   const classes = useStyles()
-  const controller = contract()
+  const CT = contract()
   const {
     state: { signer },
   } = useContext(context)
@@ -72,74 +94,23 @@ export default function Lite() {
     tabs: 0,
     tabsChild: 0,
     round: false,
-    pool: pools[0]['pool'],
+    pool: pools[0].r1.pool,
     bond: pools[0]['bond'].addr,
     want: pools[0]['want'].addr,
-    pools,
-    poolList,
-    bondList,
-    wantList: [],
-    data: {
-      balance: {
-        bond: ZERO,
-        want: ZERO,
-        call: ZERO,
-        coll: ZERO,
-        clpt: ZERO,
-        collar: ZERO,
-      },
-      allowance: {
-        bond: ZERO,
-        want: ZERO,
-      },
-      earned: {
-        collar: ZERO,
-      },
-      swap: {
-        sx: ZERO,
-        sy: ZERO,
-        sk: ZERO,
-      },
-    },
-    controller,
+    data: data_zero,
+    controller: null,
     forceUpdate: {},
   })
-  useEffect(() => {
-    if (signer) {
-      ;(async () => {
-        setLiteState({
-          data: await controller.fetch_state(liteState.pool, signer),
-        })
-      })()
-    } else {
-      setLiteState({
-        data: {
-          balance: {
-            bond: ZERO,
-            want: ZERO,
-            call: ZERO,
-            coll: ZERO,
-            clpt: ZERO,
-            collar: ZERO,
-          },
-          allowance: {
-            bond: ZERO,
-            want: ZERO,
-          },
-          earned: {
-            collar: ZERO,
-          },
-          swap: {
-            sx: ZERO,
-            sy: ZERO,
-            sk: ZERO,
-          },
-        },
-      })
-    }
-  }, [signer, liteState.pool])
 
-  const { tabs, tabsChild, round } = liteState
+  const { tabs, tabsChild, pool, data, round, controller } = liteState
+
+  const handleClick = (type) =>
+    async function () {
+      if (!controller) return
+      await controller[type].apply(this, arguments)
+      setLiteState({ forceUpdate: {} })
+    }
+
   const tabsList = ['LOAN', 'FARM', 'SWAP']
   const tabsChildList = [
     ['Borrow', 'Repay'],
@@ -152,27 +123,41 @@ export default function Lite() {
     [Lend, Exit],
   ][tabs][tabsChild]
 
-  return (
-    <liteContext.Provider value={{ liteState, setLiteState }}>
-      <div className={classes.root}>
-        <div>
-          <MyTabs value={tabs} onChange={(_, v) => setLiteState({ tabs: v, tabsChild: 0 })} labels={tabsList} />
-          <div className={classes.content}>
-            <MyTabsChild
-              tabs={tabs}
-              value={tabsChild}
-              labels={tabsChildList}
-              onChange={(_, v) => setLiteState({ tabsChild: v })}
-              round={{ round, setRound: (round) => setLiteState({ round }) }}
-            />
-            <PoolSelector />
-            <Content />
+  useEffect(() => {
+    if (signer) {
+      ;(async () => {
+        const controller = CT(signer)
+        setLiteState({ data: await controller.fetch_state(pool), controller })
+      })()
+    } else {
+      if (data !== data_zero) setLiteState({ data: data_zero, controller: null })
+    }
+  }, [signer, pool])
+
+  return useMemo(
+    () => (
+      <liteContext.Provider value={{ liteState, setLiteState, handleClick }}>
+        <div className={classes.root}>
+          <div>
+            <MyTabs value={tabs} onChange={(_, v) => setLiteState({ tabs: v, tabsChild: 0 })} labels={tabsList} />
+            <div className={classes.content}>
+              <MyTabsChild
+                tabs={tabs}
+                value={tabsChild}
+                labels={tabsChildList}
+                onChange={(_, v) => setLiteState({ tabsChild: v })}
+                round={{ round, setRound: (round) => setLiteState({ round }) }}
+              />
+              <PoolSelector />
+              <Content />
+            </div>
           </div>
+          <div></div>
+          <div></div>
+          <Info />
         </div>
-        <div></div>
-        <div></div>
-        <Info />
-      </div>
-    </liteContext.Provider>
+      </liteContext.Provider>
+    ),
+    [liteState],
   )
 }

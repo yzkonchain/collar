@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
-import { useCallback, useContext, useReducer, useMemo, useEffect, useState } from 'react'
-import { context, liteContext, tokenList } from '@/config'
+import { useContext, useReducer, useMemo, useEffect } from 'react'
+import { context, liteContext, tokenList, poolList } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 import { makeStyles } from '@material-ui/core/styles'
@@ -54,6 +54,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 const ZERO = ethers.constants.Zero
+const INIT = {
+  input: {
+    want: ZERO,
+    coll: ZERO,
+  },
+  output: {
+    clpt: ZERO,
+  },
+  tip: { share: '0.000', poolBalance: '0.00', slip: '0.00' },
+  I: { want: '', coll: '' },
+  old: { want: '', coll: '' },
+}
+const format = (num) => ethers.utils.formatEther(num)
 
 export default function Repay(props) {
   const classes = useStyles()
@@ -61,43 +74,29 @@ export default function Repay(props) {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { forceUpdate, bond, want, pool, poolList, data, controller },
+    liteState: { bond, want, pool, data, controller },
     setLiteState,
+    handleClick,
   } = useContext(liteContext)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), {
-    input: {
-      want: ZERO,
-      coll: ZERO,
-    },
-    output: {
-      clpt: ZERO,
-    },
-    tip: { share: '0.000', pool: '0.00', slip: '0.00' },
-    I: { want: '', coll: '' },
-    old: { want: '', coll: '' },
-  })
+  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
 
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const _want = ethers.utils.parseUnits(state.I.want || '0', 18)
-      const _coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
-      const _clpt = await controller.ct(pool, signer).get_dk(_coll, _want)
-
-      const _pool = (ethers.utils.formatEther(data.swap.sx) / ethers.utils.formatEther(data.swap.sy)).toPrecision(3)
-      const share = (
-        (ethers.utils.formatEther(data.balance.clpt) / ethers.utils.formatEther(data.swap.sk)) *
-        100
-      ).toPrecision(3)
+      const want = ethers.utils.parseUnits(state.I.want || '0', 18)
+      const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
+      const clpt = await controller.ct(pool, signer).get_dk(coll, want)
+      const poolBalance = (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3)
+      const share = ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3)
       const slip = (
         (parseFloat(
-          ethers.utils.formatEther(
+          format(
             data.swap.sx
-              .add(_coll)
+              .add(coll)
               .add(data.swap.sk)
               .mul(ethers.utils.parseEther('1'))
               .div(
-                data.swap.sy.add(_want).add(data.swap.sk.mul(poolList[pool].swap_sqp).div(ethers.BigNumber.from(1e9))),
+                data.swap.sy.add(want).add(data.swap.sk.mul(poolList[pool].swap_sqp).div(ethers.BigNumber.from(1e9))),
               )
               .sub(ethers.utils.parseEther('1')),
           ),
@@ -107,23 +106,17 @@ export default function Repay(props) {
         data.apy
       ).toPrecision(3)
 
-      if (_want.eq(state.input.want) === false || _coll.eq(state.input.coll) === false) {
+      if (want.eq(state.input.want) === false || coll.eq(state.input.coll) === false) {
         setState({
-          input: { want: _want, coll: _coll },
-          output: { clpt: _clpt },
-          tip: { share, pool: _pool, slip },
+          input: { want, coll },
+          output: { clpt },
+          tip: { share, slip, poolBalance },
         })
       }
     })()
   }, [state])
 
-  useEffect(() => {
-    setState({
-      tip: { share: '0.000', pool: '0.00', slip: '0.00' },
-      I: { want: '', coll: '' },
-      old: { want: '', coll: '' },
-    })
-  }, [pool])
+  useEffect(() => state == INIT || setState(INIT), [pool])
 
   return useMemo(
     () => (
@@ -136,7 +129,7 @@ export default function Repay(props) {
                 state,
                 setState,
                 token: want,
-                max: parseFloat(ethers.utils.formatEther(data.balance.want)),
+                max: parseFloat(format(data.balance.want)),
                 maxCondition: () => data.allowance.want.gt('100000000000000000000000000000000'),
               }}
               style={{ height: '90px' }}
@@ -147,7 +140,7 @@ export default function Repay(props) {
                 state,
                 setState,
                 token: poolList[pool].coll.addr,
-                max: parseFloat(ethers.utils.formatEther(data.balance.coll)),
+                max: parseFloat(format(data.balance.coll)),
                 maxCondition: () => data.balance.coll.gt('0'),
               }}
               style={{ height: '90px' }}
@@ -162,42 +155,21 @@ export default function Repay(props) {
         <ApyFloatMessage
           APY={`todo`}
           info={[
-            {
-              'Share of Pool': `${state.tip.share} %`,
-            },
-            {
-              'Pool Balance': `1 ${tokenList[want].symbol} = ${state.tip.pool} COLL`,
-            },
-            {
-              'Slippage tolerance': `${state.tip.slip} %`,
-            },
+            { 'Share of Pool': `${state.tip.share} %` },
+            { 'Pool Balance': `1 ${tokenList[want].symbol} = ${state.tip.poolBalance} COLL` },
+            { 'Slippage tolerance': `${state.tip.slip} %` },
           ]}
         />
         <div className={classes.button}>
           <div>
-            <MyButton
-              name="Approve"
-              onClick={async () => {
-                await controller.approve(want, pool, signer)
-                setLiteState({ forceUpdate: {} })
-              }}
-            />
+            <MyButton name="Approve" onClick={async () => handleClick('approve')(want, pool)} />
             <MyButton
               name="Deposit"
-              onClick={async () => {
-                await controller.deposit(state.input.want, state.input.coll, state.output.clpt, pool, signer)
-                setLiteState({ forceUpdate: {} })
-              }}
+              onClick={async () => handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt, pool)}
             />
           </div>
           <div>
-            <MyButton
-              name="Claim"
-              onClick={async () => {
-                await controller.claim(pool, signer)
-                setLiteState({ forceUpdate: {} })
-              }}
-            />
+            <MyButton name="Claim" onClick={async () => handleClick('claim')(pool)} />
           </div>
         </div>
       </div>

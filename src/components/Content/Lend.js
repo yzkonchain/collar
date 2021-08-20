@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
-import { useContext, useReducer, useMemo, useEffect, useState } from 'react'
-import { context, liteContext, tokenList } from '@/config'
+import { useContext, useReducer, useMemo, useEffect } from 'react'
+import { context, liteContext, tokenList, poolList } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 import { makeStyles } from '@material-ui/core/styles'
@@ -34,6 +34,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 const ZERO = ethers.constants.Zero
+const INIT = {
+  input: {
+    want: ZERO,
+  },
+  output: {
+    coll: ZERO,
+  },
+  tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
+  I: { want: '' },
+  old: { want: '' },
+}
+const format = (num) => ethers.utils.formatEther(num)
 
 export default function Lend(props) {
   const classes = useStyles()
@@ -41,36 +53,28 @@ export default function Lend(props) {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { forceUpdate, bond, want, pool, poolList, data, controller },
+    liteState: { bond, want, pool, data, controller },
     setLiteState,
+    handleClick,
   } = useContext(liteContext)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), {
-    input: {
-      want: ZERO,
-    },
-    output: {
-      coll: ZERO,
-    },
-    tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
-    I: { want: '' },
-    old: { want: '' },
-  })
 
+  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+  useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const _want = ethers.utils.parseUnits(state.I.want || '0', 18)
-      const _coll = await controller.ct(pool, signer).get_dx(_want)
-      const fee = (ethers.utils.formatEther(_coll) * (1 - ethers.utils.formatEther(data.swap.fee))).toFixed(4)
-      const min = (ethers.utils.formatEther(_coll) * 0.995).toFixed(3)
+      const want = ethers.utils.parseUnits(state.I.want || '0', 18)
+      const coll = await controller.ct(pool, signer).get_dx(want)
+      const fee = (format(coll) * (1 - format(data.swap.fee))).toFixed(4)
+      const min = (format(coll) * 0.995).toFixed(3)
       const slip = (
         (parseFloat(
-          ethers.utils.formatEther(
+          format(
             data.swap.sx
               .add(data.swap.sk)
               .mul(ethers.utils.parseEther('1'))
               .div(
-                data.swap.sy.add(_want).add(data.swap.sk.mul(poolList[pool].swap_sqp).div(ethers.BigNumber.from(1e9))),
+                data.swap.sy.add(want).add(data.swap.sk.mul(poolList[pool].swap_sqp).div(ethers.BigNumber.from(1e9))),
               )
               .sub(ethers.utils.parseEther('1')),
           ),
@@ -79,19 +83,11 @@ export default function Lend(props) {
           (poolList[pool].expiry_time * 1000 - new Date()) -
         data.apy
       ).toPrecision(3)
-      if (_want.eq(state.input.want) === false) {
-        setState({ input: { want: _want }, output: { coll: _coll }, tip: { fee, min, slip } })
+      if (!want.eq(state.input.want)) {
+        setState({ input: { want }, output: { coll }, tip: { fee, min, slip } })
       }
     })()
   }, [state])
-
-  useEffect(() => {
-    setState({
-      tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
-      I: { want: '' },
-      old: { want: '' },
-    })
-  }, [pool])
 
   return useMemo(
     () => (
@@ -104,7 +100,7 @@ export default function Lend(props) {
                 state,
                 setState,
                 token: want,
-                max: parseFloat(ethers.utils.formatEther(data.balance.want)),
+                max: parseFloat(format(data.balance.want)),
                 maxCondition: () => data.allowance.want.gt('100000000000000000000000000000000'),
               }}
               style={{ height: '90px' }}
@@ -118,31 +114,18 @@ export default function Lend(props) {
         <ApyFloatMessage
           APY={data.apy ? data.apy.toPrecision(3) : '0.00'}
           info={[
-            {
-              'Slippage tolerance': `${state.tip.slip} %`,
-            },
+            { 'Slippage tolerance': `${state.tip.slip} %` },
             { 'Minimum recieved': `${state.tip.min} COLL` },
             { Route: `${tokenList[want].symbol} -> COLL` },
-            {
-              'Nominal swap fee': `${state.tip.fee} COLL`,
-            },
+            { 'Nominal swap fee': `${state.tip.fee} COLL` },
           ]}
         />
         <div className={classes.button}>
           <div>
-            <MyButton
-              name="Approve"
-              onClick={async () => {
-                await controller.approve(want, pool, signer)
-                setLiteState({ forceUpdate: {} })
-              }}
-            />
+            <MyButton name="Approve" onClick={async () => handleClick('approve')(want, pool)} />
             <MyButton
               name="Lend"
-              onClick={async () => {
-                await controller.lend(state.input.want, state.output.coll, pool, signer)
-                setLiteState({ forceUpdate: {} })
-              }}
+              onClick={async () => handleClick('lend')(state.input.want, state.output.coll, pool)}
             />
           </div>
         </div>

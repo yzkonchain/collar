@@ -21,6 +21,7 @@ const useStyles = makeStyles({
     },
   },
 })
+const INIT = { pools: [], total: {} }
 
 export default function MyPage() {
   const classes = useStyles()
@@ -28,20 +29,19 @@ export default function MyPage() {
     state: { signer },
     setState,
   } = useContext(context)
-  const controller = contract()
-  const [count, setCount] = useState({
-    pools: [],
-    total: {},
-  })
+  const CT = contract()
+  const [count, setCount] = useState(INIT)
   const [update, setUpdate] = useState({})
   const { pools, total } = count
+
   useEffect(() => {
     if (!signer) {
-      setCount({ pools: [], total: [] })
+      count == INIT || setCount(INIT)
       return
     }
     ;(async () => {
-      const pools = await controller.mypage_data(signer)
+      const controller = CT(signer)
+      const pools = await controller.mypage_data()
       const total = {
         totalValueLocked: 0,
         totalBorrowed: 0,

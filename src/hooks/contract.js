@@ -21,7 +21,10 @@ const abiPool = [
 const controller = (address, signer, abi) => {
   return new ethers.Contract(address, abi || collar, signer)
 }
-const formatEther = (num, n) => parseFloat(ethers.utils.formatEther(num)).toFixed(n || 3)
+const formatEther = (num, n) => {
+  const res = parseFloat(ethers.utils.formatEther(num))
+  return n ? res.toFixed(n) : res
+}
 const with_loss = (x) => x.mul(995).div(1000)
 
 const fetch_state = async (pool, signer) => {
@@ -135,7 +138,7 @@ const mypage_data = async (signer) => {
       receivables:
         formatEther(data.clpt_coll.add(data.coll)) * Price[poolList[item.pool].coll.addr] +
         formatEther(data.clpt_want) * Price[poolList[item.pool].want.addr],
-      shareOfPoll: ((formatEther(data.clpt) / formatEther(data.sk)) * 100).toFixed(2),
+      shareOfPoll: (formatEther(data.clpt) / formatEther(data.sk)) * 100,
       coll_apy: '0.00',
       call_apy: '0.00',
       clpt_apy: '0.00',
@@ -391,6 +394,14 @@ export default function contract() {
       const clpt = await ct.balanceOf(me)
       await ct.withdraw_both(clpt).then(callback(true)('withdraw')).catch(callback(false))
       return true
+    },
+    settle: async (pool, signer) => {
+      enqueueSnackbar({
+        type: 'failed',
+        title: 'Fail.',
+        message: 'Not support yet!',
+      })
+      return false
     },
   }
 }

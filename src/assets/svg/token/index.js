@@ -1,6 +1,7 @@
-import iconUSDT from './USDT.svg'
-import iconUSDC from './USDC.svg'
-import iconCOLL from './COLL.svg'
-import iconCALL from './CALL.svg'
+import COLLAR from './COLLAR.svg'
+import USDT from './USDT.svg'
+import USDC from './USDC.svg'
+import COLL from './COLL.svg'
+import CALL from './CALL.svg'
 
-export { iconUSDT, iconUSDC, iconCOLL, iconCALL }
+export { COLLAR, USDT, USDC, COLL, CALL }

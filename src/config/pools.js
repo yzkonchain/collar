@@ -1,50 +1,38 @@
-import { iconUSDT, iconUSDC, iconCOLL, iconCALL } from '@/assets/svg/token'
+import { COLLAR, USDT, USDC, COLL, CALL } from '@/assets/svg/token'
 
-const makeToken = (symbol, addr, icon, decimals) => {
-  return { symbol, addr, icon: icon || null, decimals: decimals || 18 }
+const Token = (symbol, addr, icon, decimals) => {
+  switch (symbol) {
+    case 'COLLAR':
+    case 'CLPT':
+      return { symbol, addr, icon: COLLAR, decimals: 18 }
+    case 'COLL':
+      return { symbol, addr, icon: COLL, decimals: 18 }
+    case 'CALL':
+      return { symbol, addr, icon: CALL, decimals: 18 }
+    default:
+      return { symbol, addr, icon, decimals: decimals || 18 }
+  }
+}
+
+const poolConfig = {
+  network: 'ropsten',
+  chainid: 3,
+  infuraid: '9180c5a422ac44f9b21ad7927b6b662c',
 }
 
 const tokenList = {
-  '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE': makeToken('COLLAR', '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE'),
-  '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0': makeToken(
-    'USDT',
-    '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
-    iconUSDT,
-  ),
-  '0x67C9a0830d922C80A96408EEdF606c528836880C': makeToken(
-    'USDC',
-    '0x67C9a0830d922C80A96408EEdF606c528836880C',
-    iconUSDC,
-  ),
-  '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c': makeToken('CLPT', '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c'),
-  '0x9D8FEb661AFc92b83c45fC21836C114164beB285': makeToken(
-    'CALL',
-    '0x9D8FEb661AFc92b83c45fC21836C114164beB285',
-    iconCALL,
-  ),
-  '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231': makeToken(
-    'COLL',
-    '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231',
-    iconCOLL,
-  ),
-  '0x3894e050adae3ef3D10d7e1c79AE8F7A07866a90': makeToken('CLPT', '0x3894e050adae3ef3D10d7e1c79AE8F7A07866a90'),
-  '0x404Ced902eE6d630db51969433ea7DD2EE3524B8': makeToken(
-    'CALL',
-    '0x404Ced902eE6d630db51969433ea7DD2EE3524B8',
-    iconCALL,
-  ),
-  '0x61E04744eD53E1Ae61A9325A5Eba31AEA24eca4D': makeToken(
-    'COLL',
-    '0x61E04744eD53E1Ae61A9325A5Eba31AEA24eca4D',
-    iconCOLL,
-  ),
+  '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE': Token('COLLAR', '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE'),
+  '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0': Token('USDT', '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0', USDT),
+  '0x67C9a0830d922C80A96408EEdF606c528836880C': Token('USDC', '0x67C9a0830d922C80A96408EEdF606c528836880C', USDC),
+  '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c': Token('CLPT', '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c'),
+  '0x9D8FEb661AFc92b83c45fC21836C114164beB285': Token('CALL', '0x9D8FEb661AFc92b83c45fC21836C114164beB285'),
+  '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231': Token('COLL', '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231'),
+  '0x3894e050adae3ef3D10d7e1c79AE8F7A07866a90': Token('CLPT', '0x3894e050adae3ef3D10d7e1c79AE8F7A07866a90'),
+  '0x404Ced902eE6d630db51969433ea7DD2EE3524B8': Token('CALL', '0x404Ced902eE6d630db51969433ea7DD2EE3524B8'),
+  '0x61E04744eD53E1Ae61A9325A5Eba31AEA24eca4D': Token('COLL', '0x61E04744eD53E1Ae61A9325A5Eba31AEA24eca4D'),
 }
-
-const tokens = (() => {
-  const list = {}
-  Object.keys(tokenList).map((val) => (list[tokenList[val].symbol] = tokenList[val]))
-  return list
-})()
+const tokens = {}
+Object.keys(tokenList).map((val) => (tokens[tokenList[val].symbol] = tokenList[val]))
 
 const pools = [
   {
@@ -78,12 +66,6 @@ pools.map((val, key) => {
 })
 
 const bondList = Array.from(bondSet)
-
-const poolConfig = {
-  network: 'ropsten',
-  chainid: 3,
-  infuraid: '9180c5a422ac44f9b21ad7927b6b662c',
-}
 
 export default pools
 export { poolList, bondList, tokenList, poolConfig }

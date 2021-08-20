@@ -57,19 +57,14 @@ export default function DetailTable({ pools }) {
       case 'redeemAll':
       case 'repayAll':
       case 'withdrawAll':
+      case 'claim':
+      case 'settle':
         if (await controller[type](pool, signer)) {
           setUpdate({})
         }
         break
-      case 'claim':
-        if (await controller[type](pool.pool, signer)) {
-          setUpdate({})
-        }
-        break
-      case 'settle':
-        break
       default:
-        console.log('not support yet!')
+        return
     }
   }
   return (

@@ -78,6 +78,12 @@ const useStyles = makeStyles({
   },
 })
 
+const dec = {
+  tvl: 3,
+  tb: 3,
+  tc: 3,
+}
+
 export default function Global({ totalValueLocked, totalBorrowed, totalCollateral }) {
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState({ totalValue: null })
@@ -100,7 +106,7 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
             />
             <FloatMessage2 anchorEl={anchorEl['totalValue']} info={textInfo['TotalValueLocked']} />
           </div>
-          <div>$ {totalValueLocked || 0}</div>
+          <div>$ {parseFloat(totalValueLocked || 0).toFixed(dec.tvl)}</div>
         </div>
 
         <div className={classes.globalValue}>
@@ -109,7 +115,7 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
               <DynamicFont content="Total Borrowed" />
             </div>
             <div>
-              <DynamicFont content={`$ ${totalBorrowed || 0}`} />
+              <DynamicFont content={`$ ${parseFloat(totalBorrowed || 0).toFixed(dec.tb)}`} />
             </div>
           </div>
           <div className={classes.globalValueInfo}>
@@ -117,7 +123,7 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
               <DynamicFont content="Total Collateral" />
             </div>
             <div>
-              <DynamicFont content={`$ ${totalCollateral || 0}`} />
+              <DynamicFont content={`$ ${parseFloat(totalCollateral || 0).toFixed(dec.tc)}`} />
             </div>
           </div>
         </div>

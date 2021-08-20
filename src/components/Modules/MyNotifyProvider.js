@@ -84,7 +84,7 @@ export default withStyles({
 })(({ classes, children }) => (
   <SnackbarProvider
     maxSnack={3}
-    autoHideDuration={5000}
+    autoHideDuration={4000}
     anchorOrigin={{
       vertical: 'top',
       horizontal: 'center',

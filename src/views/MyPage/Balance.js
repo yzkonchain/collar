@@ -30,6 +30,13 @@ const useStyles = makeStyles({
   },
 })
 
+const dec = {
+  debt: 3,
+  balance: 3,
+  recv: 3,
+  rewards: 3,
+}
+
 const MyDiv = withStyles({
   root: {
     width: '100%',
@@ -94,13 +101,13 @@ export default function Balance({ outstandingDebt, depostBalance, receivables, r
           <MyDiv
             title="Outstanding Debt"
             remarks="*Value of Borrowed Asset"
-            amount={(outstandingDebt || 0).toFixed(3)}
+            amount={(outstandingDebt || 0).toFixed(dec.debt)}
             token="USD"
           />
           <MyDiv
             title="Depost Balance"
             remarks="*Value of Collateral"
-            amount={(depostBalance || 0).toFixed(3)}
+            amount={(depostBalance || 0).toFixed(dec.balance)}
             token="USD"
           />
         </div>
@@ -108,13 +115,13 @@ export default function Balance({ outstandingDebt, depostBalance, receivables, r
           <MyDiv
             title="Receivables"
             remarks="*Value of Lent Asset"
-            amount={(receivables || 0).toFixed(3)}
+            amount={(receivables || 0).toFixed(dec.recv)}
             token="USD"
           />
           <MyDiv
             title="Rewards"
             remarks="*Value of Claimable COLLAR"
-            amount={(rewards || 0).toFixed(3)}
+            amount={(rewards || 0).toFixed(dec.rewards)}
             token="COLLAR"
             color="#4975FF"
           />

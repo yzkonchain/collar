@@ -102,6 +102,15 @@ const useStyles = makeStyles({
 
 const TableCell = withStyles({ root: { lineHeight: 'unset' } })((props) => <OldTableCell {...props} />)
 
+const dec = {
+  apy: 2,
+  apr: 2,
+  sop: 2,
+  balance: 3,
+  earned: 3,
+  price: 3,
+}
+
 export default function Mobile({ pool, val, handleClick }) {
   const classes = useStyles()
   return (
@@ -124,15 +133,15 @@ export default function Mobile({ pool, val, handleClick }) {
                 </div>
               </TableCell>
               <TableCell align="center">
-                <div>{val.coll}</div>
-                <div className={classes.price}>~${val.coll * Price['COLL']}</div>
+                <div>{parseFloat(val.coll).toFixed(dec.balance)}</div>
+                <div className={classes.price}>~${parseFloat(val.coll * Price['COLL']).toFixed(dec.price)}</div>
               </TableCell>
               <TableCell align="center" className={classes.rowApy}>
-                {val.coll_apy}%
+                {parseFloat(val.coll_apy).toFixed(dec.apy)}%
               </TableCell>
               <TableCell className={classes.button}>
                 <MyButtonWhite name="Redeem All" onClick={() => handleClick('redeemAll', pool)} />
-                <MyButtonWhite name="Settle" onClick={() => alert('Not support yet!')} />
+                <MyButtonWhite name="Settle" onClick={() => handleClick('settle', pool)} />
               </TableCell>
             </TableRow>
             <TableRow>
@@ -143,11 +152,11 @@ export default function Mobile({ pool, val, handleClick }) {
                 </div>
               </TableCell>
               <TableCell align="center">
-                <div>{val.call}</div>
-                <div className={classes.price}>~${val.call * Price['COLL']}</div>
+                <div>{parseFloat(val.call).toFixed(dec.balance)}</div>
+                <div className={classes.price}>~${parseFloat(val.call * Price['COLL']).toFixed(dec.price)}</div>
               </TableCell>
               <TableCell align="center" className={classes.rowApy}>
-                {val.call_apy}%
+                {parseFloat(val.call_apy).toFixed(dec.apy)}%
               </TableCell>
               <TableCell className={classes.button}>
                 <MyButtonWhite name="Repay All" onClick={() => handleClick('repayAll', pool)} />
@@ -163,11 +172,11 @@ export default function Mobile({ pool, val, handleClick }) {
                 </div>
               </TableCell>
               <TableCell align="center">
-                <div>{val.clpt}</div>
-                <div className={classes.price}>~${val.coll * Price['COLL']}</div>
+                <div>{parseFloat(val.clpt).toFixed(dec.balance)}</div>
+                <div className={classes.price}>~${parseFloat(val.coll * Price['COLL']).toFixed(dec.price)}</div>
               </TableCell>
               <TableCell align="center" className={classes.rowApy}>
-                {val.clpt_apy}%
+                {parseFloat(val.clpt_apy).toFixed(dec.apy)}%
               </TableCell>
               <TableCell className={classes.button}>
                 <MyButtonWhite name={'Withdraw'} onClick={() => handleClick('withdrawAll', pool)} />
@@ -181,18 +190,18 @@ export default function Mobile({ pool, val, handleClick }) {
         <div>
           <div style={{ marginTop: 0 }}>
             <span>APR</span>
-            <span>{val.clpt_apr}%</span>
+            <span>{parseFloat(val.clpt_apr).toFixed(dec.apr)}%</span>
           </div>
           <div>
             <span>Share of Pool</span>
-            <span>{val.shareOfPoll}%</span>
+            <span>{parseFloat(val.shareOfPoll).toFixed(dec.sop)}%</span>
           </div>
           <div>
             <span>Claimable COLLAR</span>
-            <span>{val.earned}</span>
+            <span>{parseFloat(val.earned).toFixed(dec.earned)}</span>
           </div>
         </div>
-        <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool)} />
+        <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool.pool)} />
       </div>
     </div>
   )

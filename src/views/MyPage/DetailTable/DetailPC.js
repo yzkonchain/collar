@@ -72,6 +72,15 @@ const useStyles = makeStyles({
 
 const TableCell = withStyles({ root: { lineHeight: 'unset' } })((props) => <OldTableCell {...props} />)
 
+const dec = {
+  apy: 2,
+  apr: 2,
+  sop: 2,
+  balance: 3,
+  earned: 3,
+  price: 3,
+}
+
 export default function PC({ pool, val, handleClick }) {
   const classes = useStyles()
   return (
@@ -94,16 +103,16 @@ export default function PC({ pool, val, handleClick }) {
                 </div>
               </TableCell>
               <TableCell align="center">
-                <div>{val.coll}</div>
-                <div className={classes.price}>~${val.coll * Price['COLL']}</div>
+                <div>{parseFloat(val.coll).toFixed(dec.balance)}</div>
+                <div className={classes.price}>~${parseFloat(val.coll * Price['COLL']).toFixed(dec.price)}</div>
               </TableCell>
-              <TableCell align="center">{val.coll_apy}%</TableCell>
+              <TableCell align="center">{parseFloat(val.coll_apy).toFixed(dec.apy)}%</TableCell>
               <TableCell />
               <TableCell />
               <TableCell />
               <TableCell className={classes.button}>
                 <MyButtonWhite name="Redeem All" onClick={() => handleClick('redeemAll', pool)} />
-                <MyButtonWhite name="Settle" onClick={() => alert('Not support yet!')} />
+                <MyButtonWhite name="Settle" onClick={() => handleClick('settle', pool)} />
               </TableCell>
             </TableRow>
             <TableRow>
@@ -114,10 +123,10 @@ export default function PC({ pool, val, handleClick }) {
                 </div>
               </TableCell>
               <TableCell align="center">
-                <div>{val.call}</div>
-                <div className={classes.price}>~${val.call * Price['COLL']}</div>
+                <div>{parseFloat(val.call).toFixed(dec.balance)}</div>
+                <div className={classes.price}>~${parseFloat(val.call * Price['COLL']).toFixed(dec.price)}</div>
               </TableCell>
-              <TableCell align="center">{val.call_apy}%</TableCell>
+              <TableCell align="center">{parseFloat(val.call_apy).toFixed(dec.apy)}%</TableCell>
               <TableCell />
               <TableCell />
               <TableCell />
@@ -151,19 +160,19 @@ export default function PC({ pool, val, handleClick }) {
                 </div>
               </TableCell>
               <TableCell align="center">
-                <div>{val.clpt}</div>
-                <div className={classes.price}>~${val.coll * Price['COLL']}</div>
+                <div>{parseFloat(val.clpt).toFixed(dec.balance)}</div>
+                <div className={classes.price}>~${parseFloat(val.coll * Price['COLL']).toFixed(dec.price)}</div>
               </TableCell>
-              <TableCell align="center">{val.clpt_apy}%</TableCell>
-              <TableCell align="center">{val.clpt_apr}%</TableCell>
-              <TableCell align="center">{val.shareOfPoll}%</TableCell>
+              <TableCell align="center">{parseFloat(val.clpt_apy).toFixed(dec.apy)}%</TableCell>
+              <TableCell align="center">{parseFloat(val.clpt_apr).toFixed(dec.apr)}%</TableCell>
+              <TableCell align="center">{parseFloat(val.shareOfPoll).toFixed(dec.sop)}%</TableCell>
               <TableCell align="center">
-                <div>{val.earned}</div>
-                <div className={classes.price}>~${val.earned * Price['COLLAR']}</div>
+                <div>{parseFloat(val.earned).toFixed(dec.earned)}</div>
+                <div className={classes.price}>~${parseFloat(val.earned * Price['COLLAR']).toFixed(dec.price)}</div>
               </TableCell>
               <TableCell className={classes.button}>
                 <MyButtonWhite name={'Withdraw All'} onClick={() => handleClick('withdrawAll', pool)} />
-                <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool)} />
+                <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool.pool)} />
               </TableCell>
             </TableRow>
           </TableBody>

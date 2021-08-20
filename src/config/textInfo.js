@@ -18,6 +18,7 @@ const textInfo = {
   Exit: `Lenders can exit at any time before the current round ends. 
           The interest earned may differ from the originally quoted APY.`,
   TotalValueLocked: 'TotalValueLocked',
+  round: 'coming soon',
 }
 
 export default textInfo

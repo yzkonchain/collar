@@ -14,6 +14,8 @@ const useStyles = makeStyles((theme) => ({
       position: 'absolute',
       width: '100%',
       bottom: 0,
+      border: 'none',
+      borderTop: 'white 1px solid',
     },
   },
   title: {
@@ -25,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     margin: '5px 0',
     '& span:last-child': {
       backgroundColor: '#4976FF',
-      padding: '0px 3px',
+      padding: '0px 5px',
       height: '20px',
       lineHeight: '20px',
     },

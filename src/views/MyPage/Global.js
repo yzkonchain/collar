@@ -44,7 +44,7 @@ const useStyles = makeStyles({
       },
     },
     '&>div:last-child': {
-      fontSize: '35px',
+      fontSize: '30px',
     },
   },
   globalValue: {
@@ -100,7 +100,7 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
             />
             <FloatMessage2 anchorEl={anchorEl['totalValue']} info={textInfo['TotalValueLocked']} />
           </div>
-          <div>${totalValueLocked || 0}</div>
+          <div>$ {totalValueLocked || 0}</div>
         </div>
 
         <div className={classes.globalValue}>
@@ -109,7 +109,7 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
               <DynamicFont content="Total Borrowed" />
             </div>
             <div>
-              <DynamicFont content={`$${totalBorrowed || 0}`} />
+              <DynamicFont content={`$ ${totalBorrowed || 0}`} />
             </div>
           </div>
           <div className={classes.globalValueInfo}>
@@ -117,7 +117,7 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
               <DynamicFont content="Total Collateral" />
             </div>
             <div>
-              <DynamicFont content={`$${totalCollateral || 0}`} />
+              <DynamicFont content={`$ ${totalCollateral || 0}`} />
             </div>
           </div>
         </div>

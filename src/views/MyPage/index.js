@@ -3,4 +3,5 @@ export default MyPage
 
 export { default as Global } from './Global'
 export { default as Balance } from './Balance'
-export { default as DetailTable } from './DetailTable'
+export { default as DetailTable } from './DetailTable/index'
+export { default as Confirm } from './Confirm'

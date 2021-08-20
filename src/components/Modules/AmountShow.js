@@ -2,10 +2,10 @@ import { ethers } from 'ethers'
 import { useMemo, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { iconInfo } from '@/assets/svg'
-import { FloatMessage } from '@/components/Modules'
-import DynamicFont from 'react-dynamic-font'
+import { FloatMessage2 } from '@/components/Modules'
 import { textInfo, tokenList } from '@/config'
 import { Price } from '@/hooks'
+import DynamicFont from 'react-dynamic-font'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -65,7 +65,7 @@ export default function AmountShow({ state: { state, token }, title, style }) {
           alt=""
           src={iconInfo}
         />
-        <FloatMessage anchorEl={anchorEl} info={textInfo[title]} />
+        <FloatMessage2 anchorEl={anchorEl} info={textInfo[title]} />
       </div>
 
       <div className={classes.AmountShow} style={style}>

@@ -68,7 +68,7 @@ export default function Info() {
       </div>
       <div>
         <InfoCard2 title="Interest Rate" data={data.apy} info="FOR BOTH LENDING AND BORROWING" />
-        <InfoCard2 title="FARM APY" data="---" info="---" />
+        <InfoCard2 title="Farm APY" data="---" info="---" />
       </div>
       <div>
         <InfoCard2
@@ -80,8 +80,8 @@ export default function Info() {
         />
         <InfoCard3
           title="Nominal swap fee"
-          data1="0.01% for BORROW, WITHDRAW, LEND and REDEEM"
-          data2="0% for REPAY and DEPOSIT"
+          data1="0.01% for Borrow, Withdraw, Lend and Redeem"
+          data2="0% for Repay and Deposit"
           noHr={true}
         />
       </div>

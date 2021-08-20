@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { Accordion, AccordionSummary, AccordionDetails, Tabs, Tab, Switch } from '@material-ui/core'
-import { TabsArrow } from '@/assets/svg'
+
+import { FloatMessage2 } from '@/components/Modules'
+import { TabsArrow, iconInfo } from '@/assets/svg'
 import { textInfo } from '@/config'
 
 const MyAccordion = withStyles({
@@ -16,7 +18,7 @@ const MyAccordion = withStyles({
       height: 0,
     },
     '&>div:last-child div': {
-      padding: '4px',
+      padding: '3px',
       fontSize: '16px',
       fontFamily: 'Helvetica',
     },
@@ -76,16 +78,28 @@ const MyTabs = withStyles({
   const label = {}
   labels.forEach((v) => v.forEach((v) => (label[v] = true)))
   const [expanded, setExpanded] = useState(label)
+  const [anchorEl, setAnchorEl] = useState(null)
   const { round, setRound } = props.round
   const classes = makeStyles((theme) => ({
     root: { position: 'relative' },
     button: {
       position: 'absolute',
+      display: 'flex',
       top: '2px',
       right: 0,
     },
     switch: {
       transform: 'translateY(-8px)',
+    },
+    switchInfo: {
+      color: '#C4C4C4',
+      transform: 'translateY(-8px)',
+      display: 'flex',
+      alignItems: 'center',
+      '& img': {
+        width: '14px',
+        marginLeft: '4px',
+      },
     },
     expanded: {
       background: 'none',
@@ -105,6 +119,16 @@ const MyTabs = withStyles({
     <div className={classes.root}>
       <div className={classes.button}>
         <Switch checked={round} onChange={() => setRound(!round)} className={classes.switch} disabled />
+        <div className={classes.switchInfo}>
+          <span>NewRound</span>
+          <img
+            onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
+            onMouseLeave={() => setAnchorEl(null)}
+            alt=""
+            src={iconInfo}
+          />
+          <FloatMessage2 anchorEl={anchorEl} info={textInfo['round']} />
+        </div>
       </div>
       <Tabs {...props} variant="standard">
         {labels[tabs].map((v, k) => (

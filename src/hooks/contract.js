@@ -136,8 +136,10 @@ const mypage_data = async (signer) => {
         formatEther(data.clpt_coll.add(data.coll)) * Price[poolList[item.pool].coll.addr] +
         formatEther(data.clpt_want) * Price[poolList[item.pool].want.addr],
       shareOfPoll: ((formatEther(data.clpt) / formatEther(data.sk)) * 100).toFixed(2),
-      apr: '0.00',
-      apy: '0.00',
+      coll_apy: '0.00',
+      call_apy: '0.00',
+      clpt_apy: '0.00',
+      clpt_apr: '0.00',
     })
   }
   return res
@@ -322,6 +324,7 @@ export default function contract() {
     },
     claim: async (pool, signer) => {
       await controller(pool, signer).claim_reward().then(callback(true)('claim')).catch(callback(false))
+      return true
     },
     burn_and_claim: async (clpt, pool, signer) => {
       await controller(pool, signer).burn_and_claim(clpt).then(callback(true)('withdraw')).catch(callback(false))
@@ -340,6 +343,54 @@ export default function contract() {
     },
     mint: async (n, pool, signer) => {
       await controller(pool, signer).mint_dual(n).then(callback(true)('mint')).catch(callback(false))
+    },
+    redeemAll: async (pool, signer) => {
+      const me = await signer.getAddress()
+      const ct = controller(pool.pool, signer)
+      const call = await controller(pool.call.addr, signer).balanceOf(me)
+      const coll = await controller(pool.coll.addr, signer).balanceOf(me)
+      if (parseFloat(call) > parseFloat(coll)) {
+        enqueueSnackbar({
+          type: 'failed',
+          title: 'Fail.',
+          message: 'COLL must larger than CALL!',
+        })
+        return
+      }
+      const want = await ct.get_dy(call)
+      await ct.swap_coll_to_min_want(call, with_loss(want)).then(callback(true)('redeem')).catch(callback(false))
+      return true
+    },
+    repayAll: async (pool, signer) => {
+      const me = await signer.getAddress()
+      const call = await controller(pool.call.addr, signer).balanceOf(me)
+      const coll = await controller(pool.coll.addr, signer).balanceOf(me)
+      const want = await controller(pool.want.addr, signer).balanceOf(me)
+      if (parseFloat(call) > parseFloat(want)) {
+        enqueueSnackbar({
+          type: 'failed',
+          title: 'Fail.',
+          message: `${pool.want.symbol} must larger than CALL!`,
+        })
+        return
+      }
+      if (parseFloat(call) > parseFloat(coll)) {
+        enqueueSnackbar({
+          type: 'failed',
+          title: 'Fail.',
+          message: 'COLL must larger than CALL!',
+        })
+        return
+      }
+      await controller(pool.pool, signer).burn_dual(call).then(callback(true)('repay')).catch(callback(false))
+      return true
+    },
+    withdrawAll: async (pool, signer) => {
+      const me = await signer.getAddress()
+      const ct = controller(pool.pool, signer)
+      const clpt = await ct.balanceOf(me)
+      await ct.withdraw_both(clpt).then(callback(true)('withdraw')).catch(callback(false))
+      return true
     },
   }
 }

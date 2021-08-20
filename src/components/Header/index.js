@@ -1,10 +1,18 @@
-import { useContext } from 'react'
-import { context } from '@/config'
+import { ethers } from 'ethers'
+import Web3Modal from 'web3modal'
+import WalletConnectProvider from '@walletconnect/web3-provider'
+import { context, poolConfig } from '@/config'
+
+import { useSnackbar } from 'notistack'
+
+import { useContext, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { Box, AppBar, Toolbar, IconButton, Typography } from '@material-ui/core'
+import MenuIcon from '@material-ui/icons/Menu'
+
 import ConnectWallet from './ConnectWallet'
 import AccountDialog from './AccountDialog'
-import MenuIcon from '@material-ui/icons/Menu'
+
 const useStyles = makeStyles((theme) => ({
   root: {
     zIndex: '9999',
@@ -15,16 +23,85 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     minHeight: '56px',
   },
+  '@global': {
+    '.web3modal-modal-lightbox': {
+      zIndex: '5',
+    },
+  },
 }))
+
+const web3Modal = new Web3Modal({
+  network: poolConfig.network,
+  cacheProvider: true,
+  providerOptions: {
+    walletconnect: {
+      package: WalletConnectProvider,
+      options: {
+        infuraId: poolConfig.infuraid,
+      },
+    },
+  },
+})
+
 export default function Header() {
   const classes = useStyles()
   const {
     state: { menu_open, dialog_open, signer },
     setState,
-    web3Modal,
-    connect_wallet,
   } = useContext(context)
+  const { enqueueSnackbar } = useSnackbar()
 
+  const connect_wallet = async () => {
+    const web3provider = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(web3provider)
+    const signer = provider.getSigner()
+    const network = await provider.getNetwork()
+    if (network.chainId !== poolConfig.chainid) {
+      enqueueSnackbar({
+        type: 'failed',
+        title: 'Fail.',
+        message: `not support this network, chainId: ${network.chainId}`,
+      })
+      setState({ signer: null })
+      return
+    }
+    setState({
+      signer: signer,
+    })
+    if (!web3provider.on) {
+      return
+    }
+    web3provider.on('disconnect', () => {
+      web3Modal.clearCachedProvider()
+      setState({ signer: null, dialog_open: false })
+    })
+    web3provider.on('accountsChanged', async (accounts) => {
+      if (accounts.length === 0) {
+        web3Modal.clearCachedProvider()
+        setState({ signer: null, dialog_open: false })
+        return
+      }
+      await connect_wallet()
+    })
+    web3provider.on('chainChanged', async (chainId) => {
+      if (chainId !== poolConfig.chainid) {
+        enqueueSnackbar({
+          type: 'failed',
+          title: 'Fail.',
+          message: `not support this network, chainId: ${network.chainId}`,
+        })
+        setState({ signer: null })
+      } else {
+        await connect_wallet()
+      }
+    })
+  }
+  useEffect(() => {
+    if (web3Modal.cachedProvider) {
+      connect_wallet()
+      return
+    }
+  }, [])
   return (
     <div>
       <Box className={classes.root} overflow="hidden">

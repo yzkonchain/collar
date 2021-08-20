@@ -1,4 +1,4 @@
-import { iconUsdt, iconUsdc } from '@/assets/svg/token'
+import { iconUSDT, iconUSDC, iconCOLL, iconCALL } from '@/assets/svg/token'
 
 const makeToken = (symbol, addr, icon, decimals) => {
   return { symbol, addr, icon: icon || null, decimals: decimals || 18 }
@@ -9,34 +9,34 @@ const tokenList = {
   '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0': makeToken(
     'USDT',
     '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
-    iconUsdt,
+    iconUSDT,
   ),
   '0x67C9a0830d922C80A96408EEdF606c528836880C': makeToken(
     'USDC',
     '0x67C9a0830d922C80A96408EEdF606c528836880C',
-    iconUsdc,
+    iconUSDC,
   ),
   '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c': makeToken('CLPT', '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c'),
   '0x9D8FEb661AFc92b83c45fC21836C114164beB285': makeToken(
     'CALL',
     '0x9D8FEb661AFc92b83c45fC21836C114164beB285',
-    iconUsdc,
+    iconCALL,
   ),
   '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231': makeToken(
     'COLL',
     '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231',
-    iconUsdc,
+    iconCOLL,
   ),
   '0x3894e050adae3ef3D10d7e1c79AE8F7A07866a90': makeToken('CLPT', '0x3894e050adae3ef3D10d7e1c79AE8F7A07866a90'),
   '0x404Ced902eE6d630db51969433ea7DD2EE3524B8': makeToken(
     'CALL',
     '0x404Ced902eE6d630db51969433ea7DD2EE3524B8',
-    iconUsdc,
+    iconCALL,
   ),
   '0x61E04744eD53E1Ae61A9325A5Eba31AEA24eca4D': makeToken(
     'COLL',
     '0x61E04744eD53E1Ae61A9325A5Eba31AEA24eca4D',
-    iconUsdc,
+    iconCOLL,
   ),
 }
 

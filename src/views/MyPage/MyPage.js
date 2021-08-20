@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useEffect, useState } from 'react'
-import { context, poolList } from '@/config'
+import { context, mypageContext, poolList } from '@/config'
 import { makeStyles } from '@material-ui/core/styles'
 import { Price, contract } from '@/hooks'
 import { Global, Balance, DetailTable } from '.'
@@ -33,6 +33,7 @@ export default function MyPage() {
     pools: [],
     total: {},
   })
+  const [update, setUpdate] = useState({})
   const { pools, total } = count
   useEffect(() => {
     if (!signer) {
@@ -63,14 +64,16 @@ export default function MyPage() {
       })
       setCount({ pools, total })
     })()
-  }, [signer])
+  }, [signer, update])
 
   return (
-    <div className={classes.root}>
-      <Global {...total} />
-      <hr style={{ border: '#3B54A0 1px solid', width: '100%', margin: '20px 0' }}></hr>
-      <Balance {...total} />
-      <DetailTable pools={pools} />
-    </div>
+    <mypageContext.Provider value={{ setUpdate }}>
+      <div className={classes.root}>
+        <Global {...total} />
+        <hr style={{ border: '#3B54A0 1px solid', width: '100%', margin: '20px 0' }}></hr>
+        <Balance {...total} />
+        <DetailTable pools={pools} />
+      </div>
+    </mypageContext.Provider>
   )
 }

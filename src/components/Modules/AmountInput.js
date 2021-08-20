@@ -3,7 +3,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { iconInfo } from '@/assets/svg'
 import { TextField } from '@material-ui/core'
-import { FloatMessage } from '@/components/Modules'
+import { FloatMessage2 } from '@/components/Modules'
 import { textInfo, tokenList } from '@/config'
 import { Price } from '@/hooks'
 import { useSnackbar } from 'notistack'
@@ -141,7 +141,7 @@ export default function AmountInput({ State, title, style }) {
             alt={title}
             src={iconInfo}
           />
-          <FloatMessage anchorEl={anchorEl} info={textInfo[title]} />
+          <FloatMessage2 anchorEl={anchorEl} info={textInfo[title]} />
         </div>
         <div className={classes.AmountInput} style={style}>
           <div className={classes.amount}>

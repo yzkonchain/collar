@@ -12,6 +12,8 @@ const useStyles = makeStyles((theme) => ({
       position: 'absolute',
       width: '100%',
       bottom: 0,
+      border: 'none',
+      borderTop: 'white 1px solid',
     },
   },
   title: {

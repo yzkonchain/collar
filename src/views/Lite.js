@@ -1,12 +1,11 @@
 import { ethers } from 'ethers'
-import { useContext, useReducer, useState, useEffect, useMemo } from 'react'
+import { useContext, useReducer, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { context, liteContext, pools, poolList, bondList } from '@/config'
+import { contract } from '@/hooks'
 
 import { MyTabs, MyTabsChild } from '@/components/Modules'
 import { PoolSelector, Borrow, Repay, Deposit, Withdraw, Lend, Exit, Info } from '@/components/Content'
-
-import { contract, Price } from '@/hooks'
 
 const useStyles = makeStyles((theme) => ({
   root: {

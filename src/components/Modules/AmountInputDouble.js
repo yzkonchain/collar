@@ -3,7 +3,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { iconInfo } from '@/assets/svg'
 import { TextField, Tabs, Tab } from '@material-ui/core'
-import { FloatMessage } from '@/components/Modules'
+import { FloatMessage2 } from '@/components/Modules'
 import PhoneIcon from '@material-ui/icons/Phone'
 import { textInfo, tokenList } from '@/config'
 import { Price } from '@/hooks'
@@ -120,7 +120,7 @@ const MyTabs = withStyles({
                   src={iconInfo}
                   style={{ width: '14px', marginLeft: '5px', verticalAlign: 'middle' }}
                 />
-                <FloatMessage anchorEl={anchorEl[k]} info={props.info[k]} />
+                <FloatMessage2 anchorEl={anchorEl[k]} info={props.info[k]} />
               </div>
             }
           />

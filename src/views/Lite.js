@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useEffect, useMemo } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { context, liteContext, pools } from '@/config'
+import { context, liteContext, pools, poolSelect } from '@/config'
 import { contract } from '@/hooks'
 
 import { MyTabs, MyTabsChild } from '@/components/Modules'
@@ -154,7 +154,7 @@ export default function Lite() {
   const [liteState, setLiteState] = useReducer((s, ns) => ({ ...s, ...ns }), {
     tabs: 0,
     tabsChild: 0,
-    round: false,
+    round: [0, true],
     pool: pools[0].r1,
     coll: pools[0].r1.coll,
     bond: pools[0].r1.bond,
@@ -186,13 +186,25 @@ export default function Lite() {
   ][tabs][tabsChild]
 
   useEffect(() => {
+    const poolName = `${pool.bond.addr}-${pool.want.addr}`
+    setLiteState({ pool: poolSelect[`${poolName}-${round[0]}`] })
+  }, [round[0]])
+
+  useEffect(() => {
     if (signer) {
       ;(async () => {
         const controller = CT(signer)
-        setLiteState({ data: await controller.fetch_state(pool), controller })
+        const poolName = `${pool.bond.addr}-${pool.want.addr}`
+        const poolRound = !poolSelect[`${poolName}-1`]
+        const newData = await controller.fetch_state(pool)
+        setLiteState({
+          controller,
+          data: newData,
+          round: [poolRound ? 0 : round[0], poolRound],
+        })
       })()
     } else {
-      if (data !== data_zero) setLiteState({ data: data_zero, controller: null })
+      if (data !== data_zero) setLiteState({ data: data_zero, controller: null, round: [0, true] })
     }
   }, [signer, pool])
 
@@ -209,6 +221,7 @@ export default function Lite() {
                 labels={tabsChildList}
                 onChange={(_, v) => setLiteState({ tabsChild: v })}
                 round={{ round, setRound: (round) => setLiteState({ round }) }}
+                expiry={pool.expiry_time * 1000}
               />
               <PoolSelector />
               <Content />

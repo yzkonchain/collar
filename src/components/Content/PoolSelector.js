@@ -52,7 +52,17 @@ export default function PoolSelector() {
     setLiteState,
   } = useContext(liteContext)
 
-  const getPool = (bond, want) => poolSelect[`${bond}-${want}-${round ? '1' : '0'}`]
+  const getPool = (bond, want) => poolSelect[`${bond}-${want}-${round[0]}`]
+
+  const setPool = (bond, want) => {
+    let pool = poolSelect[`${bond}-${want}-${round[0]}`]
+    if (pool) {
+      setLiteState({ pool, bond: pool.bond, want: pool.want, coll: pool.coll })
+    } else {
+      pool = poolSelect[`${bond}-${want}-0`]
+      setLiteState({ pool, bond: pool.bond, want: pool.want, coll: pool.coll, round: [0, true] })
+    }
+  }
 
   return useMemo(
     () => (
@@ -62,23 +72,16 @@ export default function PoolSelector() {
           <FormControl className={classes.formControl}>
             <Select
               value={bond.addr}
-              onChange={({ target: { value } }) => {
-                const want = wantList[value][0]
-                const pool = getPool(value, want.addr)
-                const { bond, coll } = pool
-                setLiteState({ bond, want, coll, pool })
-              }}
+              onChange={({ target: { value } }) => setPool(value, wantList[value][0].addr)}
               className={classes.select}
               IconComponent={ExpandMoreIcon}
             >
-              {bondList.map(({ addr, icon, symbol }) => {
-                return (
-                  <MenuItem value={addr} key={addr}>
-                    <img alt="" src={icon} className={classes.icon} style={{ width: '20px' }} />
-                    <span style={{ fontFamily: 'Gillsans' }}>{symbol}</span>
-                  </MenuItem>
-                )
-              })}
+              {bondList.map(({ addr, icon, symbol }) => (
+                <MenuItem value={addr} key={addr}>
+                  <img alt="" src={icon} className={classes.icon} style={{ width: '20px' }} />
+                  <span style={{ fontFamily: 'Gillsans' }}>{symbol}</span>
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
@@ -87,22 +90,16 @@ export default function PoolSelector() {
           <FormControl className={classes.formControl}>
             <Select
               value={want.addr}
-              onChange={({ target: { value } }) => {
-                const pool = getPool(bond.addr, value)
-                const { want, coll } = pool
-                setLiteState({ want, coll, pool })
-              }}
+              onChange={({ target: { value } }) => setPool(bond.addr, value)}
               className={classes.select}
               IconComponent={ExpandMoreIcon}
             >
-              {wantList[bond.addr].map(({ addr, icon, symbol }) => {
-                return (
-                  <MenuItem value={addr} key={addr}>
-                    <img alt="" src={icon} className={classes.icon} style={{ width: '20px' }} />
-                    <span style={{ fontFamily: 'Gillsans' }}>{symbol}</span>
-                  </MenuItem>
-                )
-              })}
+              {wantList[bond.addr].map(({ addr, icon, symbol }) => (
+                <MenuItem value={addr} key={addr}>
+                  <img alt="" src={icon} className={classes.icon} style={{ width: '20px' }} />
+                  <span style={{ fontFamily: 'Gillsans' }}>{symbol}</span>
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </div>

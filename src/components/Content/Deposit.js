@@ -42,7 +42,7 @@ export default function Repay() {
         const tip = {
           poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
           share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
-          slip: controller.calc_slip(data, [coll, want], pool.addr).toPrecision(3),
+          slip: controller.calc_slip(data, [coll, want], pool).toPrecision(3),
         }
         setState({ input: { want, coll }, output: { clpt }, tip })
       }

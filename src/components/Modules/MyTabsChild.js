@@ -5,6 +5,19 @@ import { Accordion, AccordionSummary, AccordionDetails, Tabs, Tab, Switch } from
 import { FloatMessage2 } from '@/components/Modules'
 import { TabsArrow, iconInfo } from '@/assets/svg'
 import { textInfo } from '@/config'
+const timer = (time) => {
+  const dtime = new Date(time) - new Date()
+  return [
+    Math.floor(dtime / 86400000),
+    Math.floor((dtime % 86400000) / 3600000),
+    Math.floor(((dtime % 86400000) % 3600000) / 60000),
+  ]
+}
+const Timer = ({ timer: [d, h, m] }) => (
+  <div
+    style={{ position: 'absolute', right: 0, top: '-16px', width: 'max-content', fontSize: '10px', color: 'grey' }}
+  >{`${d}days ${h}hours ${m}mints`}</div>
+)
 
 const MyAccordion = withStyles({
   root: {
@@ -73,13 +86,14 @@ const MyTabs = withStyles({
     zIndex: '1',
   },
 })((props) => {
-  const { labels, tabs, value } = props
+  const { labels, tabs, value, expiry } = props
   const selected = labels[tabs][value]
   const label = {}
   labels.forEach((v) => v.forEach((v) => (label[v] = true)))
   const [expanded, setExpanded] = useState(label)
   const [anchorEl, setAnchorEl] = useState(null)
   const { round, setRound } = props.round
+  const count_time = timer(expiry)
   const classes = makeStyles((theme) => ({
     root: { position: 'relative' },
     button: {
@@ -118,7 +132,12 @@ const MyTabs = withStyles({
   return (
     <div className={classes.root}>
       <div className={classes.button}>
-        <Switch checked={round} onChange={() => setRound(!round)} className={classes.switch} />
+        <Switch
+          className={classes.switch}
+          checked={!!round[0]}
+          onChange={() => setRound([round[0] ? 0 : 1, round[1]])}
+          disabled={round[1]}
+        />
         <div className={classes.switchInfo}>
           <span>NewRound</span>
           <img
@@ -129,6 +148,7 @@ const MyTabs = withStyles({
           />
           <FloatMessage2 anchorEl={anchorEl} info={textInfo['round']} />
         </div>
+        <Timer timer={count_time} />
       </div>
       <Tabs {...props} variant="standard">
         {labels[tabs].map((v, k) => (

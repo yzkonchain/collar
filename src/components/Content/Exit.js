@@ -18,7 +18,7 @@ const INIT = {
 }
 const format = (num) => ethers.utils.formatEther(num)
 
-export default function Exit(props) {
+export default function Exit() {
   const {
     state: { signer },
   } = useContext(context)
@@ -28,6 +28,7 @@ export default function Exit(props) {
     setLiteState,
     handleClick,
   } = useContext(liteContext)
+  INIT.tip.apy = data.apy.toPrecision(3)
   const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
@@ -36,11 +37,14 @@ export default function Exit(props) {
     ;(async () => {
       const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
       const want = await controller.ct(pool).get_dy(coll)
-      const fee = (format(want) * (1 - format(data.swap.fee))).toFixed(4)
-      const min = (format(want) * 0.995).toFixed(3)
-      const slip = (controller.calc_apy(data, [null, want], pool) - data.apy).toPrecision(3)
+      const tip = {
+        fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
+        min: (format(want) * 0.995).toFixed(3),
+        slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+        apy: data.apy.toPrecision(3),
+      }
       if (!coll.eq(state.input.coll)) {
-        setState({ input: { coll }, output: { want }, tip: { fee, min, slip } })
+        setState({ input: { coll }, output: { want }, tip })
       }
     })()
   }, [state])
@@ -68,7 +72,7 @@ export default function Exit(props) {
           </div>
         </div>
         <ApyFloatMessage
-          APY={data.apy ? data.apy.toPrecision(3) : '0.00'}
+          APY={state.tip.apy}
           info={[
             { 'Slippage tolerance': `${state.tip.slip} %` },
             { 'Minimum recieved': `${state.tip.min} ${tokenList[want].symbol}` },
@@ -79,10 +83,7 @@ export default function Exit(props) {
         <div className={classes.buttonOne}>
           <div>
             <MyButton name="Approve" onClick={() => console.log('Approve')} />
-            <MyButton
-              name="Exit"
-              onClick={async () => handleClick('redeem')(state.output.want, state.input.coll, pool)}
-            />
+            <MyButton name="Exit" onClick={() => handleClick('redeem')(state.output.want, state.input.coll, pool)} />
           </div>
         </div>
       </div>

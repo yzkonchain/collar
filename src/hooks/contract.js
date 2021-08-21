@@ -38,6 +38,9 @@ const calc_apy = ({ swap: { sx, sy, sk } }, [bond, want], pool) =>
     3155692600000) /
   (poolList[pool].expiry_time * 1000 - new Date())
 
+const calc_slip = ({ swap: { sx, sy, sk } }, [bond, want], pool) =>
+  calc_apy({ swap: { sx, sy, sk } }, [bond, want], pool) - calc_apy({ swap: { sx, sy, sk } }, [null, null], pool)
+
 const fetch_state = async (pool, signer) => {
   const init = {
     balance: {
@@ -295,6 +298,7 @@ export default function contract() {
     if (signer)
       return {
         calc_apy,
+        calc_slip,
         ct: (address, abi) => controller(address, signer, abi),
         fetch_state: async (pool) => fetch_state(pool, signer),
         mypage_data: async () => mypage_data(signer),

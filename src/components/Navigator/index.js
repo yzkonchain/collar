@@ -1,22 +1,15 @@
 import { useContext, useState } from 'react'
 import { context } from '@/config'
-import { makeStyles, withStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core/styles'
 import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
-import { Drawer, Box, IconButton, Divider, List, ListItem, ListItemIcon, ListItemText, Hidden } from '@material-ui/core'
-
-import SportsEsportsIcon from '@material-ui/icons/SportsEsports'
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
-import LaptopChromebookIcon from '@material-ui/icons/LaptopChromebook'
-import KeyboardIcon from '@material-ui/icons/Keyboard'
-import PersonIcon from '@material-ui/icons/Person'
+import { Drawer, Box, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
+import { LiteIcon, TermIcon, ProIcon, MypageIcon, CloseMenuIcon } from '@/assets/svg'
 
 import Lite from '@/views/Lite'
 import MyPage from '@/views/MyPage'
 import Faucet from '@/views/Faucet'
 import Term from '@/views/Term'
 import Pro from '@/views/Pro'
-
-import { LiteIcon, TermIcon, ProIcon, MypageIcon, CloseMenuIcon } from '@/assets/svg'
 
 const useStyles = makeStyles((theme) => ({
   drawer: {

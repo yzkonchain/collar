@@ -19,7 +19,7 @@ const INIT = {
 }
 const format = (num) => ethers.utils.formatEther(num)
 
-export default function Repay(props) {
+export default function Repay() {
   const {
     state: { signer },
   } = useContext(context)
@@ -29,6 +29,7 @@ export default function Repay(props) {
     setLiteState,
     handleClick,
   } = useContext(liteContext)
+  INIT.tip.apy = data.apy.toPrecision(3)
   const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
@@ -38,11 +39,14 @@ export default function Repay(props) {
       const want = ethers.utils.parseUnits(state.I.want || '0', 18)
       const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
       const bond = want.add(coll)
-      const fee = (format(want) * (1 - format(data.swap.fee))).toFixed(4)
-      const min = (format(bond) * 0.995).toFixed(3)
-      const slip = (controller.calc_apy(data, [bond, null], pool) - data.apy).toPrecision(3)
+      const tip = {
+        fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
+        min: (format(bond) * 0.995).toFixed(3),
+        slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
+        apy: data.apy.toPrecision(3),
+      }
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
-        setState({ input: { want, coll }, output: { bond }, tip: { fee, min, slip } })
+        setState({ input: { want, coll }, output: { bond }, tip })
       }
     })()
   }, [state])
@@ -80,7 +84,7 @@ export default function Repay(props) {
             Maximum debt = {format(data.balance.call)}
           </div>
           <ApyFloatMessage
-            APY={data.apy ? data.apy.toPrecision(3) : '0.00'}
+            APY={state.tip.apy}
             info={[
               { 'Slippage tolerance': `${state.tip.slip} %` },
               {
@@ -95,10 +99,10 @@ export default function Repay(props) {
         </div>
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={async () => handleClick('approve')(want, pool)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(want, pool)} />
             <MyButton
               name="Repay"
-              onClick={async () => handleClick('repay')(state.input.want, state.input.coll, pool, signer)}
+              onClick={() => handleClick('repay')(state.input.want, state.input.coll, pool, signer)}
             />
           </div>
         </div>

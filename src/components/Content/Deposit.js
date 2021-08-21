@@ -19,7 +19,7 @@ const INIT = {
 }
 const format = (num) => ethers.utils.formatEther(num)
 
-export default function Repay(props) {
+export default function Repay() {
   const {
     state: { signer },
   } = useContext(context)
@@ -38,11 +38,13 @@ export default function Repay(props) {
       const want = ethers.utils.parseUnits(state.I.want || '0', 18)
       const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
       const clpt = await controller.ct(pool).get_dk(coll, want)
-      const poolBalance = (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3)
-      const share = ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3)
-      const slip = (controller.calc_apy(data, [coll, want], pool) - data.apy).toPrecision(3)
+      const tip = {
+        poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
+        share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
+        slip: controller.calc_slip(data, [coll, want], pool).toPrecision(3),
+      }
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
-        setState({ input: { want, coll }, output: { clpt }, tip: { share, slip, poolBalance } })
+        setState({ input: { want, coll }, output: { clpt }, tip })
       }
     })()
   }, [state])
@@ -91,14 +93,14 @@ export default function Repay(props) {
         />
         <div className={classes.buttonTwo}>
           <div>
-            <MyButton name="Approve" onClick={async () => handleClick('approve')(want, pool)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(want, pool)} />
             <MyButton
               name="Deposit"
-              onClick={async () => handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt, pool)}
+              onClick={() => handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt, pool)}
             />
           </div>
           <div>
-            <MyButton name="Claim" onClick={async () => handleClick('claim')(pool)} />
+            <MyButton name="Claim" onClick={() => handleClick('claim')(pool)} />
           </div>
         </div>
       </div>

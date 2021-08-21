@@ -1,5 +1,4 @@
 import { COLLAR, USDT, USDC, COLL, CALL } from '@/assets/svg/token'
-import { RoundedCorner } from '@material-ui/icons'
 
 const Token = (symbol, addr, icon, decimals) => {
   switch (symbol) {

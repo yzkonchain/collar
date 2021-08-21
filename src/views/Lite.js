@@ -141,6 +141,7 @@ const data_zero = {
     sy: ZERO,
     sk: ZERO,
   },
+  apy: 0,
 }
 
 export default function Lite() {

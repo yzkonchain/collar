@@ -18,7 +18,7 @@ const INIT = {
 }
 const format = (num) => ethers.utils.formatEther(num)
 
-export default function Lend(props) {
+export default function Lend() {
   const {
     state: { signer },
   } = useContext(context)
@@ -28,6 +28,7 @@ export default function Lend(props) {
     setLiteState,
     handleClick,
   } = useContext(liteContext)
+  INIT.tip.apy = data.apy.toPrecision(3)
   const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
@@ -36,11 +37,14 @@ export default function Lend(props) {
     ;(async () => {
       const want = ethers.utils.parseUnits(state.I.want || '0', 18)
       const coll = await controller.ct(pool).get_dx(want)
-      const fee = (format(coll) * (1 - format(data.swap.fee))).toFixed(4)
-      const min = (format(coll) * 0.995).toFixed(3)
-      const slip = (controller.calc_apy(data, [null, want], pool) - data.apy).toPrecision(3)
+      const tip = {
+        fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
+        min: (format(coll) * 0.995).toFixed(3),
+        slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+        apy: data.apy.toPrecision(3),
+      }
       if (!want.eq(state.input.want)) {
-        setState({ input: { want }, output: { coll }, tip: { fee, min, slip } })
+        setState({ input: { want }, output: { coll }, tip })
       }
     })()
   }, [state])
@@ -68,21 +72,18 @@ export default function Lend(props) {
           </div>
         </div>
         <ApyFloatMessage
-          APY={data.apy ? data.apy.toPrecision(3) : '0.00'}
+          APY={state.tip.apy}
           info={[
             { 'Slippage tolerance': `${state.tip.slip} %` },
             { 'Minimum recieved': `${state.tip.min} COLL` },
             { Route: `${tokenList[want].symbol} -> COLL` },
-            { 'Nominal swap fee': `${state.tip.fee} COLL` },
+            { 'Nominal swap fee': `${parseFloat(state.tip.fee).toPrecision(3)} COLL` },
           ]}
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={async () => handleClick('approve')(want, pool)} />
-            <MyButton
-              name="Lend"
-              onClick={async () => handleClick('lend')(state.input.want, state.output.coll, pool)}
-            />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(want, pool)} />
+            <MyButton name="Lend" onClick={() => handleClick('lend')(state.input.want, state.output.coll, pool)} />
           </div>
         </div>
       </div>

@@ -28,6 +28,7 @@ export default function Borrow() {
     setLiteState,
     handleClick,
   } = useContext(liteContext)
+  INIT.tip.apy = data.apy.toPrecision(3)
   const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
@@ -36,11 +37,14 @@ export default function Borrow() {
     ;(async () => {
       const bond = ethers.utils.parseUnits(state.I.bond || '0', 18)
       const want = await controller.ct(pool).get_dy(bond)
-      const fee = (format(want) * (1 - format(data.swap.fee))).toFixed(4)
-      const min = (format(want) * 0.995).toFixed(3)
-      const slip = (controller.calc_apy(data, [bond, null], pool) - data.apy).toPrecision(3)
+      const tip = {
+        fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
+        min: (format(want) * 0.995).toFixed(3),
+        slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
+        apy: data.apy.toPrecision(3),
+      }
       if (!bond.eq(state.input.bond)) {
-        setState({ input: { bond }, output: { want }, tip: { fee, min, slip } })
+        setState({ input: { bond }, output: { want }, tip })
       }
     })()
   }, [state])
@@ -68,7 +72,7 @@ export default function Borrow() {
           </div>
         </div>
         <ApyFloatMessage
-          APY={data.apy ? data.apy.toPrecision(3) : '0.00'}
+          APY={state.tip.apy}
           info={[
             { 'Slippage tolerance': `${state.tip.slip} %` },
             { 'Minimum recieved': `${state.tip.min}` },

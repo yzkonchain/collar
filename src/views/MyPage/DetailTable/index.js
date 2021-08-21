@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { poolList, context, mypageContext } from '@/config'
-import { contract } from '@/hooks'
 import DetailPC from './DetailPC'
 import DetailMobile from './DetailMobile'
 
@@ -51,7 +50,6 @@ export default function DetailTable({ pools }) {
     state: { signer },
   } = useContext(context)
   const { handleClick } = useContext(mypageContext)
-  const CT = contract()
 
   return (
     <div className={classes.root}>
@@ -71,8 +69,8 @@ export default function DetailTable({ pools }) {
                 <span>Expiry: {new Date(pool.expiry_time * 1000).toLocaleString()}</span>
               </div>
             </div>
-            <DetailPC pool={pool} val={val} handleClick={handleClick} />
-            <DetailMobile pool={pool} val={val} handleClick={handleClick} />
+            <DetailPC {...{ pool, val, handleClick }} />
+            <DetailMobile {...{ pool, val, handleClick }} />
           </div>
         )
       })}

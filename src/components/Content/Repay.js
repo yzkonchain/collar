@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList, poolList } from '@/config'
+import { context, liteContext, tokenList } from '@/config'
 import { MyButton, AmountInputDouble, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -24,7 +24,7 @@ export default function Repay() {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { bond, want, pool, data, controller },
+    liteState: { bond, want, coll, pool, data, controller },
     classesChild: classes,
     setLiteState,
     handleClick,
@@ -38,14 +38,14 @@ export default function Repay() {
     ;(async () => {
       const want = ethers.utils.parseUnits(state.I.want || '0', 18)
       const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
-      const bond = want.add(coll)
-      const tip = {
-        fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
-        min: (format(bond) * 0.995).toFixed(3),
-        slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
-        apy: data.apy.toPrecision(3),
-      }
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
+        const bond = want.add(coll)
+        const tip = {
+          fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
+          min: (format(bond) * 0.995).toFixed(3),
+          slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
+          apy: data.apy.toPrecision(3),
+        }
         setState({ input: { want, coll }, output: { bond }, tip })
       }
     })()
@@ -61,7 +61,7 @@ export default function Repay() {
               State={{
                 state,
                 setState,
-                token: [want, poolList[pool].coll.addr],
+                token: [want, coll],
                 max: [
                   Math.min(parseFloat(format(data.balance.call)), parseFloat(format(data.balance.want))),
                   Math.min(parseFloat(format(data.balance.call)), parseFloat(format(data.balance.coll))),
@@ -95,12 +95,12 @@ export default function Repay() {
         </div>
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(want, pool)} />
-            <MyButton name="Repay" onClick={() => handleClick('repay')(state.input.want, state.input.coll, pool)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(want)} />
+            <MyButton name="Repay" onClick={() => handleClick('repay')(state.input.want, state.input.coll)} />
           </div>
         </div>
       </div>
     ),
-    [state, pool, data],
+    [state, data],
   )
 }

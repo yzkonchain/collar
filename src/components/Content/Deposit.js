@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList, poolList } from '@/config'
+import { context, liteContext, tokenList } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -24,7 +24,7 @@ export default function Repay() {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { bond, want, pool, data, controller },
+    liteState: { bond, want, coll, pool, data, controller },
     classesChild: classes,
     setLiteState,
     handleClick,
@@ -37,13 +37,13 @@ export default function Repay() {
     ;(async () => {
       const want = ethers.utils.parseUnits(state.I.want || '0', 18)
       const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
-      const clpt = await controller.ct(pool).get_dk(coll, want)
-      const tip = {
-        poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
-        share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
-        slip: controller.calc_slip(data, [coll, want], pool).toPrecision(3),
-      }
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
+        const clpt = await controller.ct(pool).get_dk(coll, want)
+        const tip = {
+          poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
+          share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
+          slip: controller.calc_slip(data, [coll, want], pool).toPrecision(3),
+        }
         setState({ input: { want, coll }, output: { clpt }, tip })
       }
     })()
@@ -70,7 +70,7 @@ export default function Repay() {
               State={{
                 state,
                 setState,
-                token: poolList[pool].coll.addr,
+                token: coll,
                 max: parseFloat(format(data.balance.coll)),
                 maxCondition: () => data.balance.coll.gt('0'),
               }}
@@ -93,18 +93,18 @@ export default function Repay() {
         />
         <div className={classes.buttonTwo}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(want, pool)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(want)} />
             <MyButton
               name="Deposit"
-              onClick={() => handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt, pool)}
+              onClick={() => handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt)}
             />
           </div>
           <div>
-            <MyButton name="Claim" onClick={() => handleClick('claim')(pool)} />
+            <MyButton name="Claim" onClick={() => handleClick('claim')()} />
           </div>
         </div>
       </div>
     ),
-    [state, pool, data],
+    [state, data],
   )
 }

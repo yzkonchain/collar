@@ -54,7 +54,7 @@ export default function PoolSelector() {
     setLiteState,
   } = useContext(liteContext)
 
-  const getPool = (bond, want) => poolSelect[`${bond}-${want}-${round ? '1' : '0'}`].pool
+  const getPool = (bond, want) => poolSelect[`${bond}-${want}-${round ? '1' : '0'}`]
 
   return useMemo(
     () => (
@@ -66,7 +66,11 @@ export default function PoolSelector() {
               value={bond}
               onChange={({ target: { value: bond } }) => {
                 const want = wantList[bond][0].addr
-                setLiteState({ bond, want, pool: getPool(bond, want) })
+                const {
+                  pool,
+                  coll: { addr: coll },
+                } = getPool(bond, want)
+                setLiteState({ bond, want, coll, pool })
               }}
               className={classes.select}
               IconComponent={ExpandMoreIcon}
@@ -87,7 +91,11 @@ export default function PoolSelector() {
             <Select
               value={want}
               onChange={({ target: { value: want } }) => {
-                setLiteState({ want, pool: getPool(bond, want) })
+                const {
+                  pool,
+                  coll: { addr: coll },
+                } = getPool(bond, want)
+                setLiteState({ want, coll, pool })
               }}
               className={classes.select}
               IconComponent={ExpandMoreIcon}

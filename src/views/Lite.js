@@ -156,6 +156,7 @@ export default function Lite() {
     tabsChild: 0,
     round: false,
     pool: pools[0].r1.pool,
+    coll: pools[0].r1.coll.addr,
     bond: pools[0].bond.addr,
     want: pools[0].want.addr,
     data: data_zero,
@@ -167,7 +168,7 @@ export default function Lite() {
   const handleClick = (type) =>
     async function () {
       if (controller) {
-        await controller[type].apply(this, arguments)
+        await controller[type].call(null, ...arguments, pool)
         setLiteState({ forceUpdate: {} })
       } else CT()
     }

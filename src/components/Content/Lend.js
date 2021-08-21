@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList, poolList } from '@/config'
+import { context, liteContext, tokenList } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -23,7 +23,7 @@ export default function Lend() {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { bond, want, pool, data, controller },
+    liteState: { bond, want, coll, pool, data, controller },
     classesChild: classes,
     setLiteState,
     handleClick,
@@ -36,14 +36,14 @@ export default function Lend() {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const want = ethers.utils.parseUnits(state.I.want || '0', 18)
-      const coll = await controller.ct(pool).get_dx(want)
-      const tip = {
-        fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
-        min: (format(coll) * 0.995).toFixed(3),
-        slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
-        apy: data.apy.toPrecision(3),
-      }
       if (!want.eq(state.input.want)) {
+        const coll = await controller.ct(pool).get_dx(want)
+        const tip = {
+          fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
+          min: (format(coll) * 0.995).toFixed(3),
+          slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+          apy: data.apy.toPrecision(3),
+        }
         setState({ input: { want }, output: { coll }, tip })
       }
     })()
@@ -68,7 +68,7 @@ export default function Lend() {
           </div>
           <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
           <div>
-            <AmountShow title="coll" state={{ state, token: poolList[pool].coll.addr }} style={{ height: '90px' }} />
+            <AmountShow title="coll" state={{ state, token: coll }} style={{ height: '90px' }} />
           </div>
         </div>
         <ApyFloatMessage
@@ -82,12 +82,12 @@ export default function Lend() {
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(want, pool)} />
-            <MyButton name="Lend" onClick={() => handleClick('lend')(state.input.want, state.output.coll, pool)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(want)} />
+            <MyButton name="Lend" onClick={() => handleClick('lend')(state.input.want, state.output.coll)} />
           </div>
         </div>
       </div>
     ),
-    [state, pool, data],
+    [state, data],
   )
 }

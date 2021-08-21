@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList, poolList } from '@/config'
+import { context, liteContext, tokenList } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -23,7 +23,7 @@ export default function Exit() {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { bond, want, pool, data, controller },
+    liteState: { bond, want, coll, pool, data, controller },
     classesChild: classes,
     setLiteState,
     handleClick,
@@ -36,14 +36,14 @@ export default function Exit() {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
-      const want = await controller.ct(pool).get_dy(coll)
-      const tip = {
-        fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
-        min: (format(want) * 0.995).toFixed(3),
-        slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
-        apy: data.apy.toPrecision(3),
-      }
       if (!coll.eq(state.input.coll)) {
+        const want = await controller.ct(pool).get_dy(coll)
+        const tip = {
+          fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
+          min: (format(want) * 0.995).toFixed(3),
+          slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+          apy: data.apy.toPrecision(3),
+        }
         setState({ input: { coll }, output: { want }, tip })
       }
     })()
@@ -59,7 +59,7 @@ export default function Exit() {
               State={{
                 state,
                 setState,
-                token: poolList[pool].coll.addr,
+                token: coll,
                 max: parseFloat(format(data.balance.coll)),
                 maxCondition: () => data.balance.coll.gt('0'),
               }}
@@ -83,11 +83,11 @@ export default function Exit() {
         <div className={classes.buttonOne}>
           <div>
             <MyButton name="Approve" onClick={() => console.log('Approve')} />
-            <MyButton name="Exit" onClick={() => handleClick('redeem')(state.output.want, state.input.coll, pool)} />
+            <MyButton name="Exit" onClick={() => handleClick('redeem')(state.output.want, state.input.coll)} />
           </div>
         </div>
       </div>
     ),
-    [state, pool, data],
+    [state, data],
   )
 }

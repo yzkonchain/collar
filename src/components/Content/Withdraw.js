@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList, poolList } from '@/config'
+import { context, liteContext, tokenList } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { makeStyles } from '@material-ui/core/styles'
 import { ArrowForwardIosIcon } from '@/assets/svg'
@@ -25,7 +25,7 @@ export default function Withdraw() {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { bond, want, pool, data, controller },
+    liteState: { bond, want, coll, pool, data, controller },
     classesChild: classes,
     setLiteState,
     handleClick,
@@ -37,17 +37,17 @@ export default function Withdraw() {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const clpt = ethers.utils.parseUnits(state.I.clpt || '0', 18)
-      const res = await controller.ct(pool).get_dxdy(clpt)
-      const tip = {
-        poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
-        share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
-        rate: {
-          coll: clpt.eq(ZERO) ? 0 : parseFloat(format(res[0]) / state.I.clpt).toPrecision(3),
-          want: clpt.eq(ZERO) ? 0 : parseFloat(format(res[1]) / state.I.clpt).toPrecision(3),
-        },
-        fee: (format(res[0]) * (1 - format(data.swap.fee))).toFixed(4),
-      }
       if (!clpt.eq(state.input.clpt)) {
+        const res = await controller.ct(pool).get_dxdy(clpt)
+        const tip = {
+          poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
+          share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
+          rate: {
+            coll: clpt.eq(ZERO) ? 0 : parseFloat(format(res[0]) / state.I.clpt).toPrecision(3),
+            want: clpt.eq(ZERO) ? 0 : parseFloat(format(res[1]) / state.I.clpt).toPrecision(3),
+          },
+          fee: (format(res[0]) * (1 - format(data.swap.fee))).toFixed(4),
+        }
         setState({ input: { clpt }, output: { coll: res[0], want: res[1] }, tip })
       }
     })()
@@ -73,7 +73,7 @@ export default function Withdraw() {
           <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
           <div>
             <AmountShow title="want" state={{ state, token: want }} style={{ height: '90px' }} />
-            <AmountShow title="coll" state={{ state, token: poolList[pool].coll.addr }} style={{ height: '90px' }} />
+            <AmountShow title="coll" state={{ state, token: coll }} style={{ height: '90px' }} />
           </div>
         </div>
         <ApyFloatMessage
@@ -89,15 +89,15 @@ export default function Withdraw() {
         />
         <div className={classes.buttonTwo}>
           <div>
-            <MyButton name="Withdraw" onClick={() => handleClick('withdraw')(state.input.clpt, pool)} />
-            <MyButton name="Claim" onClick={() => handleClick('claim')(pool)} />
+            <MyButton name="Withdraw" onClick={() => handleClick('withdraw')(state.input.clpt)} />
+            <MyButton name="Claim" onClick={() => handleClick('claim')()} />
           </div>
           <div>
-            <MyButton name="Withdraw & Claim" onClick={() => handleClick('burn_and_claim')(state.input.clpt, pool)} />
+            <MyButton name="Withdraw & Claim" onClick={() => handleClick('burn_and_claim')(state.input.clpt)} />
           </div>
         </div>
       </div>
     ),
-    [state, pool, data],
+    [state, data],
   )
 }

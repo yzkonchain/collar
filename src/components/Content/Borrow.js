@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList, poolList } from '@/config'
+import { context, liteContext, tokenList } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -36,14 +36,14 @@ export default function Borrow() {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const bond = ethers.utils.parseUnits(state.I.bond || '0', 18)
-      const want = await controller.ct(pool).get_dy(bond)
-      const tip = {
-        fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
-        min: (format(want) * 0.995).toFixed(3),
-        slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
-        apy: data.apy.toPrecision(3),
-      }
       if (!bond.eq(state.input.bond)) {
+        const want = await controller.ct(pool).get_dy(bond)
+        const tip = {
+          fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
+          min: (format(want) * 0.995).toFixed(3),
+          slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
+          apy: data.apy.toPrecision(3),
+        }
         setState({ input: { bond }, output: { want }, tip })
       }
     })()
@@ -82,15 +82,15 @@ export default function Borrow() {
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(bond, pool)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(bond)} />
             <MyButton
               name="Deposit & Borrow"
-              onClick={() => handleClick('borrow')(state.input.bond, state.output.want, pool)}
+              onClick={() => handleClick('borrow')(state.input.bond, state.output.want)}
             />
           </div>
         </div>
       </div>
     ),
-    [state, pool, data],
+    [state, data],
   )
 }

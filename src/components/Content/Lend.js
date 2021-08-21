@@ -77,7 +77,7 @@ export default function Lend() {
             { 'Slippage tolerance': `${state.tip.slip} %` },
             { 'Minimum recieved': `${state.tip.min} COLL` },
             { Route: `${tokenList[want].symbol} -> COLL` },
-            { 'Nominal swap fee': `${parseFloat(state.tip.fee).toPrecision(3)} COLL` },
+            { 'Nominal swap fee': `${state.tip.fee} COLL` },
           ]}
         />
         <div className={classes.buttonOne}>

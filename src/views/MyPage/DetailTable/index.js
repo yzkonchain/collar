@@ -8,6 +8,9 @@ const useStyles = makeStyles({
   root: {
     fontFamily: 'Gillsans',
     color: 'white',
+    '&>div': {
+      marginBottom: '40px',
+    },
   },
   header: {
     display: 'flex',
@@ -56,7 +59,7 @@ export default function DetailTable({ pools }) {
       {pools.map((val, key) => {
         const pool = poolList[val.pool]
         return (
-          <div key={key} style={{ marginBottom: '40px' }}>
+          <div key={key}>
             <div className={classes.header}>
               <div>
                 <img src={pool.bond.icon} />

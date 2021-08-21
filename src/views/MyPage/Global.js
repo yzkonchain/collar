@@ -101,7 +101,7 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
             <img
               src={iconInfo}
               alt=""
-              onMouseEnter={(e) => setAnchorEl({ totalValue: e.currentTarget })}
+              onMouseEnter={({ currentTarget }) => setAnchorEl({ totalValue: currentTarget })}
               onMouseLeave={() => setAnchorEl({ totalValue: null })}
             />
             <FloatMessage2 anchorEl={anchorEl['totalValue']} info={textInfo['TotalValueLocked']} />

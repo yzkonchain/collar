@@ -87,11 +87,7 @@ export default function Repay() {
             APY={state.tip.apy}
             info={[
               { 'Slippage tolerance': `${state.tip.slip} %` },
-              {
-                'Minimum recieved': `${parseFloat(format(state.input.want.add(state.input.coll))).toFixed(3)} ${
-                  tokenList[bond].symbol
-                }`,
-              },
+              { 'Minimum recieved': `${state.tip.min} ${tokenList[bond].symbol}` },
               { Route: `COLL-> ${tokenList[bond].symbol} / ${tokenList[want].symbol}->${tokenList[bond].symbol}` },
               { 'Nominal swap fee': `${state.tip.fee} ${tokenList[want].symbol} ` },
             ]}
@@ -100,10 +96,7 @@ export default function Repay() {
         <div className={classes.buttonOne}>
           <div>
             <MyButton name="Approve" onClick={() => handleClick('approve')(want, pool)} />
-            <MyButton
-              name="Repay"
-              onClick={() => handleClick('repay')(state.input.want, state.input.coll, pool, signer)}
-            />
+            <MyButton name="Repay" onClick={() => handleClick('repay')(state.input.want, state.input.coll, pool)} />
           </div>
         </div>
       </div>

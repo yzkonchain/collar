@@ -5,54 +5,6 @@ import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components
 import { makeStyles } from '@material-ui/core/styles'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
-const useStyles = makeStyles((theme) => ({
-  root: {},
-  amount: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '15px',
-    '&>div': {
-      width: '50%',
-    },
-    '&>img': {
-      marginTop: '40px',
-    },
-  },
-  icon: {
-    margin: '0 10px',
-  },
-  button: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    '&>div': {
-      width: 'calc(50% - 15px)',
-      display: 'flex',
-      flexDirection: 'column',
-      '&>button': {
-        '&:first-child': {
-          marginBottom: '15px',
-        },
-      },
-      //PC
-      '@media screen and (min-width:960px)': {
-        '&:first-child': {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          '&>button': {
-            width: 'calc(50% - 10px)',
-            marginBottom: '0 !important',
-          },
-        },
-        '&:last-child': {
-          '&>button': {
-            width: '100%',
-            marginBottom: '0 !important',
-          },
-        },
-      },
-    },
-  },
-}))
 const ZERO = ethers.constants.Zero
 const INIT = {
   input: {
@@ -69,23 +21,23 @@ const INIT = {
 const format = (num) => ethers.utils.formatEther(num)
 
 export default function Withdraw(props) {
-  const classes = useStyles()
   const {
     state: { signer },
   } = useContext(context)
   const {
     liteState: { bond, want, pool, data, controller },
+    classesChild: classes,
     setLiteState,
     handleClick,
   } = useContext(liteContext)
-
   const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const clpt = ethers.utils.parseUnits(state.I.clpt || '0', 18)
-      const res = await controller.ct(pool, signer).get_dxdy(clpt)
+      const res = await controller.ct(pool).get_dxdy(clpt)
       const poolBalance = (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3)
       const share = ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3)
       const rate = {
@@ -93,7 +45,7 @@ export default function Withdraw(props) {
         want: clpt.eq(ZERO) ? 0 : parseFloat(format(res[1]) / state.I.clpt).toPrecision(3),
       }
       const fee = (format(res[0]) * (1 - format(data.swap.fee))).toFixed(4)
-      if (clpt.eq(state.input.clpt) === false) {
+      if (!clpt.eq(state.input.clpt)) {
         setState({
           input: { clpt },
           output: { coll: res[0], want: res[1] },
@@ -137,7 +89,7 @@ export default function Withdraw(props) {
             { 'Nominal swap fee': `${state.tip.fee} COLL` },
           ]}
         />
-        <div className={classes.button}>
+        <div className={classes.buttonTwo}>
           <div>
             <MyButton name="Withdraw" onClick={async () => handleClick('withdraw')(state.input.clpt, pool)} />
             <MyButton name="Claim" onClick={async () => handleClick('claim')(pool)} />

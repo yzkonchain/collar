@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useEffect, useMemo } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { context, liteContext, pools, poolList, bondList, wantList, poolSelect } from '@/config'
+import { context, liteContext, pools } from '@/config'
 import { contract } from '@/hooks'
 
 import { MyTabs, MyTabsChild } from '@/components/Modules'
@@ -60,6 +60,65 @@ const useStyles = makeStyles((theme) => ({
     padding: '15px',
   },
 }))
+const useStylesChild = makeStyles((theme) => ({
+  root: {},
+  amount: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '15px',
+    '&>div': {
+      width: '50%',
+    },
+    '&>img': {
+      marginTop: '40px',
+    },
+  },
+  icon: {
+    margin: '0 10px',
+  },
+  buttonOne: {
+    display: 'flex',
+    flexDirection: 'column',
+    '&>div': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      '&>button': {
+        width: 'calc(50% - 15px)',
+      },
+    },
+  },
+  buttonTwo: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    '&>div': {
+      width: 'calc(50% - 15px)',
+      display: 'flex',
+      flexDirection: 'column',
+      '&>button': {
+        '&:first-child': {
+          marginBottom: '15px',
+        },
+      },
+      '@media screen and (min-width:960px)': {
+        '&:first-child': {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          '&>button': {
+            width: 'calc(50% - 10px)',
+            marginBottom: '0 !important',
+          },
+        },
+        '&:last-child': {
+          '&>button': {
+            width: '100%',
+            marginBottom: '0 !important',
+          },
+        },
+      },
+    },
+  },
+}))
+
 const ZERO = ethers.constants.Zero
 const data_zero = {
   balance: {
@@ -86,6 +145,7 @@ const data_zero = {
 
 export default function Lite() {
   const classes = useStyles()
+  const classesChild = useStylesChild()
   const CT = contract()
   const {
     state: { signer },
@@ -101,14 +161,14 @@ export default function Lite() {
     controller: null,
     forceUpdate: {},
   })
-
   const { tabs, tabsChild, pool, data, round, controller } = liteState
 
   const handleClick = (type) =>
     async function () {
-      if (!controller) return
-      await controller[type].apply(this, arguments)
-      setLiteState({ forceUpdate: {} })
+      if (controller) {
+        await controller[type].apply(this, arguments)
+        setLiteState({ forceUpdate: {} })
+      } else CT()
     }
 
   const tabsList = ['LOAN', 'FARM', 'SWAP']
@@ -136,7 +196,7 @@ export default function Lite() {
 
   return useMemo(
     () => (
-      <liteContext.Provider value={{ liteState, setLiteState, handleClick }}>
+      <liteContext.Provider value={{ liteState, setLiteState, handleClick, classesChild }}>
         <div className={classes.root}>
           <div>
             <MyTabs value={tabs} onChange={(_, v) => setLiteState({ tabs: v, tabsChild: 0 })} labels={tabsList} />

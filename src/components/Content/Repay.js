@@ -3,36 +3,7 @@ import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { context, liteContext, tokenList, poolList } from '@/config'
 import { MyButton, AmountInputDouble, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
-import { makeStyles } from '@material-ui/core/styles'
 
-const useStyles = makeStyles((theme) => ({
-  root: {},
-  amount: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '15px',
-    '&>div': {
-      width: '50%',
-    },
-    '&>img': {
-      marginTop: '40px',
-    },
-  },
-  icon: {
-    margin: '0 10px',
-  },
-  button: {
-    display: 'flex',
-    flexDirection: 'column',
-    '&>div': {
-      display: 'flex',
-      justifyContent: 'space-between',
-      '&>button': {
-        width: 'calc(50% - 15px)',
-      },
-    },
-  },
-}))
 const ZERO = ethers.constants.Zero
 const INIT = {
   input: {
@@ -49,18 +20,18 @@ const INIT = {
 const format = (num) => ethers.utils.formatEther(num)
 
 export default function Repay(props) {
-  const classes = useStyles()
   const {
     state: { signer },
   } = useContext(context)
   const {
-    liteState: { bond, want, pool, data },
+    liteState: { bond, want, pool, data, controller },
+    classesChild: classes,
     setLiteState,
     handleClick,
   } = useContext(liteContext)
-
   const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
 
+  useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
@@ -69,28 +40,12 @@ export default function Repay(props) {
       const bond = want.add(coll)
       const fee = (format(want) * (1 - format(data.swap.fee))).toFixed(4)
       const min = (format(bond) * 0.995).toFixed(3)
-      const slip = (
-        (parseFloat(
-          format(
-            data.swap.sx
-              .add(bond)
-              .add(data.swap.sk)
-              .mul(ethers.utils.parseEther('1'))
-              .div(data.swap.sy.add(data.swap.sk.mul(poolList[pool].swap_sqp).div(ethers.BigNumber.from(1e9))))
-              .sub(ethers.utils.parseEther('1')),
-          ),
-        ) *
-          3155692600000) /
-          (poolList[pool].expiry_time * 1000 - new Date()) -
-        data.apy
-      ).toPrecision(3)
-      if (want.eq(state.input.want) === false || coll.eq(state.input.coll) === false) {
+      const slip = (controller.calc_apy(data, [bond, null], pool) - data.apy).toPrecision(3)
+      if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
         setState({ input: { want, coll }, output: { bond }, tip: { fee, min, slip } })
       }
     })()
   }, [state])
-
-  useEffect(() => state == INIT || setState(INIT), [pool])
 
   return useMemo(
     () => (
@@ -138,7 +93,7 @@ export default function Repay(props) {
             ]}
           />
         </div>
-        <div className={classes.button}>
+        <div className={classes.buttonOne}>
           <div>
             <MyButton name="Approve" onClick={async () => handleClick('approve')(want, pool)} />
             <MyButton

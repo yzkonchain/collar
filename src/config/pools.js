@@ -47,13 +47,13 @@ const pools = [
       swap_sqp: 992187500,
       expiry_time: 1633017600,
     },
-    r2: {
-      pool: '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c',
-      call: tokenList['0x9D8FEb661AFc92b83c45fC21836C114164beB285'],
-      coll: tokenList['0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231'],
-      swap_sqp: 992187500,
-      expiry_time: 1634017600,
-    },
+    // r2: {
+    //   pool: '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c',
+    //   call: tokenList['0x9D8FEb661AFc92b83c45fC21836C114164beB285'],
+    //   coll: tokenList['0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231'],
+    //   swap_sqp: 992187500,
+    //   expiry_time: 1634017600,
+    // },
   },
   {
     bond: tokens['USDC'],

@@ -1,12 +1,10 @@
-import { ethers } from 'ethers'
-import { useContext, useReducer, useEffect, useMemo } from 'react'
+import { useContext, useMemo } from 'react'
+import { liteContext, bondList, wantList, poolSelect } from '@/config'
 import { makeStyles } from '@material-ui/core/styles'
-import { liteContext, pools, tokenList, bondList, wantList, poolSelect } from '@/config'
-
-import { FormControl, InputLabel, Box, Select, MenuItem } from '@material-ui/core'
-import { iconInfo, ArrowForwardIosIcon } from '@/assets/svg'
-
+import { FormControl, Select, MenuItem } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import { ArrowForwardIosIcon } from '@/assets/svg'
+
 const useStyles = makeStyles((theme) => ({
   root: {},
   formControlTitle: {
@@ -50,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
 export default function PoolSelector() {
   const classes = useStyles()
   const {
-    liteState: { pool, bond, want, round },
+    liteState: { bond, want, round },
     setLiteState,
   } = useContext(liteContext)
 
@@ -63,13 +61,11 @@ export default function PoolSelector() {
         <div className={classes.formControlList}>
           <FormControl className={classes.formControl}>
             <Select
-              value={bond}
-              onChange={({ target: { value: bond } }) => {
-                const want = wantList[bond][0].addr
-                const {
-                  pool,
-                  coll: { addr: coll },
-                } = getPool(bond, want)
+              value={bond.addr}
+              onChange={({ target: { value } }) => {
+                const want = wantList[value][0]
+                const pool = getPool(value, want.addr)
+                const { bond, coll } = pool
                 setLiteState({ bond, want, coll, pool })
               }}
               className={classes.select}
@@ -87,20 +83,19 @@ export default function PoolSelector() {
           </FormControl>
 
           <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
+
           <FormControl className={classes.formControl}>
             <Select
-              value={want}
-              onChange={({ target: { value: want } }) => {
-                const {
-                  pool,
-                  coll: { addr: coll },
-                } = getPool(bond, want)
+              value={want.addr}
+              onChange={({ target: { value } }) => {
+                const pool = getPool(bond.addr, value)
+                const { want, coll } = pool
                 setLiteState({ want, coll, pool })
               }}
               className={classes.select}
               IconComponent={ExpandMoreIcon}
             >
-              {wantList[bond].map(({ addr, icon, symbol }) => {
+              {wantList[bond.addr].map(({ addr, icon, symbol }) => {
                 return (
                   <MenuItem value={addr} key={addr}>
                     <img alt="" src={icon} className={classes.icon} style={{ width: '20px' }} />

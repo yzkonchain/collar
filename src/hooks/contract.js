@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { abi as collar, pools, poolList, tokens } from '@/config'
+import { abi as collar, pools, poolList, poolConfig, signerNoAccount } from '@/config'
 import { useSnackbar } from 'notistack'
 import { Price } from '@/hooks'
 
@@ -21,58 +21,45 @@ const abiPool = [
 const controller = (address, signer, abi) => {
   return new ethers.Contract(address, abi || collar, signer)
 }
-const formatEther = (num, n) => {
+const format = (num, n) => {
   const res = parseFloat(ethers.utils.formatEther(num))
   return n ? res.toFixed(n) : res
 }
+const unformat = (num) => ethers.utils.parseEther(String(num))
+const formatMap = (data) => data.map((v) => format(v))
 const with_loss = (x) => x.mul(995).div(1000)
-const calc_apy = ({ swap: { sx, sy, sk } }, [bond, want], pool) =>
-  (formatEther(
-    sx
-      .add(bond || ZERO)
-      .add(sk)
-      .mul(ethers.utils.parseEther('1'))
-      .div(sy.add(want || ZERO).add(sk.mul(poolList[pool].swap_sqp).div(ethers.BigNumber.from(1e9))))
-      .sub(ethers.utils.parseEther('1')),
+
+const calc_apy_basic = ([sx, sy, sk], [bond, want], swap_sqp) => {
+  const one = ethers.utils.parseEther('1')
+  const mul = ethers.BigNumber.from(1e9)
+  return sx
+    .add(bond || ZERO)
+    .add(sk)
+    .mul(one)
+    .div(sy.add(want || ZERO).add(sk.mul(swap_sqp).div(mul)))
+    .sub(one)
+}
+
+const calc_apy = ({ swap: { sx, sy, sk } }, [bond, want], { swap_sqp, expiry_time }) =>
+  (format(calc_apy_basic([sx, sy, sk], [bond, want], swap_sqp)) * 3155692600000) / (expiry_time * 1000 - new Date())
+
+const calc_slip = ({ swap: { sx, sy, sk } }, [bond, want], { swap_sqp, expiry_time }) =>
+  (format(
+    calc_apy_basic([sx, sy, sk], [bond, want], swap_sqp).sub(calc_apy_basic([sx, sy, sk], [null, null], swap_sqp)),
   ) *
     3155692600000) /
-  (poolList[pool].expiry_time * 1000 - new Date())
-
-const calc_slip = ({ swap: { sx, sy, sk } }, [bond, want], pool) =>
-  calc_apy({ swap: { sx, sy, sk } }, [bond, want], pool) - calc_apy({ swap: { sx, sy, sk } }, [null, null], pool)
+  (expiry_time * 1000 - new Date())
 
 const fetch_state = async (pool, signer) => {
-  const init = {
-    balance: {
-      bond: ZERO,
-      want: ZERO,
-      call: ZERO,
-      coll: ZERO,
-      clpt: ZERO,
-      collar: ZERO,
-    },
-    allowance: {
-      bond: ZERO,
-      want: ZERO,
-    },
-    earned: {
-      collar: ZERO,
-    },
-    swap: {
-      sx: ZERO,
-      sy: ZERO,
-      sk: ZERO,
-    },
-  }
-  const p = poolList[pool]
+  const init = { balance: {}, allowance: {}, earned: {}, swap: {} }
   const me = await signer.getAddress()
-  const bond = controller(p['bond'].addr, signer, abiToken)
-  const want = controller(p['want'].addr, signer, abiToken)
-  const call = controller(p['call'].addr, signer, abiToken)
-  const coll = controller(p['coll'].addr, signer, abiToken)
-  const clpt = controller(pool, signer, abiToken)
-  const collar = controller(tokens['COLLAR'].addr, signer, abiToken)
-  const poolCt = controller(pool, signer, abiPool)
+  const collar = controller(poolConfig.collar, signer, abiToken)
+  const bond = controller(pool.bond.addr, signer, abiToken)
+  const want = controller(pool.want.addr, signer, abiToken)
+  const call = controller(pool.call.addr, signer, abiToken)
+  const coll = controller(pool.coll.addr, signer, abiToken)
+  const clpt = controller(pool.addr, signer, abiToken)
+  const poolCt = controller(pool.addr, signer, abiPool)
   ;[
     init.balance.bond,
     init.balance.want,
@@ -94,8 +81,8 @@ const fetch_state = async (pool, signer) => {
     coll.balanceOf(me),
     clpt.balanceOf(me),
     collar.balanceOf(me),
-    bond.allowance(me, pool),
-    want.allowance(me, pool),
+    bond.allowance(me, pool.addr),
+    want.allowance(me, pool.addr),
     poolCt.earned(me),
     poolCt.sx(),
     poolCt.sy(),
@@ -109,44 +96,66 @@ const fetch_state = async (pool, signer) => {
 const mypage_data = async (signer) => {
   const me = await signer.getAddress()
   const res = []
-  for (let pool of Object.keys(poolList)) {
-    const data = {}
-    const ct = {
-      pool: controller(pool, signer),
-      bond: controller(poolList[pool].bond.addr, signer, abiToken),
-      want: controller(poolList[pool].want.addr, signer, abiToken),
-      call: controller(poolList[pool].call.addr, signer, abiToken),
-      coll: controller(poolList[pool].coll.addr, signer, abiToken),
+  for (let { r1, r2 } of pools) {
+    for (let pool of [r1, r2]) {
+      if (pool) {
+        const ct = {
+          pool: controller(pool.addr, signer),
+          bond: controller(pool.bond.addr, signer, abiToken),
+          want: controller(pool.want.addr, signer, abiToken),
+          call: controller(pool.call.addr, signer, abiToken),
+          coll: controller(pool.coll.addr, signer, abiToken),
+        }
+        let [coll_total, want_total, clpt_total, bond_total, earned, clpt, call, coll] = await Promise.all([
+          ct.pool.sx(),
+          ct.pool.sy(),
+          ct.pool.sk(),
+          ct.bond.balanceOf(pool.addr),
+          ct.pool.earned(me),
+          ct.pool.balanceOf(me),
+          ct.call.balanceOf(me),
+          ct.coll.balanceOf(me),
+        ]).then(formatMap)
+        let [clpt_coll, clpt_want] = await ct.pool.get_dxdy(unformat(clpt)).then(formatMap)
+        res.push({
+          pool: pool,
+          coll_total,
+          want_total,
+          bond_total,
+          clpt,
+          call,
+          coll,
+          earned,
+          receivables: (clpt_coll + coll) * Price[pool.coll.addr] + clpt_want * Price[pool.want.addr],
+          shareOfPoll: (clpt / clpt_total) * 100,
+          coll_apy: '0.00',
+          call_apy: '0.00',
+          clpt_apy: '0.00',
+          clpt_apr: '0.00',
+        })
+      }
     }
-    ;[data.sx, data.sy, data.sk, data.bond, data.earned, data.clpt, data.call, data.coll] = await Promise.all([
-      ct.pool.sx(),
-      ct.pool.sy(),
-      ct.pool.sk(),
-      ct.bond.balanceOf(pool),
-      ct.pool.earned(me),
-      ct.pool.balanceOf(me),
-      ct.call.balanceOf(me),
-      ct.coll.balanceOf(me),
-    ])
-    ;[data.clpt_coll, data.clpt_want] = await ct.pool.get_dxdy(data.clpt)
-    res.push({
-      pool: pool,
-      coll_total: formatEther(data.sx),
-      want_total: formatEther(data.sy),
-      bond_total: formatEther(data.bond),
-      clpt: formatEther(data.clpt),
-      call: formatEther(data.call),
-      coll: formatEther(data.coll),
-      earned: formatEther(data.earned),
-      receivables:
-        formatEther(data.clpt_coll.add(data.coll)) * Price[poolList[pool].coll.addr] +
-        formatEther(data.clpt_want) * Price[poolList[pool].want.addr],
-      shareOfPoll: (formatEther(data.clpt) / formatEther(data.sk)) * 100,
-      coll_apy: '0.00',
-      call_apy: '0.00',
-      clpt_apy: '0.00',
-      clpt_apr: '0.00',
-    })
+  }
+  return res
+}
+
+const mypage_data_noaccount = async () => {
+  const res = []
+  for (let { r1, r2 } of pools) {
+    for (let pool of [r1, r2]) {
+      if (pool) {
+        const ct = {
+          pool: controller(pool.addr, signerNoAccount),
+          bond: controller(pool.bond.addr, signerNoAccount, abiToken),
+        }
+        const [coll_total, want_total, bond_total] = await Promise.all([
+          ct.pool.sx(),
+          ct.pool.sy(),
+          ct.bond.balanceOf(pool.addr),
+        ]).then(formatMap)
+        res.push({ pool, coll_total, want_total, bond_total })
+      }
+    }
   }
   return res
 }
@@ -302,67 +311,68 @@ export default function contract() {
         ct: (address, abi) => controller(address, signer, abi),
         fetch_state: async (pool) => fetch_state(pool, signer),
         mypage_data: async () => mypage_data(signer),
-        approve: async (coin, pool) => {
+        approve: async (coin, { addr }) => {
           await controller(coin, signer, ['function approve(address, uint256) external'])
-            .approve(pool, ethers.constants.MaxUint256)
+            .approve(addr, ethers.constants.MaxUint256)
             .then(callback(true)('approve'))
             .catch(callback(false))
         },
-        borrow: async (bond, want, pool) => {
-          await controller(pool, signer)
+        borrow: async (bond, want, { addr }) => {
+          await controller(addr, signer)
             .borrow_want(bond, with_loss(want))
             .then(callback(true)('borrow'))
             .catch(callback(false))
         },
-        repay: async (want, coll, pool) => {
+        repay: async (want, coll, { addr }) => {
+          const ct = controller(addr, signer)
           let resp
           switch (true) {
             case want.eq(ZERO):
-              resp = controller(pool, signer).burn_dual(coll)
+              resp = ct.burn_dual(coll)
               break
             case coll.eq(ZERO):
-              resp = controller(pool, signer).burn_call(want)
+              resp = ct.burn_call(want)
               break
             default:
-              resp = controller(pool, signer).repay_both(want, coll)
+              resp = ct.repay_both(want, coll)
               break
           }
           await resp.then(callback(true)('repay')).catch(callback(false))
         },
-        deposit: async (want, coll, clpt, pool) => {
-          await controller(pool, signer)
+        deposit: async (want, coll, clpt, { addr }) => {
+          await controller(addr, signer)
             .mint(coll, want, with_loss(clpt))
             .then(callback(true)('deposit'))
             .catch(callback(false))
         },
-        withdraw: async (clpt, pool) => {
-          await controller(pool, signer).withdraw_both(clpt).then(callback(true)('withdraw')).catch(callback(false))
+        withdraw: async (clpt, { addr }) => {
+          await controller(addr, signer).withdraw_both(clpt).then(callback(true)('withdraw')).catch(callback(false))
         },
-        claim: async (pool) => {
-          await controller(pool, signer).claim_reward().then(callback(true)('claim')).catch(callback(false))
+        claim: async ({ addr }) => {
+          await controller(addr, signer).claim_reward().then(callback(true)('claim')).catch(callback(false))
           return true
         },
-        burn_and_claim: async (clpt, pool) => {
-          await controller(pool, signer).burn_and_claim(clpt).then(callback(true)('withdraw')).catch(callback(false))
+        burn_and_claim: async (clpt, { addr }) => {
+          await controller(addr, signer).burn_and_claim(clpt).then(callback(true)('withdraw')).catch(callback(false))
         },
-        lend: async (want, coll, pool) => {
-          await controller(pool, signer)
+        lend: async (want, coll, { addr }) => {
+          await controller(addr, signer)
             .swap_want_to_min_coll(with_loss(coll), want)
             .then(callback(true)('lend'))
             .catch(callback(false))
         },
-        redeem: async (want, coll, pool) => {
-          await controller(pool, signer)
+        redeem: async (want, coll, { addr }) => {
+          await controller(addr, signer)
             .swap_coll_to_min_want(coll, with_loss(want))
             .then(callback(true)('redeem'))
             .catch(callback(false))
         },
-        mint: async (n, pool) => {
-          await controller(pool, signer).mint_dual(n).then(callback(true)('mint')).catch(callback(false))
+        mint: async (n, { addr }) => {
+          await controller(addr, signer).mint_dual(n).then(callback(true)('mint')).catch(callback(false))
         },
         redeemAll: async (pool) => {
           const me = await signer.getAddress()
-          const ct = controller(pool.pool, signer)
+          const ct = controller(pool.addr, signer)
           const call = await controller(pool.call.addr, signer).balanceOf(me)
           const coll = await controller(pool.coll.addr, signer).balanceOf(me)
           if (parseFloat(call) > parseFloat(coll)) {
@@ -398,12 +408,12 @@ export default function contract() {
             })
             return
           }
-          await controller(pool.pool, signer).burn_dual(call).then(callback(true)('repay')).catch(callback(false))
+          await controller(pool.addr, signer).burn_dual(call).then(callback(true)('repay')).catch(callback(false))
           return true
         },
-        withdrawAll: async (pool) => {
+        withdrawAll: async ({ addr }) => {
           const me = await signer.getAddress()
-          const ct = controller(pool.pool, signer)
+          const ct = controller(addr, signer)
           const clpt = await ct.balanceOf(me)
           await ct.withdraw_both(clpt).then(callback(true)('withdraw')).catch(callback(false))
           return true
@@ -425,7 +435,10 @@ export default function contract() {
         },
       }
     else {
-      if (command) return null
+      if (command)
+        return {
+          mypage_data_noaccount,
+        }
       else enqueueSnackbar(callbackInfo('noaccount'))
     }
   }

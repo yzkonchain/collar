@@ -86,7 +86,7 @@ const dec = {
 
 export default function Global({ totalValueLocked, totalBorrowed, totalCollateral }) {
   const classes = useStyles()
-  const [anchorEl, setAnchorEl] = useState({ totalValue: null })
+  const [anchorEl, setAnchorEl] = useState(null)
 
   return (
     <div className={classes.root}>
@@ -101,10 +101,10 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
             <img
               src={iconInfo}
               alt=""
-              onMouseEnter={({ currentTarget }) => setAnchorEl({ totalValue: currentTarget })}
-              onMouseLeave={() => setAnchorEl({ totalValue: null })}
+              onMouseEnter={({ currentTarget: e }) => setAnchorEl(e)}
+              onMouseLeave={() => setAnchorEl(null)}
             />
-            <FloatMessage2 anchorEl={anchorEl['totalValue']} info={textInfo['TotalValueLocked']} />
+            <FloatMessage2 anchorEl={anchorEl} info={textInfo['TotalValueLocked']} />
           </div>
           <div>$ {parseFloat(totalValueLocked || 0).toFixed(dec.tvl)}</div>
         </div>

@@ -2,7 +2,6 @@ import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { Table, TableBody, TableCell as OldTableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import { MyButtonWhite } from '@/components/Modules'
 import { Price } from '@/hooks'
-import { Class } from '@material-ui/icons'
 
 const useStyles = makeStyles({
   root: {
@@ -172,7 +171,7 @@ export default function PC({ pool, val, handleClick }) {
               </TableCell>
               <TableCell className={classes.button}>
                 <MyButtonWhite name={'Withdraw All'} onClick={() => handleClick('withdrawAll', pool)} />
-                <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool.pool)} />
+                <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool)} />
               </TableCell>
             </TableRow>
           </TableBody>

@@ -4,8 +4,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { iconInfo } from '@/assets/svg'
 import { TextField, Tabs, Tab } from '@material-ui/core'
 import { FloatMessage2 } from '@/components/Modules'
-import PhoneIcon from '@material-ui/icons/Phone'
-import { textInfo, tokenList } from '@/config'
+import { textInfo } from '@/config'
 import { Price } from '@/hooks'
 import { useSnackbar } from 'notistack'
 
@@ -194,8 +193,8 @@ const MyInput = ({ state, setState, title, max, maxCondition, token, style }) =>
           }}
         ></TextField>
       </div>
-      <span className={classes.token}>{tokenList[token].symbol}</span>
-      <span className={classes.dollar}> ~${(Price[tokenList[token].addr] * state.I[title]).toFixed(3)}</span>
+      <span className={classes.token}>{token.symbol}</span>
+      <span className={classes.dollar}> ~${(Price[token.addr] * state.I[title]).toFixed(3)}</span>
     </div>
   )
 }

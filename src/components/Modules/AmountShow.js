@@ -72,9 +72,9 @@ export default function AmountShow({ state: { state, token }, title, style }) {
         <div>
           <DynamicFont content={parseFloat(ethers.utils.formatEther(state.output[title])).toFixed(3)} />
         </div>
-        <span>{tokenList[token].symbol}</span>
+        <span>{token.symbol}</span>
         <span className={classes.dollar}>
-          ~${(Price[tokenList[token].addr] * ethers.utils.formatEther(state.output[title])).toFixed(3)}
+          ~${(Price[token.addr] * ethers.utils.formatEther(state.output[title])).toFixed(3)}
         </span>
       </div>
     </div>

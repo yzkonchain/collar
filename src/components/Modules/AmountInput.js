@@ -170,8 +170,8 @@ export default function AmountInput({ State, title, style }) {
               }}
             ></TextField>
           </div>
-          <span className={classes.token}>{tokenList[token].symbol}</span>
-          <span className={classes.dollar}>~${(Price[tokenList[token].addr] * state.I[title]).toFixed(3)}</span>
+          <span className={classes.token}>{token.symbol}</span>
+          <span className={classes.dollar}>~${(Price[token.addr] * state.I[title]).toFixed(3)}</span>
         </div>
       </div>
     ),

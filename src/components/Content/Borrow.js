@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList } from '@/config'
+import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -37,7 +37,7 @@ export default function Borrow() {
     ;(async () => {
       const bond = ethers.utils.parseUnits(state.I.bond || '0', 18)
       if (!bond.eq(state.input.bond)) {
-        const want = await controller.ct(pool).get_dy(bond)
+        const want = await controller.ct(pool.addr).get_dy(bond)
         const tip = {
           fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
           min: (format(want) * 0.995).toFixed(3),
@@ -76,13 +76,13 @@ export default function Borrow() {
           info={[
             { 'Slippage tolerance': `${state.tip.slip} %` },
             { 'Minimum recieved': `${state.tip.min}` },
-            { Route: `${tokenList[bond].symbol} -> COLL -> ${tokenList[want].symbol}` },
-            { 'Nominal swap fee': `${state.tip.fee} ${tokenList[want].symbol}` },
+            { Route: `${bond.symbol} -> COLL -> ${want.symbol}` },
+            { 'Nominal swap fee': `${state.tip.fee} ${want.symbol}` },
           ]}
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(bond)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(bond.addr)} />
             <MyButton
               name="Deposit & Borrow"
               onClick={() => handleClick('borrow')(state.input.bond, state.output.want)}

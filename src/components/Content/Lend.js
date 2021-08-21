@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList } from '@/config'
+import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -37,11 +37,11 @@ export default function Lend() {
     ;(async () => {
       const want = ethers.utils.parseUnits(state.I.want || '0', 18)
       if (!want.eq(state.input.want)) {
-        const coll = await controller.ct(pool).get_dx(want)
+        const coll = await controller.ct(pool.addr).get_dx(want)
         const tip = {
           fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
           min: (format(coll) * 0.995).toFixed(3),
-          slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+          slip: controller.calc_slip(data, [null, want], pool.addr).toPrecision(3),
           apy: data.apy.toPrecision(3),
         }
         setState({ input: { want }, output: { coll }, tip })
@@ -76,13 +76,13 @@ export default function Lend() {
           info={[
             { 'Slippage tolerance': `${state.tip.slip} %` },
             { 'Minimum recieved': `${state.tip.min} COLL` },
-            { Route: `${tokenList[want].symbol} -> COLL` },
+            { Route: `${want.symbol} -> COLL` },
             { 'Nominal swap fee': `${state.tip.fee} COLL` },
           ]}
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(want)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(want.addr)} />
             <MyButton name="Lend" onClick={() => handleClick('lend')(state.input.want, state.output.coll)} />
           </div>
         </div>

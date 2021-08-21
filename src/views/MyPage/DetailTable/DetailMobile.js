@@ -201,7 +201,7 @@ export default function Mobile({ pool, val, handleClick }) {
             <span>{parseFloat(val.earned).toFixed(dec.earned)}</span>
           </div>
         </div>
-        <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool.pool)} />
+        <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool)} />
       </div>
     </div>
   )

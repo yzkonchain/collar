@@ -1,6 +1,5 @@
-import { ethers } from 'ethers'
 import { useContext, useEffect, useState, useMemo } from 'react'
-import { context, mypageContext, poolList } from '@/config'
+import { context } from '@/config'
 import { makeStyles } from '@material-ui/core/styles'
 import { Price, contract } from '@/hooks'
 import { Global, Balance, DetailTable } from '.'
@@ -10,6 +9,11 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     margin: '30px auto',
+    '&>hr': {
+      border: '#3B54A0 1px solid',
+      width: '100%',
+      margin: '20px 0',
+    },
     //Mobile
     '@media screen and (max-width:960px)': {
       width: 'calc(100% - 40px)',
@@ -32,6 +36,7 @@ const INIT = {
     receivables: 0,
     rewards: 0,
   },
+  timer: new Date().getTime(),
 }
 
 export default function MyPage() {
@@ -54,7 +59,7 @@ export default function MyPage() {
         const pools = await controller.mypage_data()
         const total = { ...INIT.total }
         pools.forEach(({ pool, coll_total, want_total, bond_total, call, receivables, earned }) => {
-          const getPrice = (token) => Price[poolList[pool][token].addr]
+          const getPrice = (token) => Price[pool[token].addr]
           total.totalValueLocked +=
             coll_total * getPrice('coll') + want_total * getPrice('want') + bond_total * getPrice('bond')
           total.totalBorrowed += coll_total * getPrice('coll')
@@ -64,23 +69,33 @@ export default function MyPage() {
           total.receivables += receivables
           total.rewards += earned * Price['COLLAR']
         })
-        setCount({ pools, total })
+        setCount({ pools, total, timer: new Date().getTime() })
       })()
     } else {
-      count == INIT || setCount(INIT)
+      ;(async () => {
+        const timer = new Date().getTime()
+        const pools = await controller.mypage_data_noaccount()
+        const total = { ...INIT.total }
+        pools.forEach(({ pool, coll_total, want_total, bond_total }) => {
+          const getPrice = (token) => Price[pool[token].addr]
+          total.totalValueLocked +=
+            coll_total * getPrice('coll') + want_total * getPrice('want') + bond_total * getPrice('bond')
+          total.totalBorrowed += coll_total * getPrice('coll')
+          total.totalCollateral += bond_total * getPrice('bond')
+        })
+        setCount((count) => (timer > count.timer ? { pools: [], total, timer: new Date().getTime() } : count))
+      })()
     }
   }, [signer, update])
 
   return useMemo(
     () => (
-      <mypageContext.Provider value={{ handleClick }}>
-        <div className={classes.root}>
-          <Global {...total} />
-          <hr style={{ border: '#3B54A0 1px solid', width: '100%', margin: '20px 0' }}></hr>
-          <Balance {...total} />
-          <DetailTable pools={pools} />
-        </div>
-      </mypageContext.Provider>
+      <div className={classes.root}>
+        <Global {...total} />
+        <hr />
+        <Balance {...total} />
+        <DetailTable {...{ pools, handleClick }} />
+      </div>
     ),
     [count],
   )

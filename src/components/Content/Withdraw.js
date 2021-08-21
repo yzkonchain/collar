@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList } from '@/config'
+import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { makeStyles } from '@material-ui/core/styles'
 import { ArrowForwardIosIcon } from '@/assets/svg'
@@ -38,7 +38,7 @@ export default function Withdraw() {
     ;(async () => {
       const clpt = ethers.utils.parseUnits(state.I.clpt || '0', 18)
       if (!clpt.eq(state.input.clpt)) {
-        const res = await controller.ct(pool).get_dxdy(clpt)
+        const res = await controller.ct(pool.addr).get_dxdy(clpt)
         const tip = {
           poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
           share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
@@ -80,10 +80,10 @@ export default function Withdraw() {
           APY={`todo`}
           info={[
             {
-              'Exchange Rate': `1CLPT = ${state.tip.rate.want} ${tokenList[want].symbol} + ${state.tip.rate.coll} COLL`,
+              'Exchange Rate': `1CLPT = ${state.tip.rate.want} ${want.symbol} + ${state.tip.rate.coll} COLL`,
             },
             { 'Share of Pool': `${state.tip.share} %` },
-            { 'Pool Balance': `1 ${tokenList[want].symbol} = ${state.tip.poolBalance} COLL` },
+            { 'Pool Balance': `1 ${want.symbol} = ${state.tip.poolBalance} COLL` },
             { 'Nominal swap fee': `${state.tip.fee} COLL` },
           ]}
         />

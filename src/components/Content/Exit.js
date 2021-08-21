@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList } from '@/config'
+import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -37,11 +37,11 @@ export default function Exit() {
     ;(async () => {
       const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
       if (!coll.eq(state.input.coll)) {
-        const want = await controller.ct(pool).get_dy(coll)
+        const want = await controller.ct(pool.addr).get_dy(coll)
         const tip = {
           fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
           min: (format(want) * 0.995).toFixed(3),
-          slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+          slip: controller.calc_slip(data, [null, want], pool.addr).toPrecision(3),
           apy: data.apy.toPrecision(3),
         }
         setState({ input: { coll }, output: { want }, tip })
@@ -75,9 +75,9 @@ export default function Exit() {
           APY={state.tip.apy}
           info={[
             { 'Slippage tolerance': `${state.tip.slip} %` },
-            { 'Minimum recieved': `${state.tip.min} ${tokenList[want].symbol}` },
-            { Route: `COLL -> ${tokenList[want].symbol}` },
-            { 'Nominal swap fee': `${state.tip.fee} ${tokenList[want].symbol} ` },
+            { 'Minimum recieved': `${state.tip.min} ${want.symbol}` },
+            { Route: `COLL -> ${want.symbol}` },
+            { 'Nominal swap fee': `${state.tip.fee} ${want.symbol} ` },
           ]}
         />
         <div className={classes.buttonOne}>

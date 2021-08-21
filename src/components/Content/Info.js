@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useEffect, useState, useMemo } from 'react'
-import { context, liteContext, tokenList, poolList } from '@/config'
+import { context, liteContext, poolList } from '@/config'
 import { makeStyles } from '@material-ui/core/styles'
 import { InfoCard1, InfoCard2, InfoCard3 } from '@/components/Modules'
 
@@ -45,12 +45,12 @@ export default function Info() {
       <div className={classes.root}>
         <div>
           <InfoCard1
-            token={tokenList[bond].symbol}
+            token={bond.symbol}
             status={data.allowance.bond.gt('100000000000000000000000000000000') ? 'APPROVED' : 'NOT APPROVED'}
             amount={format(data.balance.bond)}
           />
           <InfoCard1
-            token={tokenList[want].symbol}
+            token={want.symbol}
             status={data.allowance.want.gt('100000000000000000000000000000000') ? 'APPROVED' : 'NOT APPROVED'}
             amount={format(data.balance.want)}
           />
@@ -80,7 +80,7 @@ export default function Info() {
         <div>
           <InfoCard2
             title="Expiry"
-            data={new Date(poolList[pool].expiry_time * 1000).toLocaleString()}
+            data={new Date(pool.expiry_time * 1000).toLocaleString()}
             info="REPAY BEFORE THIS TIME"
             styles={{ color: '#FF5C5C' }}
             noHr={true}

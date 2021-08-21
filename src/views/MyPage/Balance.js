@@ -1,3 +1,5 @@
+import { useContext, useMemo } from 'react'
+import { context } from '@/config'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import DynamicFont from 'react-dynamic-font'
 
@@ -91,42 +93,50 @@ const MyDiv = withStyles({
   )
 })
 
-export default function Balance({ outstandingDebt, depostBalance, receivables, rewards }) {
+export default function Balance(props) {
   const classes = useStyles()
-  return (
-    <div className={classes.root}>
-      <div>Your Balance</div>
-      <div>
-        <div>
-          <MyDiv
-            title="Outstanding Debt"
-            remarks="*Value of Borrowed Asset"
-            amount={(outstandingDebt || 0).toFixed(dec.debt)}
-            token="USD"
-          />
-          <MyDiv
-            title="Depost Balance"
-            remarks="*Value of Collateral"
-            amount={(depostBalance || 0).toFixed(dec.balance)}
-            token="USD"
-          />
+  const { state } = useContext(context)
+  const { outstandingDebt, depostBalance, receivables, rewards } = props
+  return useMemo(
+    () =>
+      state.signer ? (
+        <div className={classes.root}>
+          <div>Your Balance</div>
+          <div>
+            <div>
+              <MyDiv
+                title="Outstanding Debt"
+                remarks="*Value of Borrowed Asset"
+                amount={(outstandingDebt || 0).toFixed(dec.debt)}
+                token="USD"
+              />
+              <MyDiv
+                title="Depost Balance"
+                remarks="*Value of Collateral"
+                amount={(depostBalance || 0).toFixed(dec.balance)}
+                token="USD"
+              />
+            </div>
+            <div>
+              <MyDiv
+                title="Receivables"
+                remarks="*Value of Lent Asset"
+                amount={(receivables || 0).toFixed(dec.recv)}
+                token="USD"
+              />
+              <MyDiv
+                title="Rewards"
+                remarks="*Value of Claimable COLLAR"
+                amount={(rewards || 0).toFixed(dec.rewards)}
+                token="COLLAR"
+                color="#4975FF"
+              />
+            </div>
+          </div>
         </div>
-        <div>
-          <MyDiv
-            title="Receivables"
-            remarks="*Value of Lent Asset"
-            amount={(receivables || 0).toFixed(dec.recv)}
-            token="USD"
-          />
-          <MyDiv
-            title="Rewards"
-            remarks="*Value of Claimable COLLAR"
-            amount={(rewards || 0).toFixed(dec.rewards)}
-            token="COLLAR"
-            color="#4975FF"
-          />
-        </div>
-      </div>
-    </div>
+      ) : (
+        <div></div>
+      ),
+    [props],
   )
 }

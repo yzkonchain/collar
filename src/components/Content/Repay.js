@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
-import { context, liteContext, tokenList } from '@/config'
+import { context, liteContext } from '@/config'
 import { MyButton, AmountInputDouble, AmountShow, ApyFloatMessage } from '@/components/Modules'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
@@ -43,7 +43,7 @@ export default function Repay() {
         const tip = {
           fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
           min: (format(bond) * 0.995).toFixed(3),
-          slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
+          slip: controller.calc_slip(data, [bond, null], pool.addr).toPrecision(3),
           apy: data.apy.toPrecision(3),
         }
         setState({ input: { want, coll }, output: { bond }, tip })
@@ -87,15 +87,15 @@ export default function Repay() {
             APY={state.tip.apy}
             info={[
               { 'Slippage tolerance': `${state.tip.slip} %` },
-              { 'Minimum recieved': `${state.tip.min} ${tokenList[bond].symbol}` },
-              { Route: `COLL-> ${tokenList[bond].symbol} / ${tokenList[want].symbol}->${tokenList[bond].symbol}` },
-              { 'Nominal swap fee': `${state.tip.fee} ${tokenList[want].symbol} ` },
+              { 'Minimum recieved': `${state.tip.min} ${bond.symbol}` },
+              { Route: `COLL-> ${bond.symbol} / ${want.symbol}->${bond.symbol}` },
+              { 'Nominal swap fee': `${state.tip.fee} ${want.symbol} ` },
             ]}
           />
         </div>
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(want)} />
+            <MyButton name="Approve" onClick={() => handleClick('approve')(want.addr)} />
             <MyButton name="Repay" onClick={() => handleClick('repay')(state.input.want, state.input.coll)} />
           </div>
         </div>

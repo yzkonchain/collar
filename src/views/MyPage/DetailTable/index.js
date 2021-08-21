@@ -1,6 +1,4 @@
-import { useContext } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { poolList, context, mypageContext } from '@/config'
 import DetailPC from './DetailPC'
 import DetailMobile from './DetailMobile'
 
@@ -47,17 +45,12 @@ const useStyles = makeStyles({
   },
 })
 
-export default function DetailTable({ pools }) {
+export default function DetailTable({ pools, handleClick }) {
   const classes = useStyles()
-  const {
-    state: { signer },
-  } = useContext(context)
-  const { handleClick } = useContext(mypageContext)
-
   return (
     <div className={classes.root}>
       {pools.map((val, key) => {
-        const pool = poolList[val.pool]
+        const pool = val.pool
         return (
           <div key={key}>
             <div className={classes.header}>

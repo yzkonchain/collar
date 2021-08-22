@@ -9,10 +9,10 @@ const useStyles = makeStyles((theme) => ({
     border: 'none',
     position: 'relative',
     '&:hover': {
-      opacity: 0.8,
+      opacity: ({ disabled }) => (disabled ? 1 : 0.8),
     },
     '&:active': {
-      transform: 'translateY(3px)',
+      transform: ({ disabled }) => (disabled ? 'none' : 'translateY(3px)'),
     },
     '&:focus': {},
     '&>img': {
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 export default function Button({ name, onClick, style, disabled }) {
-  const classes = useStyles()
+  const classes = useStyles({ disabled })
   return (
     <button className={classes.button} {...{ onClick, style, disabled }}>
       <div>

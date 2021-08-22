@@ -64,7 +64,7 @@ export default function Withdraw() {
                 state,
                 setState,
                 token: pool,
-                max: parseFloat(format(data.balance.clpt)),
+                max: data.balance.clpt,
                 maxCondition: () => data.balance.clpt.gt('0'),
               }}
               style={{ height: '249px' }}
@@ -89,11 +89,21 @@ export default function Withdraw() {
         />
         <div className={classes.buttonTwo}>
           <div>
-            <MyButton name="Withdraw" onClick={() => handleClick('withdraw')(state.input.clpt)} />
-            <MyButton name="Claim" onClick={() => handleClick('claim')()} />
+            <MyButton
+              name="Withdraw"
+              onClick={async () => (await handleClick('withdraw')(state.input.clpt)) && setState({ I: { clpt: '' } })}
+              disabled={ZERO.eq(state.output.want)}
+            />
+            <MyButton name="Claim" onClick={() => handleClick('claim')()} disabled={ZERO.eq(data.earned.collar)} />
           </div>
           <div>
-            <MyButton name="Withdraw & Claim" onClick={() => handleClick('burn_and_claim')(state.input.clpt)} />
+            <MyButton
+              name="Withdraw & Claim"
+              onClick={async () =>
+                (await handleClick('burn_and_claim')(state.input.clpt)) && setState({ I: { clpt: '' } })
+              }
+              disabled={ZERO.eq(state.output.want) || ZERO.eq(data.earned.collar)}
+            />
           </div>
         </div>
       </div>

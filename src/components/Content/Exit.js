@@ -60,7 +60,7 @@ export default function Exit() {
                 state,
                 setState,
                 token: coll,
-                max: parseFloat(format(data.balance.coll)),
+                max: data.balance.coll,
                 maxCondition: () => data.balance.coll.gt('0'),
               }}
               style={{ height: '90px' }}
@@ -82,8 +82,14 @@ export default function Exit() {
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => alert('Not necessary')} />
-            <MyButton name="Exit" onClick={() => handleClick('redeem')(state.output.want, state.input.coll)} />
+            <MyButton name="Approve" disabled />
+            <MyButton
+              name="Exit"
+              onClick={async () =>
+                (await handleClick('redeem')(state.output.want, state.input.coll)) && setState({ I: { coll: '' } })
+              }
+              disabled={ZERO.eq(state.output.want)}
+            />
           </div>
         </div>
       </div>

@@ -60,7 +60,7 @@ export default function Lend() {
                 state,
                 setState,
                 token: want,
-                max: parseFloat(format(data.balance.want)),
+                max: data.balance.want,
                 maxCondition: () => data.allowance.want.gt('100000000000000000000000000000000'),
               }}
               style={{ height: '90px' }}
@@ -82,8 +82,18 @@ export default function Lend() {
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(want.addr)} />
-            <MyButton name="Lend" onClick={() => handleClick('lend')(state.input.want, state.output.coll)} />
+            <MyButton
+              name="Approve"
+              onClick={() => handleClick('approve')(want.addr)}
+              disabled={data.allowance.want.gt('100000000000000000000000000000000')}
+            />
+            <MyButton
+              name="Lend"
+              onClick={async () =>
+                (await handleClick('lend')(state.input.want, state.output.coll)) && setState({ I: { want: '' } })
+              }
+              disabled={ZERO.eq(state.output.coll)}
+            />
           </div>
         </div>
       </div>

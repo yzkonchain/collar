@@ -170,9 +170,11 @@ export default function Lite() {
   const handleClick = (type) =>
     async function () {
       if (controller) {
-        setLoading(true)
-        if (await controller[type].call(null, ...arguments, pool)) setLiteState({ forceUpdate: {} })
-        setLoading(false)
+        // setLoading(true)
+        const res = await controller[type].call(null, ...arguments, pool)
+        if (res) setLiteState({ forceUpdate: {} })
+        // setLoading(false)
+        return res
       } else CT()
     }
 

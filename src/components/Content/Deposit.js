@@ -60,7 +60,7 @@ export default function Repay() {
                 state,
                 setState,
                 token: want,
-                max: parseFloat(format(data.balance.want)),
+                max: data.balance.want,
                 maxCondition: () => data.allowance.want.gt('100000000000000000000000000000000'),
               }}
               style={{ height: '90px' }}
@@ -71,7 +71,7 @@ export default function Repay() {
                 state,
                 setState,
                 token: coll,
-                max: parseFloat(format(data.balance.coll)),
+                max: data.balance.coll,
                 maxCondition: () => data.balance.coll.gt('0'),
               }}
               style={{ height: '90px' }}
@@ -93,14 +93,22 @@ export default function Repay() {
         />
         <div className={classes.buttonTwo}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(want.addr)} />
+            <MyButton
+              name="Approve"
+              onClick={() => handleClick('approve')(want.addr)}
+              disabled={data.allowance.want.gt('100000000000000000000000000000000')}
+            />
             <MyButton
               name="Deposit"
-              onClick={() => handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt)}
+              onClick={async () =>
+                (await handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt)) &&
+                setState({ I: { want: '', coll: '' } })
+              }
+              disabled={ZERO.eq(state.output.clpt)}
             />
           </div>
           <div>
-            <MyButton name="Claim" onClick={() => handleClick('claim')()} />
+            <MyButton name="Claim" onClick={() => handleClick('claim')()} disabled={ZERO.eq(data.earned.collar)} />
           </div>
         </div>
       </div>

@@ -28,6 +28,10 @@ const format = (num, n) => {
 const unformat = (num) => ethers.utils.parseEther(String(num))
 const formatMap = (data) => data.map((v) => format(v))
 const with_loss = (x) => x.mul(995).div(1000)
+const toNonExponential = (num) => {
+  var m = num.toExponential().match(/\d(?:\.(\d*))?e([+-]\d+)/)
+  return num.toFixed(Math.max(0, (m[1] || '').length - m[2]))
+}
 
 const calc_apy_basic = ([sx, sy, sk], [bond, want], swap_sqp) => {
   const one = ethers.utils.parseEther('1')

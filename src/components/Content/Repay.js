@@ -63,8 +63,8 @@ export default function Repay() {
                 setState,
                 token: [want, coll],
                 max: [
-                  Math.min(parseFloat(format(data.balance.call)), parseFloat(format(data.balance.want))),
-                  Math.min(parseFloat(format(data.balance.call)), parseFloat(format(data.balance.coll))),
+                  data.balance.call.lt(data.balance.want) ? data.balance.call : data.balance.want,
+                  data.balance.call.lt(data.balance.coll) ? data.balance.call : data.balance.coll,
                 ],
                 maxCondition: [
                   () => data.allowance.want.gt('100000000000000000000000000000000'),
@@ -95,8 +95,19 @@ export default function Repay() {
         </div>
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(want.addr)} />
-            <MyButton name="Repay" onClick={() => handleClick('repay')(state.input.want, state.input.coll)} />
+            <MyButton
+              name="Approve"
+              onClick={() => handleClick('approve')(want.addr)}
+              disabled={data.allowance.want.gt('100000000000000000000000000000000')}
+            />
+            <MyButton
+              name="Repay"
+              onClick={async () =>
+                (await handleClick('repay')(state.input.want, state.input.coll)) &&
+                setState({ I: { want: '', coll: '' } })
+              }
+              disabled={ZERO.eq(state.output.bond)}
+            />
           </div>
         </div>
       </div>

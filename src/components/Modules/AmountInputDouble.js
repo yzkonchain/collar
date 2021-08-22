@@ -135,21 +135,19 @@ const MyInput = ({ state, setState, title, max, maxCondition, token, style }) =>
   const inputRef = useRef()
   const { enqueueSnackbar } = useSnackbar()
   const changInput = useCallback(
-    (event) => {
-      const newV = event.target.value
-      const oldV = state.I[title]
-      const cur = event.nativeEvent.data
-      if (max < parseFloat(newV)) {
+    ({ target: { value }, nativeEvent: { data } }) => {
+      const old = state.I[title]
+      if (max.lt(ethers.utils.parseEther(value || '0'))) {
         enqueueSnackbar({ type: 'failed', title: 'Fail.', message: 'Maximum range exceeded.' })
         return
       }
       if (
-        ((newV.length === 1 || oldV.indexOf('.') !== -1) && cur === '.') ||
-        (oldV === '0' && ['.', null].indexOf(cur) === -1)
+        ((value.length === 1 || old.indexOf('.') !== -1) && data === '.') ||
+        (old === '0' && ['.', null].indexOf(data) === -1)
       )
         return
-      if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', null].indexOf(cur) > -1)
-        setState({ I: { ...state.I, [title]: newV }, old: { ...state.old, [title]: oldV } })
+      if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', null].indexOf(data) > -1)
+        setState({ I: { ...state.I, [title]: value }, old: { ...state.old, [title]: old } })
     },
     [state.I, title],
   )
@@ -180,7 +178,7 @@ const MyInput = ({ state, setState, title, max, maxCondition, token, style }) =>
                   setState({
                     I: {
                       ...state.I,
-                      [title]: `${max}`,
+                      [title]: `${ethers.utils.formatEther(max)}`,
                     },
                   })
                 }

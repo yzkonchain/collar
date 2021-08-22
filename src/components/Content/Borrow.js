@@ -60,7 +60,7 @@ export default function Borrow() {
                 state,
                 setState,
                 token: bond,
-                max: parseFloat(format(data.balance.bond)),
+                max: data.balance.bond,
                 maxCondition: () => data.allowance.bond.gt('100000000000000000000000000000000'),
               }}
               style={{ height: '90px' }}
@@ -82,10 +82,17 @@ export default function Borrow() {
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => handleClick('approve')(bond.addr)} />
+            <MyButton
+              name="Approve"
+              onClick={() => handleClick('approve')(bond.addr)}
+              disabled={data.allowance.bond.gt('100000000000000000000000000000000')}
+            />
             <MyButton
               name="Deposit & Borrow"
-              onClick={() => handleClick('borrow')(state.input.bond, state.output.want)}
+              onClick={async () =>
+                (await handleClick('borrow')(state.input.bond, state.output.want)) && setState({ I: { bond: '' } })
+              }
+              disabled={ZERO.eq(state.output.want)}
             />
           </div>
         </div>

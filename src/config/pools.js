@@ -87,12 +87,12 @@ pools = [
       call: '0x9D8FEb661AFc92b83c45fC21836C114164beB285',
       expiry_time: 1633017600,
     },
-    r2: {
-      addr: '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c',
-      coll: '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231',
-      call: '0x9D8FEb661AFc92b83c45fC21836C114164beB285',
-      expiry_time: 1634017600,
-    },
+    // r2: {
+    //   addr: '0x506FeA08646b7ED5084c7a9a302FF5a95B9E980c',
+    //   coll: '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231',
+    //   call: '0x9D8FEb661AFc92b83c45fC21836C114164beB285',
+    //   expiry_time: 1634017600,
+    // },
   }),
   // USDC => USDT
   Pool({

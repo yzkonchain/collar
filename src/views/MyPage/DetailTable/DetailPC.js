@@ -27,17 +27,7 @@ const useStyles = makeStyles({
       },
     },
   },
-  tokenOne: {
-    margin: '10px 0',
-    textAlign: 'center',
-    width: 'fit-content',
-    '& img': {
-      display: 'block',
-      width: '40px',
-      marginBottom: '5px',
-    },
-  },
-  tokenTwo: {
+  token: {
     margin: '10px 0',
     textAlign: 'center',
     width: 'fit-content',
@@ -96,8 +86,9 @@ export default function PC({ pool, val, handleClick }) {
           <TableBody>
             <TableRow>
               <TableCell className={classes.cellWidthEmpty}>
-                <div className={classes.tokenOne}>
+                <div className={classes.token}>
                   <img src={pool.coll.icon} alt="" />
+                  <br />
                   <span>COLL</span>
                 </div>
               </TableCell>
@@ -116,8 +107,9 @@ export default function PC({ pool, val, handleClick }) {
             </TableRow>
             <TableRow>
               <TableCell>
-                <div className={classes.tokenOne}>
+                <div className={classes.token}>
                   <img src={pool.call.icon} alt="" />
+                  <br />
                   <span>CALL</span>
                 </div>
               </TableCell>
@@ -151,7 +143,7 @@ export default function PC({ pool, val, handleClick }) {
             </TableRow>
             <TableRow>
               <TableCell>
-                <div className={classes.tokenTwo}>
+                <div className={classes.token}>
                   <img src={pool.coll.icon} alt="" />
                   <img src={pool.want.icon} alt="" />
                   <br />

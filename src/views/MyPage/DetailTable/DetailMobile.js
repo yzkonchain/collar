@@ -68,22 +68,13 @@ const useStyles = makeStyles({
       display: 'block',
     },
   },
-  tokenOne: {
+  token: {
+    fontSize: '12px',
     margin: '10px 0',
     textAlign: 'center',
     width: 'fit-content',
     '& img': {
-      display: 'block',
-      width: '40px',
-      marginBottom: '5px',
-    },
-  },
-  tokenTwo: {
-    margin: '10px 0',
-    textAlign: 'center',
-    width: 'fit-content',
-    '& img': {
-      width: '40px',
+      width: '30px',
       marginBottom: '5px',
       '&:nth-child(2)': {
         position: 'relative',
@@ -127,8 +118,9 @@ export default function Mobile({ pool, val, handleClick }) {
           <TableBody>
             <TableRow>
               <TableCell className={classes.cellWidthEmpty}>
-                <div className={classes.tokenOne}>
+                <div className={classes.token}>
                   <img src={pool.coll.icon} alt="" />
+                  <br />
                   <span>COLL</span>
                 </div>
               </TableCell>
@@ -146,8 +138,9 @@ export default function Mobile({ pool, val, handleClick }) {
             </TableRow>
             <TableRow>
               <TableCell>
-                <div className={classes.tokenOne}>
+                <div className={classes.token}>
                   <img src={pool.call.icon} alt="" />
+                  <br />
                   <span>CALL</span>
                 </div>
               </TableCell>
@@ -164,7 +157,7 @@ export default function Mobile({ pool, val, handleClick }) {
             </TableRow>
             <TableRow style={{ borderBottom: 'none' }}>
               <TableCell>
-                <div className={classes.tokenTwo}>
+                <div className={classes.token}>
                   <img src={pool.coll.icon} alt="" />
                   <img src={pool.want.icon} alt="" />
                   <br />

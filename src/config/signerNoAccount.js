@@ -5,4 +5,5 @@ const httpProvider = new Web3.providers.HttpProvider('https://ropsten.infura.io/
   timeout: 10000,
 })
 const signer = new ethers.providers.Web3Provider(httpProvider)
+
 export default signer

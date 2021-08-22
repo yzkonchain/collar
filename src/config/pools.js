@@ -46,9 +46,9 @@ const Token = (symbol, addr, icon, decimals) => {
 }
 
 const Pool = ({ bond, want, r1, r2 }) => {
-  const r = [r1, r2].map((round) => {
-    if (round) {
-      const { addr, coll, call, swap_sqp, expiry_time, symbol } = round
+  const r = [r1, r2].map((pool) => {
+    if (pool) {
+      const { addr, coll, call, swap_sqp, expiry_time, symbol } = pool
       return {
         addr,
         expiry_time,
@@ -77,6 +77,7 @@ tokenList = {
 }
 
 pools = [
+  // USDT => USDC
   Pool({
     bond: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
     want: '0x67C9a0830d922C80A96408EEdF606c528836880C',
@@ -93,6 +94,7 @@ pools = [
       expiry_time: 1634017600,
     },
   }),
+  // USDC => USDT
   Pool({
     bond: '0x67C9a0830d922C80A96408EEdF606c528836880C',
     want: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
@@ -125,4 +127,4 @@ Object.keys(wantList).forEach((val) => {
 })
 
 export default pools
-export { poolConfig, tokenList, poolList, bondList, wantList, poolSelect, mypageDetail }
+export { poolConfig, pools, tokenList, poolList, bondList, wantList, poolSelect, mypageDetail }

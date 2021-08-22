@@ -1,6 +1,6 @@
 export { default as abi } from './abi'
 export { default as pools } from './pools'
-export { poolConfig, tokenList, poolList, bondList, wantList, poolSelect } from './pools'
+export { poolConfig, tokenList, poolList, bondList, wantList, poolSelect, mypageDetail } from './pools'
 export { context, liteContext } from './store'
 export { default as textInfo } from './textInfo'
 export { default as signerNoAccount } from './signerNoAccount'

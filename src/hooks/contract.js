@@ -153,7 +153,22 @@ const mypage_data_noaccount = async () => {
           ct.pool.sy(),
           ct.bond.balanceOf(pool.addr),
         ]).then(formatMap)
-        res.push({ pool, coll_total, want_total, bond_total })
+        res.push({
+          pool,
+          coll_total,
+          want_total,
+          bond_total,
+          clpt: 0,
+          call: 0,
+          coll: 0,
+          earned: 0,
+          receivables: 0,
+          shareOfPoll: 0,
+          coll_apy: '0.00',
+          call_apy: '0.00',
+          clpt_apy: '0.00',
+          clpt_apr: '0.00',
+        })
       }
     }
   }

@@ -70,7 +70,7 @@ const useStyles = makeStyles({
   },
   token: {
     fontSize: '12px',
-    margin: '10px 0',
+    margin: '15px 0',
     textAlign: 'center',
     width: 'fit-content',
     '& img': {

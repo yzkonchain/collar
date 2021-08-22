@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useMemo } from 'react'
-import { context } from '@/config'
+import { context, mypageDetail } from '@/config'
 import { makeStyles } from '@material-ui/core/styles'
 import { Price, contract } from '@/hooks'
 import { Loading } from '@/components/Modules'
@@ -27,7 +27,7 @@ const useStyles = makeStyles({
   },
 })
 const INIT = {
-  pools: [],
+  pools: mypageDetail,
   total: {
     totalValueLocked: 0,
     totalBorrowed: 0,
@@ -56,55 +56,38 @@ export default function MyPage() {
   }
 
   useEffect(() => {
-    if (signer) {
-      ;(async () => {
-        setLoading(true)
-        const pools = await controller.mypage_data()
-        const total = { ...INIT.total }
-        pools.forEach(({ pool, coll_total, want_total, bond_total, call, receivables, earned }) => {
-          const getPrice = (token) => Price[pool[token].addr]
-          total.totalValueLocked +=
-            coll_total * getPrice('coll') + want_total * getPrice('want') + bond_total * getPrice('bond')
-          total.totalBorrowed += coll_total * getPrice('coll')
-          total.totalCollateral += bond_total * getPrice('bond')
-          total.outstandingDebt += call * getPrice('want')
-          total.depostBalance += call * getPrice('bond')
-          total.receivables += receivables
-          total.rewards += earned * Price['COLLAR']
-        })
-        setCount({ pools, total, timer: new Date().getTime() })
-        setLoading(false)
-      })()
-    } else {
-      ;(async () => {
-        setLoading(true)
-        const timer = new Date().getTime()
-        const pools = await controller.mypage_data_noaccount()
-        const total = { ...INIT.total }
-        pools.forEach(({ pool, coll_total, want_total, bond_total }) => {
-          const getPrice = (token) => Price[pool[token].addr]
-          total.totalValueLocked +=
-            coll_total * getPrice('coll') + want_total * getPrice('want') + bond_total * getPrice('bond')
-          total.totalBorrowed += coll_total * getPrice('coll')
-          total.totalCollateral += bond_total * getPrice('bond')
-        })
-        setCount((count) => {
-          if (timer > count.timer) {
-            setLoading(false)
-            return { pools: [], total, timer: new Date().getTime() }
-          } else return count
-        })
-      })()
-    }
+    ;(async () => {
+      setLoading(true)
+      const timer = new Date().getTime()
+      const pools = signer ? await controller.mypage_data() : await controller.mypage_data_noaccount()
+      const total = { ...INIT.total }
+      pools.forEach(({ pool, coll_total, want_total, bond_total, call, receivables, earned }) => {
+        const getPrice = (token) => Price[pool[token].addr]
+        total.totalValueLocked +=
+          coll_total * getPrice('coll') + want_total * getPrice('want') + bond_total * getPrice('bond')
+        total.totalBorrowed += coll_total * getPrice('coll')
+        total.totalCollateral += bond_total * getPrice('bond')
+        total.outstandingDebt += call * getPrice('want')
+        total.depostBalance += call * getPrice('bond')
+        total.receivables += receivables
+        total.rewards += earned * Price['COLLAR']
+      })
+      setCount((count) => {
+        if (timer > count.timer) {
+          setLoading(false)
+          return { pools, total, timer: new Date().getTime() }
+        } else return count
+      })
+    })()
   }, [signer, update])
 
   return useMemo(
     () => (
       <div className={classes.root}>
         <div className={classes.mypage}>
-          <Global {...total} signer={signer} />
-          <Balance {...total} signer={signer} />
-          <DetailTable {...{ pools, handleClick, signer }} />
+          <Global {...total} />
+          <Balance {...total} />
+          <DetailTable {...{ pools, handleClick }} />
         </div>
         {loading && <Loading />}
       </div>

@@ -6,7 +6,23 @@ var tokenList = {},
   poolSelect = {},
   wantList = {},
   bondList = [],
-  bondSet = new Set()
+  bondSet = new Set(),
+  mypageDetail = [],
+  mypageDetailInit = {
+    coll_total: 0,
+    want_total: 0,
+    bond_total: 0,
+    clpt: 0,
+    call: 0,
+    coll: 0,
+    earned: 0,
+    receivables: 0,
+    shareOfPoll: 0,
+    coll_apy: 0,
+    call_apy: 0,
+    clpt_apy: 0,
+    clpt_apr: 0,
+  }
 
 const poolConfig = {
   network: 'ropsten',
@@ -90,10 +106,11 @@ pools = [
 ]
 
 pools.forEach(({ r1, r2 }) =>
-  [r1, r2].forEach((round, key) => {
-    if (round) {
-      poolSelect[`${round.bond.addr}-${round.want.addr}-${key}`] = poolList[round.addr] = round
-      bondSet.add(round.bond)
+  [r1, r2].forEach((pool, key) => {
+    if (pool) {
+      poolSelect[`${pool.bond.addr}-${pool.want.addr}-${key}`] = poolList[pool.addr] = pool
+      bondSet.add(pool.bond)
+      mypageDetail.push({ pool, ...mypageDetailInit })
     }
   }),
 )
@@ -108,4 +125,4 @@ Object.keys(wantList).forEach((val) => {
 })
 
 export default pools
-export { poolConfig, tokenList, poolList, bondList, wantList, poolSelect }
+export { poolConfig, tokenList, poolList, bondList, wantList, poolSelect, mypageDetail }

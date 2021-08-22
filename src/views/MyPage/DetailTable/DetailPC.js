@@ -28,7 +28,7 @@ const useStyles = makeStyles({
     },
   },
   token: {
-    margin: '10px 0',
+    margin: '15px 0',
     textAlign: 'center',
     width: 'fit-content',
     '& img': {
@@ -50,7 +50,7 @@ const useStyles = makeStyles({
   },
   button: {
     textAlign: 'right',
-    margin: '10px 0',
+    margin: '15px 0',
     width: 0,
   },
   price: {

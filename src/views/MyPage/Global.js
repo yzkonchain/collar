@@ -89,12 +89,12 @@ const dec = {
   tc: 3,
 }
 
-export default function Global({ totalValueLocked, totalBorrowed, totalCollateral, signer }) {
+export default function Global({ totalValueLocked, totalBorrowed, totalCollateral }) {
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState(null)
 
   return (
-    <div className={classes.root} style={{ height: signer ? '100%' : 'calc(100vh)' }}>
+    <div className={classes.root}>
       <div className={classes.header}>
         <img src={GlobalIcon} alt="" />
         <span>Global</span>
@@ -134,7 +134,6 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
         </div>
       </div>
       <hr />
-      {/* <div style={{ height: signer ? 0 : 'calc(100vh - 300px)' }}></div> */}
     </div>
   )
 }

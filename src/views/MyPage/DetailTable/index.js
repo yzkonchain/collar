@@ -48,36 +48,33 @@ const useStyles = makeStyles({
 
 export default function DetailTable(props) {
   const classes = useStyles()
-  const { pools, handleClick, signer } = props
+  const { pools, handleClick } = props
   return useMemo(
-    () =>
-      signer ? (
-        <div className={classes.root}>
-          {pools.map((val, key) => {
-            const pool = val.pool
-            return (
-              <div key={key}>
-                <div className={classes.header}>
-                  <div>
-                    <img src={pool.bond.icon} />
-                    <img src={pool.want.icon} />
-                    <span>
-                      {pool.bond.symbol}/{pool.want.symbol}
-                    </span>
-                  </div>
-                  <div>
-                    <span>Expiry: {new Date(pool.expiry_time * 1000).toLocaleString()}</span>
-                  </div>
+    () => (
+      <div className={classes.root}>
+        {pools.map((val, key) => {
+          const pool = val.pool
+          return (
+            <div key={key}>
+              <div className={classes.header}>
+                <div>
+                  <img src={pool.bond.icon} />
+                  <img src={pool.want.icon} />
+                  <span>
+                    {pool.bond.symbol}/{pool.want.symbol}
+                  </span>
                 </div>
-                <DetailPC {...{ pool, val, handleClick }} />
-                <DetailMobile {...{ pool, val, handleClick }} />
+                <div>
+                  <span>Expiry: {new Date(pool.expiry_time * 1000).toLocaleString()}</span>
+                </div>
               </div>
-            )
-          })}
-        </div>
-      ) : (
-        <div></div>
-      ),
+              <DetailPC {...{ pool, val, handleClick }} />
+              <DetailMobile {...{ pool, val, handleClick }} />
+            </div>
+          )
+        })}
+      </div>
+    ),
     [props],
   )
 }

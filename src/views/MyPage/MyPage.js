@@ -2,18 +2,19 @@ import { useContext, useEffect, useState, useMemo } from 'react'
 import { context } from '@/config'
 import { makeStyles } from '@material-ui/core/styles'
 import { Price, contract } from '@/hooks'
+import { Loading } from '@/components/Modules'
 import { Global, Balance, DetailTable } from '.'
 
 const useStyles = makeStyles({
   root: {
+    position: 'relative',
+    paddingTop: '30px',
+    height: 'inherit',
+  },
+  mypage: {
     display: 'flex',
     flexDirection: 'column',
-    margin: '30px auto',
-    '&>hr': {
-      border: '#3B54A0 1px solid',
-      width: '100%',
-      margin: '20px 0',
-    },
+    margin: 'auto',
     //Mobile
     '@media screen and (max-width:960px)': {
       width: 'calc(100% - 40px)',
@@ -45,6 +46,7 @@ export default function MyPage() {
     state: { signer },
   } = useContext(context)
   const controller = contract()(signer, true)
+  const [loading, setLoading] = useState(false)
   const [update, setUpdate] = useState({})
   const [count, setCount] = useState(INIT)
   const { pools, total } = count
@@ -56,6 +58,7 @@ export default function MyPage() {
   useEffect(() => {
     if (signer) {
       ;(async () => {
+        setLoading(true)
         const pools = await controller.mypage_data()
         const total = { ...INIT.total }
         pools.forEach(({ pool, coll_total, want_total, bond_total, call, receivables, earned }) => {
@@ -70,9 +73,11 @@ export default function MyPage() {
           total.rewards += earned * Price['COLLAR']
         })
         setCount({ pools, total, timer: new Date().getTime() })
+        setLoading(false)
       })()
     } else {
       ;(async () => {
+        setLoading(true)
         const timer = new Date().getTime()
         const pools = await controller.mypage_data_noaccount()
         const total = { ...INIT.total }
@@ -83,7 +88,12 @@ export default function MyPage() {
           total.totalBorrowed += coll_total * getPrice('coll')
           total.totalCollateral += bond_total * getPrice('bond')
         })
-        setCount((count) => (timer > count.timer ? { pools: [], total, timer: new Date().getTime() } : count))
+        setCount((count) => {
+          if (timer > count.timer) {
+            setLoading(false)
+            return { pools: [], total, timer: new Date().getTime() }
+          } else return count
+        })
       })()
     }
   }, [signer, update])
@@ -91,12 +101,14 @@ export default function MyPage() {
   return useMemo(
     () => (
       <div className={classes.root}>
-        <Global {...total} />
-        <hr />
-        <Balance {...total} />
-        <DetailTable {...{ pools, handleClick }} />
+        <div className={classes.mypage}>
+          <Global {...total} signer={signer} />
+          <Balance {...total} signer={signer} />
+          <DetailTable {...{ pools, handleClick, signer }} />
+        </div>
+        {loading && <Loading />}
       </div>
     ),
-    [count],
+    [count, loading],
   )
 }

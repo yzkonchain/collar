@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import DetailPC from './DetailPC'
 import DetailMobile from './DetailMobile'
@@ -45,31 +46,38 @@ const useStyles = makeStyles({
   },
 })
 
-export default function DetailTable({ pools, handleClick }) {
+export default function DetailTable(props) {
   const classes = useStyles()
-  return (
-    <div className={classes.root}>
-      {pools.map((val, key) => {
-        const pool = val.pool
-        return (
-          <div key={key}>
-            <div className={classes.header}>
-              <div>
-                <img src={pool.bond.icon} />
-                <img src={pool.want.icon} />
-                <span>
-                  {pool.bond.symbol}/{pool.want.symbol}
-                </span>
+  const { pools, handleClick, signer } = props
+  return useMemo(
+    () =>
+      signer ? (
+        <div className={classes.root}>
+          {pools.map((val, key) => {
+            const pool = val.pool
+            return (
+              <div key={key}>
+                <div className={classes.header}>
+                  <div>
+                    <img src={pool.bond.icon} />
+                    <img src={pool.want.icon} />
+                    <span>
+                      {pool.bond.symbol}/{pool.want.symbol}
+                    </span>
+                  </div>
+                  <div>
+                    <span>Expiry: {new Date(pool.expiry_time * 1000).toLocaleString()}</span>
+                  </div>
+                </div>
+                <DetailPC {...{ pool, val, handleClick }} />
+                <DetailMobile {...{ pool, val, handleClick }} />
               </div>
-              <div>
-                <span>Expiry: {new Date(pool.expiry_time * 1000).toLocaleString()}</span>
-              </div>
-            </div>
-            <DetailPC {...{ pool, val, handleClick }} />
-            <DetailMobile {...{ pool, val, handleClick }} />
-          </div>
-        )
-      })}
-    </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div></div>
+      ),
+    [props],
   )
 }

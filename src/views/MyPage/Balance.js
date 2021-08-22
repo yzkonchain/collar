@@ -1,5 +1,4 @@
-import { useContext, useMemo } from 'react'
-import { context } from '@/config'
+import { useMemo } from 'react'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import DynamicFont from 'react-dynamic-font'
 
@@ -95,11 +94,10 @@ const MyDiv = withStyles({
 
 export default function Balance(props) {
   const classes = useStyles()
-  const { state } = useContext(context)
-  const { outstandingDebt, depostBalance, receivables, rewards } = props
+  const { outstandingDebt, depostBalance, receivables, rewards, signer } = props
   return useMemo(
     () =>
-      state.signer ? (
+      signer ? (
         <div className={classes.root}>
           <div>Your Balance</div>
           <div>

@@ -82,7 +82,7 @@ export default function Exit() {
         />
         <div className={classes.buttonOne}>
           <div>
-            <MyButton name="Approve" onClick={() => console.log('Approve')} />
+            <MyButton name="Approve" onClick={() => alert('Not necessary')} />
             <MyButton name="Exit" onClick={() => handleClick('redeem')(state.output.want, state.input.coll)} />
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { useReducer, useState } from 'react'
 import { context } from '@/config'
-import { MyNotifyProvider, Loading } from '@/components/Modules'
+import { MyNotifyProvider } from '@/components/Modules'
 import Header from './components/Header'
 import Navigator from './components/Navigator'
 
@@ -16,7 +16,6 @@ export default function App() {
         <div style={{ position: 'relative' }}>
           <Header />
           <Navigator />
-          {/* {<Loading />} */}
         </div>
       </MyNotifyProvider>
     </context.Provider>

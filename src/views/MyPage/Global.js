@@ -9,6 +9,11 @@ const useStyles = makeStyles({
   root: {
     color: 'white',
     fontFamily: 'Gillsans',
+    '&>hr': {
+      border: '#3B54A0 1px solid',
+      width: '100%',
+      margin: '20px 0',
+    },
   },
   header: {
     display: 'flex',
@@ -84,12 +89,12 @@ const dec = {
   tc: 3,
 }
 
-export default function Global({ totalValueLocked, totalBorrowed, totalCollateral }) {
+export default function Global({ totalValueLocked, totalBorrowed, totalCollateral, signer }) {
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState(null)
 
   return (
-    <div className={classes.root}>
+    <div className={classes.root} style={{ height: signer ? '100%' : 'calc(100vh)' }}>
       <div className={classes.header}>
         <img src={GlobalIcon} alt="" />
         <span>Global</span>
@@ -128,6 +133,8 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
           </div>
         </div>
       </div>
+      <hr />
+      {/* <div style={{ height: signer ? 0 : 'calc(100vh - 300px)' }}></div> */}
     </div>
   )
 }

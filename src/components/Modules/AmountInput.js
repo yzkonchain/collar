@@ -92,6 +92,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '12px',
   },
 }))
+const MIN = 0.000001
 
 export default function AmountInput({ State, title, style }) {
   const [fontSize, setFontSize] = useState(35)
@@ -153,15 +154,15 @@ export default function AmountInput({ State, title, style }) {
               InputProps={{
                 endAdornment: (
                   <button
-                    onClick={() =>
+                    onClick={() => {
                       setState({
                         I: {
                           ...state.I,
                           [title]: `${max}`,
                         },
                       })
-                    }
-                    disabled={!maxCondition()}
+                    }}
+                    disabled={!maxCondition() || max < MIN}
                   >
                     MAX
                     <span>Balance</span>

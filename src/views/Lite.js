@@ -170,8 +170,7 @@ export default function Lite() {
   const handleClick = (type) =>
     async function () {
       if (controller) {
-        await controller[type].call(null, ...arguments, pool)
-        setLiteState({ forceUpdate: {} })
+        if (await controller[type].call(null, ...arguments, pool)) setLiteState({ forceUpdate: {} })
       } else CT()
     }
 
@@ -195,10 +194,10 @@ export default function Lite() {
   useEffect(() => {
     if (signer) {
       ;(async () => {
+        setLoading(true)
         const controller = CT(signer)
         const poolName = `${pool.bond.addr}-${pool.want.addr}`
         const poolRound = !poolSelect[`${poolName}-1`]
-        setLoading(true)
         const newData = await controller.fetch_state(pool)
         setLiteState({
           controller,

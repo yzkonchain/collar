@@ -287,16 +287,20 @@ export default function contract() {
   const callback = (type) => {
     switch (type) {
       case true:
-        return (method) => (resp) => resp.wait().then(({ status }) => enqueueSnackbar(callbackInfo(method, status)))
+        return (method) => (resp) =>
+          resp.wait().then(({ status }) => {
+            enqueueSnackbar(callbackInfo(method, status))
+            return status == 1
+          })
       case false:
         return (err) => {
           switch (err.code) {
             case 4001:
               enqueueSnackbar(callbackInfo('cancel'))
-              break
+              return false
             default:
               console.log(err)
-              break
+              return false
           }
         }
       default:
@@ -312,13 +316,13 @@ export default function contract() {
         fetch_state: async (pool) => fetch_state(pool, signer),
         mypage_data: async () => mypage_data(signer),
         approve: async (coin, { addr }) => {
-          await controller(coin, signer, ['function approve(address, uint256) external'])
+          return await controller(coin, signer, ['function approve(address, uint256) external'])
             .approve(addr, ethers.constants.MaxUint256)
             .then(callback(true)('approve'))
             .catch(callback(false))
         },
         borrow: async (bond, want, { addr }) => {
-          await controller(addr, signer)
+          return await controller(addr, signer)
             .borrow_want(bond, with_loss(want))
             .then(callback(true)('borrow'))
             .catch(callback(false))
@@ -337,38 +341,43 @@ export default function contract() {
               resp = ct.repay_both(want, coll)
               break
           }
-          await resp.then(callback(true)('repay')).catch(callback(false))
+          return await resp.then(callback(true)('repay')).catch(callback(false))
         },
         deposit: async (want, coll, clpt, { addr }) => {
-          await controller(addr, signer)
+          return await controller(addr, signer)
             .mint(coll, want, with_loss(clpt))
             .then(callback(true)('deposit'))
             .catch(callback(false))
         },
         withdraw: async (clpt, { addr }) => {
-          await controller(addr, signer).withdraw_both(clpt).then(callback(true)('withdraw')).catch(callback(false))
+          return await controller(addr, signer)
+            .withdraw_both(clpt)
+            .then(callback(true)('withdraw'))
+            .catch(callback(false))
         },
         claim: async ({ addr }) => {
-          await controller(addr, signer).claim_reward().then(callback(true)('claim')).catch(callback(false))
-          return true
+          return await controller(addr, signer).claim_reward().then(callback(true)('claim')).catch(callback(false))
         },
         burn_and_claim: async (clpt, { addr }) => {
-          await controller(addr, signer).burn_and_claim(clpt).then(callback(true)('withdraw')).catch(callback(false))
+          return await controller(addr, signer)
+            .burn_and_claim(clpt)
+            .then(callback(true)('withdraw'))
+            .catch(callback(false))
         },
         lend: async (want, coll, { addr }) => {
-          await controller(addr, signer)
+          return await controller(addr, signer)
             .swap_want_to_min_coll(with_loss(coll), want)
             .then(callback(true)('lend'))
             .catch(callback(false))
         },
         redeem: async (want, coll, { addr }) => {
-          await controller(addr, signer)
+          return await controller(addr, signer)
             .swap_coll_to_min_want(coll, with_loss(want))
             .then(callback(true)('redeem'))
             .catch(callback(false))
         },
         mint: async (n, { addr }) => {
-          await controller(addr, signer).mint_dual(n).then(callback(true)('mint')).catch(callback(false))
+          return await controller(addr, signer).mint_dual(n).then(callback(true)('mint')).catch(callback(false))
         },
         redeemAll: async (pool) => {
           const me = await signer.getAddress()
@@ -384,8 +393,10 @@ export default function contract() {
             return
           }
           const want = await ct.get_dy(call)
-          await ct.swap_coll_to_min_want(call, with_loss(want)).then(callback(true)('redeem')).catch(callback(false))
-          return true
+          return await ct
+            .swap_coll_to_min_want(call, with_loss(want))
+            .then(callback(true)('redeem'))
+            .catch(callback(false))
         },
         repayAll: async (pool) => {
           const me = await signer.getAddress()
@@ -408,15 +419,16 @@ export default function contract() {
             })
             return
           }
-          await controller(pool.addr, signer).burn_dual(call).then(callback(true)('repay')).catch(callback(false))
-          return true
+          return await controller(pool.addr, signer)
+            .burn_dual(call)
+            .then(callback(true)('repay'))
+            .catch(callback(false))
         },
         withdrawAll: async ({ addr }) => {
           const me = await signer.getAddress()
           const ct = controller(addr, signer)
           const clpt = await ct.balanceOf(me)
-          await ct.withdraw_both(clpt).then(callback(true)('withdraw')).catch(callback(false))
-          return true
+          return await ct.withdraw_both(clpt).then(callback(true)('withdraw')).catch(callback(false))
         },
         settle: async (pool) => {
           enqueueSnackbar({

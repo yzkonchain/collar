@@ -54,14 +54,11 @@ export default function PoolSelector() {
 
   const getPool = (bond, want) => poolSelect[`${bond}-${want}-${round[0]}`]
 
-  const setPool = (bond, want) => {
-    let pool = poolSelect[`${bond}-${want}-${round[0]}`]
-    if (pool) {
-      setLiteState({ pool, bond: pool.bond, want: pool.want, coll: pool.coll })
-    } else {
-      pool = poolSelect[`${bond}-${want}-0`]
-      setLiteState({ pool, bond: pool.bond, want: pool.want, coll: pool.coll, round: [0, true] })
-    }
+  const setPool = (b, w) => {
+    const _pool = poolSelect[`${b}-${w}-${round[0]}`]
+    const [pool, r] = _pool ? [_pool, round] : [poolSelect[`${b}-${w}-0`], [0, true]]
+    const { bond, want, coll } = pool
+    setLiteState({ pool, bond, want, coll, round: r })
   }
 
   return useMemo(

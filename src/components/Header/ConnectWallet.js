@@ -1,23 +1,18 @@
-import { useState } from 'react'
-import Button from '@material-ui/core/Button'
-import LinearProgress from '@material-ui/core/LinearProgress'
-import Box from '@material-ui/core/Box'
+import { useContext, useState } from 'react'
+import { context } from '@/config'
+import { Button, LinearProgress, Box } from '@material-ui/core'
 
-export default function ConnectWallet(props) {
-  const { signer, click_address, click_connect } = props
+export default function ConnectWallet({ click_address, click_connect }) {
+  const {
+    state: { signer },
+  } = useContext(context)
   const [address, setAddress] = useState(null)
 
   ;(async () => {
     if (signer) {
-      const addr = await signer.getAddress()
-      if (addr !== address) {
-        setAddress(addr)
-      }
-    } else {
-      if (address !== null) {
-        setAddress(null)
-      }
-    }
+      const _address = await signer.getAddress()
+      if (_address !== address) setAddress(_address)
+    } else if (address !== null) setAddress(null)
   })()
 
   return address ? (

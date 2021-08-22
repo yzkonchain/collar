@@ -1,14 +1,15 @@
 import { ethers } from 'ethers'
-import { useContext, useReducer, useEffect, useMemo } from 'react'
+import { useContext, useReducer, useEffect, useMemo, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { context, liteContext, pools, poolSelect } from '@/config'
 import { contract } from '@/hooks'
 
-import { MyTabs, MyTabsChild } from '@/components/Modules'
+import { MyTabs, MyTabsChild, Loading } from '@/components/Modules'
 import { PoolSelector, Borrow, Repay, Deposit, Withdraw, Lend, Exit, Info } from '@/components/Content'
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -151,6 +152,7 @@ export default function Lite() {
   const {
     state: { signer },
   } = useContext(context)
+  const [loading, setLoading] = useState(false)
   const [liteState, setLiteState] = useReducer((s, ns) => ({ ...s, ...ns }), {
     tabs: 0,
     tabsChild: 0,
@@ -196,12 +198,14 @@ export default function Lite() {
         const controller = CT(signer)
         const poolName = `${pool.bond.addr}-${pool.want.addr}`
         const poolRound = !poolSelect[`${poolName}-1`]
+        setLoading(true)
         const newData = await controller.fetch_state(pool)
         setLiteState({
           controller,
           data: newData,
           round: [poolRound ? 0 : round[0], poolRound],
         })
+        setLoading(false)
       })()
     } else {
       if (data !== data_zero) setLiteState({ data: data_zero, controller: null, round: [0, true] })
@@ -230,9 +234,10 @@ export default function Lite() {
           <div></div>
           <div></div>
           <Info />
+          {loading && <Loading />}
         </div>
       </liteContext.Provider>
     ),
-    [liteState],
+    [liteState, loading],
   )
 }

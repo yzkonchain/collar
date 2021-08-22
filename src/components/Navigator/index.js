@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme) => ({
       flexDirection: 'row',
       background: 'none',
       border: 'none',
+      zIndex: '9999',
     },
   },
   listItem: {
@@ -38,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
       width: '100%',
       height: '100%',
       backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: '200',
+      zIndex: '9998',
     },
     '&:after': {
       filter: 'blur(15px) brightness(110%)',
@@ -85,7 +86,7 @@ const MyListItemUrl = ({ url, item, icon }) => {
 export default function Navigator() {
   const classes = useStyles()
   const {
-    state: { menu_open, signer, registry },
+    state: { menu_open, signer },
     setState,
   } = useContext(context)
   const [curpage, setCurpage] = useState(window.location.pathname.split('/')[1] || 'lite')

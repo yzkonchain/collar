@@ -5,7 +5,7 @@ import { context, poolConfig } from '@/config'
 
 import { useSnackbar } from 'notistack'
 
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { Box, AppBar, Toolbar, IconButton, Typography } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu'
@@ -13,7 +13,7 @@ import MenuIcon from '@material-ui/icons/Menu'
 import ConnectWallet from './ConnectWallet'
 import AccountDialog from './AccountDialog'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     zIndex: '9999',
   },
@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
   },
   '@global': {
     '.web3modal-modal-lightbox': {
-      zIndex: '5',
+      zIndex: '9999',
     },
   },
 }))
@@ -46,9 +46,10 @@ const web3Modal = new Web3Modal({
 export default function Header() {
   const classes = useStyles()
   const {
-    state: { menu_open, dialog_open, signer },
+    state: { menu_open },
     setState,
   } = useContext(context)
+  const [dialog, setDialog] = useState(false)
   const { enqueueSnackbar } = useSnackbar()
 
   const connect_wallet = async () => {
@@ -65,20 +66,20 @@ export default function Header() {
       setState({ signer: null })
       return
     }
-    setState({
-      signer: signer,
-    })
+    setState({ signer })
     if (!web3provider.on) {
       return
     }
     web3provider.on('disconnect', () => {
       web3Modal.clearCachedProvider()
-      setState({ signer: null, dialog_open: false })
+      setState({ signer: null })
+      setDialog(false)
     })
     web3provider.on('accountsChanged', async (accounts) => {
       if (accounts.length === 0) {
         web3Modal.clearCachedProvider()
-        setState({ signer: null, dialog_open: false })
+        setState({ signer: null })
+        setDialog(false)
         return
       }
       await connect_wallet()
@@ -97,24 +98,16 @@ export default function Header() {
     })
   }
   useEffect(() => {
-    if (web3Modal.cachedProvider) {
-      connect_wallet()
-      return
-    }
+    if (web3Modal.cachedProvider) connect_wallet()
   }, [])
+
   return (
     <div>
       <Box className={classes.root} overflow="hidden">
         <AppBar position="static" className={classes.appbar}>
           <Toolbar className={classes.toolbar}>
             <Box maxWidth="10vw" display={menu_open ? 'none' : 'block'}>
-              <IconButton
-                color="inherit"
-                onClick={() => {
-                  setState({ menu_open: true })
-                }}
-                edge="start"
-              >
+              <IconButton color="inherit" onClick={() => setState({ menu_open: true })} edge="start">
                 <MenuIcon />
               </IconButton>
             </Box>
@@ -123,27 +116,19 @@ export default function Header() {
                 Collar
               </Typography>
             </Box>
-            <ConnectWallet
-              signer={signer}
-              click_connect={connect_wallet}
-              click_address={() => {
-                setState({ dialog_open: true })
-              }}
-            />
+            <ConnectWallet click_connect={connect_wallet} click_address={() => setDialog(true)} />
           </Toolbar>
         </AppBar>
       </Box>
 
       <AccountDialog
-        signer={signer}
         disconnect={() => {
           web3Modal.clearCachedProvider()
-          setState({ signer: null, dialog_open: false })
+          setState({ signer: null })
+          setDialog(false)
         }}
-        open={dialog_open}
-        onClose={() => {
-          setState({ dialog_open: false })
-        }}
+        open={dialog}
+        onClose={() => setDialog(false)}
       />
     </div>
   )

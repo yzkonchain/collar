@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="300px" height="300px" viewBox="0 0 300 300" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+  <g id="Group">
+    <path d="M0 150C0 67.1573 67.1573 0 150 0C232.843 0 300 67.1573 300 150C300 232.843 232.843 300 150 300C67.1573 300 0 232.843 0 150Z" id="Circle" fill="#FFFFFF" fill-rule="evenodd" stroke="none" />
+  </g>
+  <g id="Group" transform="translate(21.01001 87.87988)">
+    <path d="M74.6902 0L152.37 0L77.6602 74.71L0 74.71L74.6902 0Z" transform="translate(29.909912 0)" id="Polygon" fill="#000000" fill-rule="evenodd" stroke="none" />
+    <path d="M37.05 0L0 37.0499L133.98 37.0499L171.02 0L37.05 0Z" transform="translate(0 87.18005)" id="Polygon" fill="#000000" fill-rule="evenodd" stroke="none" />
+    <path d="M42.9299 0L117.14 0L74.22 42.9301L0 42.9301L42.9299 0Z" transform="translate(144.52002 12.459961)" id="Polygon" fill="#000000" fill-rule="evenodd" stroke="none" />
+    <path d="M12.02 74.71L70.52 74.71L145.24 0L220.94 0L208.48 12.46L150.4 12.46L75.6799 87.17L0 87.17L12.02 74.71Z" transform="translate(37.05005 0)" id="Polygon" fill="#FF2424" fill-rule="evenodd" stroke="none" />
+  </g>
+</svg>

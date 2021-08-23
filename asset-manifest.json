@@ -1,13 +1,11 @@
 {
   "files": {
     "main.css": "/rebuild/static/css/main.c00b5a09.chunk.css",
-    "main.js": "/rebuild/static/js/main.23bc5297.chunk.js",
+    "main.js": "/rebuild/static/js/main.29e115dc.chunk.js",
     "runtime-main.js": "/rebuild/static/js/runtime-main.3d5c5e52.js",
-    "static/js/2.bf87f1a9.chunk.js": "/rebuild/static/js/2.bf87f1a9.chunk.js",
+    "static/js/2.40b59536.chunk.js": "/rebuild/static/js/2.40b59536.chunk.js",
     "index.html": "/rebuild/index.html",
-    "static/js/2.bf87f1a9.chunk.js.LICENSE.txt": "/rebuild/static/js/2.bf87f1a9.chunk.js.LICENSE.txt",
-    "static/js/2.bf87f1a9.chunk.js.gz": "/rebuild/static/js/2.bf87f1a9.chunk.js.gz",
-    "static/js/main.23bc5297.chunk.js.gz": "/rebuild/static/js/main.23bc5297.chunk.js.gz",
+    "static/js/2.40b59536.chunk.js.LICENSE.txt": "/rebuild/static/js/2.40b59536.chunk.js.LICENSE.txt",
     "static/media/index.css": "/rebuild/static/media/helvetica.0796970a.ttf",
     "static/media/CALL.fa5dcf83.svg": "/rebuild/static/media/CALL.fa5dcf83.svg",
     "static/media/COLL.18017a76.svg": "/rebuild/static/media/COLL.18017a76.svg",
@@ -37,8 +35,8 @@
   },
   "entrypoints": [
     "static/js/runtime-main.3d5c5e52.js",
-    "static/js/2.bf87f1a9.chunk.js",
+    "static/js/2.40b59536.chunk.js",
     "static/css/main.c00b5a09.chunk.css",
-    "static/js/main.23bc5297.chunk.js"
+    "static/js/main.29e115dc.chunk.js"
   ]
 }

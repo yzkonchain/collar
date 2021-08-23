@@ -84,7 +84,11 @@ export default function Faucet() {
       <TextField
         className={classes.input}
         value={amount}
-        label={amount === '' ? 'The amount of ETH needed.' : `You will get ${(133337 * amount || 0) + 13.37} testcoin`}
+        label={
+          amount === ''
+            ? 'The amount of ETH needed.'
+            : `You will get ${(133337 * amount || 0) + 13.37} ${selected.symbol}`
+        }
         type="number"
         variant="filled"
         onChange={({ target: { value: v } }) => setAmount(v)}

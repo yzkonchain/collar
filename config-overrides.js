@@ -5,8 +5,8 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 module.exports = function override(config, env) {
   config.resolve.alias['@'] = resolve('src')
   //deploy
-  config.devtool = false
-  config.optimization.minimizer.push(new UglifyJsPlugin())
+  // config.devtool = false
+  // config.optimization.minimizer.push(new UglifyJsPlugin())
   // config.plugins.push(
   //   new CompressionPlugin({
   //     filename: '[path].gz[query]',

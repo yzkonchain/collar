@@ -89,7 +89,7 @@ export default function Navigator() {
     state: { menu_open, signer },
     setState,
   } = useContext(context)
-  const [curpage, setCurpage] = useState(window.location.pathname.split('/')[1] || 'lite')
+  const [curpage, setCurpage] = useState(window.location.hash.slice(2) || 'lite')
   const changePage = (item) => {
     setCurpage(item)
     setState({ menu_open: false })

@@ -36,12 +36,14 @@ const toNonExponential = (num) => {
 const calc_apy_basic = ([sx, sy, sk], [bond, want], swap_sqp) => {
   const one = ethers.utils.parseEther('1')
   const mul = ethers.BigNumber.from(1e9)
-  return sx
-    .add(bond || ZERO)
-    .add(sk)
-    .mul(one)
-    .div(sy.add(want || ZERO).add(sk.mul(swap_sqp).div(mul)))
-    .sub(one)
+  return sk.eq('0')
+    ? sk
+    : sx
+        .add(bond || ZERO)
+        .add(sk)
+        .mul(one)
+        .div(sy.add(want || ZERO).add(sk.mul(swap_sqp).div(mul)))
+        .sub(one)
 }
 
 const calc_apy = ({ swap: { sx, sy, sk } }, [bond, want], { swap_sqp, expiry_time }) =>
@@ -119,8 +121,16 @@ const mypage_data = async (signer) => {
           ct.pool.balanceOf(me),
           ct.call.balanceOf(me),
           ct.coll.balanceOf(me),
-        ]).then(formatMap)
-        let [clpt_coll, clpt_want] = await ct.pool.get_dxdy(unformat(clpt)).then(formatMap)
+        ])
+          .then(formatMap)
+          .catch((e) => [0, 0, 0, 0, 0, 0, 0, 0])
+        let [clpt_coll, clpt_want] =
+          clpt === 0
+            ? [0, 0]
+            : await ct.pool
+                .get_dxdy(unformat(clpt))
+                .then(formatMap)
+                .catch(() => [0, 0])
         res.push({
           pool: pool,
           coll_total,
@@ -131,7 +141,7 @@ const mypage_data = async (signer) => {
           coll,
           earned,
           receivables: (clpt_coll + coll) * Price[pool.coll.addr] + clpt_want * Price[pool.want.addr],
-          shareOfPoll: (clpt / clpt_total) * 100,
+          shareOfPoll: clpt_total ? (clpt / clpt_total) * 100 : 0,
           coll_apy: '0.00',
           call_apy: '0.00',
           clpt_apy: '0.00',
@@ -156,7 +166,9 @@ const mypage_data_noaccount = async () => {
           ct.pool.sx(),
           ct.pool.sy(),
           ct.bond.balanceOf(pool.addr),
-        ]).then(formatMap)
+        ])
+          .then(formatMap)
+          .catch(() => [0, 0, 0])
         res.push({
           pool,
           coll_total,

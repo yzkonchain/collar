@@ -4,8 +4,15 @@ import { makeStyles } from '@material-ui/core/styles'
 import { context, liteContext, pools, poolSelect } from '@/config'
 import { contract } from '@/hooks'
 
+import Borrow from './Borrow'
+import Repay from './Repay'
+import Deposit from './Deposit'
+import Withdraw from './Withdraw'
+import Lend from './Lend'
+import Exit from './Exit'
+import Info from './Info'
+import PoolSelector from './PoolSelector'
 import { MyTabs, MyTabsChild, Loading } from '@/components/Modules'
-import { PoolSelector, Borrow, Repay, Deposit, Withdraw, Lend, Exit, Info } from '@/components/Content'
 
 const useStyles = makeStyles((theme) => ({
   root: {

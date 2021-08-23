@@ -85,7 +85,7 @@ export default function Borrow() {
             <MyButton
               name="Approve"
               onClick={() => handleClick('approve')(bond.addr)}
-              disabled={data.allowance.bond.gt('100000000000000000000000000000000')}
+              disabled={!signer || data.allowance.bond.gt('100000000000000000000000000000000')}
             />
             <MyButton
               name="Deposit & Borrow"

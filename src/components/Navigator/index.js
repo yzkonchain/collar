@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 import { context } from '@/config'
 import { makeStyles } from '@material-ui/core/styles'
-import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
+import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { Drawer, Box, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
 import { LiteIcon, TermIcon, ProIcon, MypageIcon, CloseMenuIcon } from '@/assets/svg'
 
@@ -95,7 +95,7 @@ export default function Navigator() {
     setState({ menu_open: false })
   }
   return (
-    <BrowserRouter>
+    <Router>
       <Drawer variant="persistent" anchor="left" open={menu_open} className={classes.drawer}>
         <Box width="30vw" style={{ backgroundColor: '#4975FF' }}>
           <Box
@@ -142,6 +142,6 @@ export default function Navigator() {
           </Route>
         </Switch>
       </Box>
-    </BrowserRouter>
+    </Router>
   )
 }

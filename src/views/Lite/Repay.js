@@ -98,7 +98,7 @@ export default function Repay() {
             <MyButton
               name="Approve"
               onClick={() => handleClick('approve')(want.addr)}
-              disabled={data.allowance.want.gt('100000000000000000000000000000000')}
+              disabled={!signer || data.allowance.want.gt('100000000000000000000000000000000')}
             />
             <MyButton
               name="Repay"

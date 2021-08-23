@@ -8,18 +8,17 @@ const ZERO = ethers.constants.Zero
 const INIT = {
   input: {
     want: ZERO,
-    coll: ZERO,
   },
   output: {
-    clpt: ZERO,
+    coll: ZERO,
   },
-  tip: { share: '0.000', poolBalance: '0.00', slip: '0.00' },
-  I: { want: '', coll: '' },
-  old: { want: '', coll: '' },
+  tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
+  I: { want: '' },
+  old: { want: '' },
 }
 const format = (num) => ethers.utils.formatEther(num)
 
-export default function Repay() {
+export default function Lend() {
   const {
     state: { signer },
   } = useContext(context)
@@ -29,6 +28,7 @@ export default function Repay() {
     setLiteState,
     handleClick,
   } = useContext(liteContext)
+  INIT.tip.apy = data.apy.toPrecision(3)
   const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
@@ -36,15 +36,15 @@ export default function Repay() {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const want = ethers.utils.parseUnits(state.I.want || '0', 18)
-      const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
-      if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
-        const clpt = await controller.ct(pool.addr).get_dk(coll, want)
+      if (!want.eq(state.input.want)) {
+        const coll = await controller.ct(pool.addr).get_dx(want)
         const tip = {
-          poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
-          share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
-          slip: controller.calc_slip(data, [coll, want], pool).toPrecision(3),
+          fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
+          min: (format(coll) * 0.995).toFixed(3),
+          slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+          apy: data.apy.toPrecision(3),
         }
-        setState({ input: { want, coll }, output: { clpt }, tip })
+        setState({ input: { want }, output: { coll }, tip })
       }
     })()
   }, [state])
@@ -65,50 +65,35 @@ export default function Repay() {
               }}
               style={{ height: '90px' }}
             />
-            <AmountInput
-              title="coll"
-              State={{
-                state,
-                setState,
-                token: coll,
-                max: data.balance.coll,
-                maxCondition: () => data.balance.coll.gt('0'),
-              }}
-              style={{ height: '90px' }}
-            />
           </div>
           <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
-
           <div>
-            <AmountShow title="clpt" state={{ state, token: pool }} style={{ height: '249px' }} />
+            <AmountShow title="coll" state={{ state, token: coll }} style={{ height: '90px' }} />
           </div>
         </div>
         <ApyFloatMessage
-          APY={`todo`}
+          APY={state.tip.apy}
           info={[
-            { 'Share of Pool': `${state.tip.share} %` },
-            { 'Pool Balance': `1 ${want.symbol} = ${state.tip.poolBalance} COLL` },
             { 'Slippage tolerance': `${state.tip.slip} %` },
+            { 'Minimum recieved': `${state.tip.min} COLL` },
+            { Route: `${want.symbol} -> COLL` },
+            { 'Nominal swap fee': `${state.tip.fee} COLL` },
           ]}
         />
-        <div className={classes.buttonTwo}>
+        <div className={classes.buttonOne}>
           <div>
             <MyButton
               name="Approve"
               onClick={() => handleClick('approve')(want.addr)}
-              disabled={data.allowance.want.gt('100000000000000000000000000000000')}
+              disabled={!signer || data.allowance.want.gt('100000000000000000000000000000000')}
             />
             <MyButton
-              name="Deposit"
+              name="Lend"
               onClick={async () =>
-                (await handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt)) &&
-                setState({ I: { want: '', coll: '' } })
+                (await handleClick('lend')(state.input.want, state.output.coll)) && setState({ I: { want: '' } })
               }
-              disabled={ZERO.eq(state.output.clpt)}
+              disabled={ZERO.eq(state.output.coll)}
             />
-          </div>
-          <div>
-            <MyButton name="Claim" onClick={() => handleClick('claim')()} disabled={ZERO.eq(data.earned.collar)} />
           </div>
         </div>
       </div>

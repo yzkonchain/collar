@@ -113,6 +113,7 @@ export default function Mobile({ pool, val, handleClick }) {
               <TableCell>Token</TableCell>
               <TableCell align="center">Balance</TableCell>
               <TableCell>APY</TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>

@@ -1,10 +1,12 @@
-import { makeStyles } from '@material-ui/core/styles'
-import { TextField, Button, InputAdornment } from '@material-ui/core'
-import { useState, useContext } from 'react'
-import { context, abi } from '@/config'
-import DynamicFont from 'react-dynamic-font'
 import { ethers } from 'ethers'
-import { useSnackbar } from 'notistack'
+import { contract } from '@/hooks'
+import { context } from '@/config'
+import { useState, useContext, useRef } from 'react'
+import { makeStyles } from '@material-ui/core/styles'
+import { TextField, Button } from '@material-ui/core'
+import { ButtonGroup, Paper, Popper, MenuItem, MenuList, ClickAwayListener } from '@material-ui/core'
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
+
 const useStyles = makeStyles({
   root: {
     height: 'calc(90vh - 100px)',
@@ -28,82 +30,46 @@ const useStyles = makeStyles({
     },
   },
 })
+
+const addr = {
+  usdt: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
+  usdc: '0x67C9a0830d922C80A96408EEdF606c528836880C',
+}
+
+const options = ['Create a merge commit', 'Squash and merge', 'Rebase and merge']
+
 export default function Faucet() {
   const classes = useStyles()
-  const { enqueueSnackbar } = useSnackbar()
-  const {
-    state: { registry, signer },
-    setState,
-  } = useContext(context)
+  const { state } = useContext(context)
+  const CT = contract()
   const [amount, setAmount] = useState('')
-  const handleChange = (e) => {
-    setAmount(e.target.value)
-  }
   const sendMe = async (token) => {
-    if (!signer) {
-      enqueueSnackbar({
-        type: 'failed',
-        title: 'Fail.',
-        message: 'No Account.',
-      })
-      return
-    }
-    const addr = {
-      usdt: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
-      usdc: '0x67C9a0830d922C80A96408EEdF606c528836880C',
-    }
-    const account = await signer.getAddress()
-    // const balance = await new ethers.Contract(addr['usdt'], abi, signer).balanceOf(account)
-    // console.log(balance)
-    signer
-      .sendTransaction({ to: addr[token], value: ethers.utils.parseEther(String(amount || 0)) })
-      .then((resp) => resp.wait())
-      .then(({ status }) => {
-        if (status === 1)
-          enqueueSnackbar({
-            type: 'success',
-            title: 'Faucet.',
-            message: 'You have successfully get test token.',
-          })
-        else
-          enqueueSnackbar({
-            type: 'failed',
-            title: 'Fail.',
-            message: 'The execution failed due to an exception.',
-          })
-      })
-      .catch(({ code }) => {
-        switch (code) {
-          case 4001:
-            enqueueSnackbar({
-              type: 'failed',
-              title: 'Fail.',
-              message: 'User denied transaction signature.',
-            })
-            break
-          default:
-            console.log(code)
-            break
-        }
-      })
+    if (state.signer) {
+      const ct = CT(state.signer)
+      const value = ethers.utils.parseEther(String(amount || 0))
+      if (value.eq('0')) ct.notify('faucet', 'empty')
+      else if (await ct.faucet(addr[token], value)) setAmount('')
+    } else CT()
   }
+
+  const anchorRef = useRef(null)
+  const [open, setOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(1)
+  const handleClick = () => console.log(selectedIndex)
+
   return (
     <div className={classes.root}>
       <div style={{ fontSize: '40px' }}>Collar Faucet</div>
       <div style={{ fontSize: '20px', maxWidth: 'calc(80vw)' }}>
-        <DynamicFont content="Claim your test token for Collar open alpha product" />
+        Claim your test token for Collar open alpha product
       </div>
       <TextField
         className={classes.input}
-        label={
-          amount === ''
-            ? 'The amount of ETH you need to exchange for testcoin'
-            : `You will get ${(133337 * amount || 0) + 13.37} testcoin`
-        }
+        label={amount === '' ? 'The amount of ETH needed.' : `You will get ${(133337 * amount || 0) + 13.37} testcoin`}
         type="number"
         variant="filled"
         value={amount}
-        onChange={handleChange}
+        onChange={({ target: { value: v } }) => setAmount(v)}
       />
       <div style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
         <Button
@@ -125,6 +91,33 @@ export default function Faucet() {
           Send me USDC
         </Button>
       </div>
+
+      <ButtonGroup variant="contained" color="primary" ref={anchorRef}>
+        <Button onClick={handleClick}>{options[selectedIndex]}</Button>
+        <Button onClick={() => setOpen((v) => !v)}>
+          <ArrowDropDownIcon />
+        </Button>
+      </ButtonGroup>
+      <Popper open={open} anchorEl={anchorRef.current} transition disablePortal>
+        <Paper>
+          <ClickAwayListener onClickAway={() => setOpen(false)}>
+            <MenuList>
+              {options.map((option, index) => (
+                <MenuItem
+                  key={option}
+                  selected={index === selectedIndex}
+                  onClick={() => {
+                    setSelectedIndex(index)
+                    setOpen(false)
+                  }}
+                >
+                  {option}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </ClickAwayListener>
+        </Paper>
+      </Popper>
     </div>
   )
 }

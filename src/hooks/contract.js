@@ -285,6 +285,23 @@ const callbackInfo = (method, status) => {
         default:
           return failed
       }
+    case 'faucet':
+      switch (status) {
+        case 1:
+          return {
+            type: 'success',
+            title: 'Faucet.',
+            message: 'You have successfully get test token.',
+          }
+        case 'empty':
+          return {
+            type: 'failed',
+            title: 'Fail.',
+            message: 'The amount of ETH is necessary.',
+          }
+        default:
+          return failed
+      }
     case 'cancel':
       return {
         type: 'failed',
@@ -303,19 +320,20 @@ const callbackInfo = (method, status) => {
 }
 export default function contract() {
   const { enqueueSnackbar } = useSnackbar()
+  const notify = (method, status) => enqueueSnackbar(callbackInfo(method, status))
   const callback = (type) => {
     switch (type) {
       case true:
         return (method) => (resp) =>
           resp.wait().then(({ status }) => {
-            enqueueSnackbar(callbackInfo(method, status))
+            notify(method, status)
             return status == 1
           })
       case false:
         return (err) => {
           switch (err.code) {
             case 4001:
-              enqueueSnackbar(callbackInfo('cancel'))
+              notify('cancel')
               return false
             default:
               console.log(err)
@@ -326,11 +344,13 @@ export default function contract() {
         return console.log
     }
   }
+
   return (signer, command) => {
     if (signer)
       return {
         calc_apy,
         calc_slip,
+        notify,
         ct: (address, abi) => controller(address, signer, abi),
         fetch_state: async (pool) => fetch_state(pool, signer),
         mypage_data: async () => mypage_data(signer),
@@ -457,6 +477,9 @@ export default function contract() {
           })
           return false
         },
+        faucet: async (to, value) => {
+          return await signer.sendTransaction({ to, value }).then(callback(true)('withdraw')).catch(callback(false))
+        },
         error: () => {
           enqueueSnackbar({
             type: 'failed',
@@ -468,6 +491,7 @@ export default function contract() {
     else {
       if (command)
         return {
+          notify,
           mypage_data_noaccount,
         }
       else enqueueSnackbar(callbackInfo('noaccount'))

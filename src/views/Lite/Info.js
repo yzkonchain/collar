@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const format = (num) => ethers.utils.formatEther(num)
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 
 export default function Info() {
   const classes = useStyles()
@@ -33,9 +33,8 @@ export default function Info() {
   } = useContext(liteContext)
   const [update, setUpdate] = useState({})
   useEffect(() => {
-    if (!controller) return
     ;(async () => {
-      setLiteState({ data: await controller.fetch_state(pool) })
+      if (controller) setLiteState({ data: await controller.fetch_state(pool) })
       setUpdate({})
     })()
   }, [forceUpdate])
@@ -47,12 +46,12 @@ export default function Info() {
           <InfoCard1
             token={bond.symbol}
             status={data.allowance.bond.gt('100000000000000000000000000000000') ? 'APPROVED' : 'NOT APPROVED'}
-            amount={format(data.balance.bond)}
+            amount={format(data.balance.bond, bond.decimals)}
           />
           <InfoCard1
             token={want.symbol}
             status={data.allowance.want.gt('100000000000000000000000000000000') ? 'APPROVED' : 'NOT APPROVED'}
-            amount={format(data.balance.want)}
+            amount={format(data.balance.want, want.decimals)}
           />
         </div>
         <div>

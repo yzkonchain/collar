@@ -17,7 +17,8 @@ const INIT = {
   I: { want: '', coll: '' },
   old: { want: '', coll: '' },
 }
-const format = (num) => ethers.utils.formatEther(num)
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
+const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Repay() {
   const {
@@ -30,19 +31,19 @@ export default function Repay() {
     handleClick,
   } = useContext(liteContext)
   INIT.tip.apy = data.apy.toPrecision(3)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+  const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const want = ethers.utils.parseUnits(state.I.want || '0', 18)
-      const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
+      const want = parse(state.I.want, pool.want.decimals)
+      const coll = parse(state.I.coll)
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
         const bond = want.add(coll)
         const tip = {
-          fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
-          min: (format(bond) * 0.995).toFixed(3),
+          fee: (format(want, pool.want.decimals) * (1 - format(data.swap.fee))).toFixed(4),
+          min: (format(bond, pool.bond.decimals) * 0.995).toFixed(3),
           slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
           apy: data.apy.toPrecision(3),
         }
@@ -63,13 +64,14 @@ export default function Repay() {
                 setState,
                 token: [want, coll],
                 max: [
-                  data.balance.call.lt(data.balance.want) ? data.balance.call : data.balance.want,
-                  data.balance.call.lt(data.balance.coll) ? data.balance.call : data.balance.coll,
+                  data.balance.want.lt(data.balance.call.sub(state.input.coll))
+                    ? data.balance.want
+                    : data.balance.call.sub(state.input.coll),
+                  data.balance.coll.lt(data.balance.call.sub(state.input.want))
+                    ? data.balance.coll
+                    : data.balance.call.sub(state.input.want),
                 ],
-                maxCondition: [
-                  () => data.allowance.want.gt('100000000000000000000000000000000'),
-                  () => data.balance.coll.gt('0'),
-                ],
+                if_max: [data.allowance.want.gt('100000000000000000000000000000000'), data.balance.coll.gt('0')],
               }}
               style={{ height: '90px' }}
             />

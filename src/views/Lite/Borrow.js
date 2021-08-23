@@ -16,7 +16,8 @@ const INIT = {
   I: { bond: '' },
   old: { bond: '' },
 }
-const format = (num) => ethers.utils.formatEther(num)
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
+const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Borrow() {
   const {
@@ -29,22 +30,24 @@ export default function Borrow() {
     handleClick,
   } = useContext(liteContext)
   INIT.tip.apy = data.apy.toPrecision(3)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+  const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const bond = ethers.utils.parseUnits(state.I.bond || '0', 18)
+      const bond = parse(state.I.bond, pool.bond.decimals)
       if (!bond.eq(state.input.bond)) {
-        const want = await controller.ct(pool.addr).get_dy(bond)
-        const tip = {
-          fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
-          min: (format(want) * 0.995).toFixed(3),
-          slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
-          apy: data.apy.toPrecision(3),
+        const want = await controller.get_dy(bond, pool)
+        if (want) {
+          const tip = {
+            fee: (format(want, pool.want.decimals) * (1 - format(data.swap.fee))).toFixed(4),
+            min: (format(want, pool.want.decimals) * 0.995).toFixed(3),
+            slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
+            apy: data.apy.toPrecision(3),
+          }
+          setState({ input: { bond }, output: { want }, tip })
         }
-        setState({ input: { bond }, output: { want }, tip })
       }
     })()
   }, [state])
@@ -61,7 +64,7 @@ export default function Borrow() {
                 setState,
                 token: bond,
                 max: data.balance.bond,
-                maxCondition: () => data.allowance.bond.gt('100000000000000000000000000000000'),
+                if_max: data.allowance.bond.gt('100000000000000000000000000000000'),
               }}
               style={{ height: '90px' }}
             />

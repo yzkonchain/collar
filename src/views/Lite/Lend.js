@@ -16,7 +16,8 @@ const INIT = {
   I: { want: '' },
   old: { want: '' },
 }
-const format = (num) => ethers.utils.formatEther(num)
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
+const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Lend() {
   const {
@@ -29,22 +30,24 @@ export default function Lend() {
     handleClick,
   } = useContext(liteContext)
   INIT.tip.apy = data.apy.toPrecision(3)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+  const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const want = ethers.utils.parseUnits(state.I.want || '0', 18)
+      const want = parse(state.I.want, pool.want.decimals)
       if (!want.eq(state.input.want)) {
-        const coll = await controller.ct(pool.addr).get_dx(want)
-        const tip = {
-          fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
-          min: (format(coll) * 0.995).toFixed(3),
-          slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
-          apy: data.apy.toPrecision(3),
+        const coll = await controller.get_dx(want, pool)
+        if (coll) {
+          const tip = {
+            fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
+            min: (format(coll) * 0.995).toFixed(3),
+            slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+            apy: data.apy.toPrecision(3),
+          }
+          setState({ input: { want }, output: { coll }, tip })
         }
-        setState({ input: { want }, output: { coll }, tip })
       }
     })()
   }, [state])
@@ -61,7 +64,7 @@ export default function Lend() {
                 setState,
                 token: want,
                 max: data.balance.want,
-                maxCondition: () => data.allowance.want.gt('100000000000000000000000000000000'),
+                if_max: data.allowance.want.gt('100000000000000000000000000000000'),
               }}
               style={{ height: '90px' }}
             />

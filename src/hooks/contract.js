@@ -21,12 +21,12 @@ const abiPool = [
 const controller = (address, signer, abi) => {
   return new ethers.Contract(address, abi || collar, signer)
 }
-const format = (num, n) => {
-  const res = parseFloat(ethers.utils.formatEther(num))
-  return n ? res.toFixed(n) : res
+const format = (num, n, fixed) => {
+  const res = parseFloat(ethers.utils.formatUnits(num, n || 18))
+  return fixed ? res.toFixed(fixed) : res
 }
-const unformat = (num) => ethers.utils.parseEther(String(num))
-const formatMap = (data) => data.map((v) => format(v))
+const unformat = (num, n) => ethers.utils.parseUnits(String(num) || '', n || 18)
+const formatMap = (data, n) => (n ? data.map((v, k) => format(v, n[k] || 18)) : data.map((v) => format(v)))
 const with_loss = (x) => x.mul(995).div(1000)
 const toNonExponential = (num) => {
   var m = num.toExponential().match(/\d(?:\.(\d*))?e([+-]\d+)/)
@@ -122,14 +122,14 @@ const mypage_data = async (signer) => {
           ct.call.balanceOf(me),
           ct.coll.balanceOf(me),
         ])
-          .then(formatMap)
+          .then((data) => formatMap(data, [null, pool.want.decimals, null, pool.bond.decimals]))
           .catch((e) => [0, 0, 0, 0, 0, 0, 0, 0])
         let [clpt_coll, clpt_want] =
           clpt === 0
             ? [0, 0]
             : await ct.pool
                 .get_dxdy(unformat(clpt))
-                .then(formatMap)
+                .then((data) => formatMap(data, [null, pool.want.decimals]))
                 .catch(() => [0, 0])
         res.push({
           pool: pool,
@@ -142,10 +142,10 @@ const mypage_data = async (signer) => {
           earned,
           receivables: (clpt_coll + coll) * Price[pool.coll.addr] + clpt_want * Price[pool.want.addr],
           shareOfPoll: clpt_total ? (clpt / clpt_total) * 100 : 0,
-          coll_apy: '0.00',
-          call_apy: '0.00',
-          clpt_apy: '0.00',
-          clpt_apr: '0.00',
+          coll_apy: 0,
+          call_apy: 0,
+          clpt_apy: 0,
+          clpt_apr: 0,
         })
       }
     }
@@ -167,7 +167,7 @@ const mypage_data_noaccount = async () => {
           ct.pool.sy(),
           ct.bond.balanceOf(pool.addr),
         ])
-          .then(formatMap)
+          .then((data) => formatMap(data, [null, pool.want.decimals, pool.bond.decimals]))
           .catch(() => [0, 0, 0])
         res.push({
           pool,
@@ -180,10 +180,10 @@ const mypage_data_noaccount = async () => {
           earned: 0,
           receivables: 0,
           shareOfPoll: 0,
-          coll_apy: '0.00',
-          call_apy: '0.00',
-          clpt_apy: '0.00',
-          clpt_apr: '0.00',
+          coll_apy: 0,
+          call_apy: 0,
+          clpt_apy: 0,
+          clpt_apr: 0,
         })
       }
     }
@@ -198,6 +198,17 @@ const callbackInfo = (method, status) => {
     message: 'Your transaction failed.',
   }
   switch (method) {
+    case 'balance':
+      switch (status) {
+        case 'insufficient':
+          return {
+            type: 'failed',
+            title: 'Fail.',
+            message: 'Maximum range exceeded.',
+          }
+        default:
+          return failed
+      }
     case 'approve':
       switch (status) {
         case 1:
@@ -372,6 +383,30 @@ export default function contract() {
         ct: (address, abi) => controller(address, signer, abi),
         fetch_state: async (pool) => fetch_state(pool, signer),
         mypage_data: async () => mypage_data(signer),
+        get_dx: async (coin, { addr }) => {
+          return await controller(addr, signer)
+            .get_dx(coin)
+            .catch(() => {
+              notify('balance', 'insufficient')
+              return false
+            })
+        },
+        get_dy: async (coin, { addr }) => {
+          return await controller(addr, signer)
+            .get_dy(coin)
+            .catch(() => {
+              notify('balance', 'insufficient')
+              return false
+            })
+        },
+        get_dk: async (coll, want, { addr }) => {
+          return await controller(addr, signer)
+            .get_dk(coll, want)
+            .catch(() => {
+              notify('balance', 'insufficient')
+              return false
+            })
+        },
         approve: async (coin, { addr }) => {
           return await controller(coin, signer, ['function approve(address, uint256) external'])
             .approve(addr, ethers.constants.MaxUint256)

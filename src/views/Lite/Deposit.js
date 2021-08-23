@@ -17,7 +17,8 @@ const INIT = {
   I: { want: '', coll: '' },
   old: { want: '', coll: '' },
 }
-const format = (num) => ethers.utils.formatEther(num)
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
+const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Repay() {
   const {
@@ -29,22 +30,24 @@ export default function Repay() {
     setLiteState,
     handleClick,
   } = useContext(liteContext)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+  const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const want = ethers.utils.parseUnits(state.I.want || '0', 18)
-      const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
+      const want = parse(state.I.want, pool.want.decimals)
+      const coll = parse(state.I.coll)
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
-        const clpt = await controller.ct(pool.addr).get_dk(coll, want)
-        const tip = {
-          share: ((format(clpt) / format(data.swap.sk)) * 100).toPrecision(3),
-          poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
-          slip: controller.calc_slip(data, [coll, want], pool).toPrecision(3),
+        const clpt = await controller.get_dk(coll, want, pool)
+        if (clpt) {
+          const tip = {
+            share: ((format(clpt) / format(data.swap.sk)) * 100).toPrecision(3),
+            poolBalance: (format(data.swap.sx) / format(data.swap.sy, pool.want.decimals)).toPrecision(3),
+            slip: controller.calc_slip(data, [coll, want], pool).toPrecision(3),
+          }
+          setState({ input: { want, coll }, output: { clpt }, tip })
         }
-        setState({ input: { want, coll }, output: { clpt }, tip })
       }
     })()
   }, [state])
@@ -61,7 +64,7 @@ export default function Repay() {
                 setState,
                 token: want,
                 max: data.balance.want,
-                maxCondition: () => data.allowance.want.gt('100000000000000000000000000000000'),
+                if_max: data.allowance.want.gt('100000000000000000000000000000000'),
               }}
               style={{ height: '90px' }}
             />
@@ -72,7 +75,7 @@ export default function Repay() {
                 setState,
                 token: coll,
                 max: data.balance.coll,
-                maxCondition: () => data.balance.coll.gt('0'),
+                if_max: data.balance.coll.gt('0'),
               }}
               style={{ height: '90px' }}
             />
@@ -80,7 +83,7 @@ export default function Repay() {
           <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
 
           <div>
-            <AmountShow title="clpt" state={{ state, token: pool }} style={{ height: '249px' }} />
+            <AmountShow title="clpt" state={{ state, token: pool }} style={{ height: '239px' }} />
           </div>
         </div>
         <ApyFloatMessage

@@ -5,7 +5,7 @@ import Header from './components/Header'
 import Navigator from './components/Navigator'
 
 export default function App() {
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), {
+  const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), {
     menu_open: false,
     signer: null,
   })

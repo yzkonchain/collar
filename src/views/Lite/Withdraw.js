@@ -18,7 +18,8 @@ const INIT = {
   I: { clpt: '' },
   old: { clpt: '' },
 }
-const format = (num) => ethers.utils.formatEther(num)
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
+const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Withdraw() {
   const {
@@ -30,21 +31,21 @@ export default function Withdraw() {
     setLiteState,
     handleClick,
   } = useContext(liteContext)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+  const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const clpt = ethers.utils.parseUnits(state.I.clpt || '0', 18)
+      const clpt = parse(state.I.clpt)
       if (!clpt.eq(state.input.clpt)) {
         const res = await controller.ct(pool.addr).get_dxdy(clpt)
         const tip = {
-          poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
+          poolBalance: (format(data.swap.sx) / format(data.swap.sy, pool.want.decimals)).toPrecision(3),
           share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
           rate: {
             coll: clpt.eq(ZERO) ? 0 : parseFloat(format(res[0]) / state.I.clpt).toPrecision(3),
-            want: clpt.eq(ZERO) ? 0 : parseFloat(format(res[1]) / state.I.clpt).toPrecision(3),
+            want: clpt.eq(ZERO) ? 0 : parseFloat(format(res[1], pool.want.decimals) / state.I.clpt).toPrecision(3),
           },
           fee: (format(res[0]) * (1 - format(data.swap.fee))).toFixed(4),
         }
@@ -65,9 +66,9 @@ export default function Withdraw() {
                 setState,
                 token: pool,
                 max: data.balance.clpt,
-                maxCondition: () => data.balance.clpt.gt('0'),
+                if_max: data.balance.clpt.gt('0'),
               }}
-              style={{ height: '249px' }}
+              style={{ height: '239px' }}
             />
           </div>
           <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />

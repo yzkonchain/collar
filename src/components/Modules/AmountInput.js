@@ -11,7 +11,7 @@ import { useSnackbar } from 'notistack'
 const useStyles = makeStyles((theme) => ({
   root: {
     '&>div:first-child': {
-      margin: '10px 0',
+      margin: '5px 0',
       height: '25px',
       display: 'flex',
       alignItems: 'center',
@@ -92,6 +92,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '12px',
   },
 }))
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 
 export default function AmountInput({ State, title, style }) {
   const [fontSize, setFontSize] = useState(35)
@@ -99,7 +100,7 @@ export default function AmountInput({ State, title, style }) {
   const classes = useStyles({ fontSize })
   const inputRef = useRef()
   const { enqueueSnackbar } = useSnackbar()
-  const { state, setState, token, max, maxCondition } = State
+  const { state, setState, token, max, if_max } = State
   const changInput = useCallback(
     ({ target: { value }, nativeEvent: { data } }) => {
       const old = state.I[title]
@@ -155,11 +156,11 @@ export default function AmountInput({ State, title, style }) {
                       setState({
                         I: {
                           ...state.I,
-                          [title]: `${ethers.utils.formatEther(max)}`,
+                          [title]: `${format(max, token.decimals)}`,
                         },
                       })
                     }}
-                    disabled={!maxCondition()}
+                    disabled={!if_max}
                   >
                     MAX
                     <span>Balance</span>

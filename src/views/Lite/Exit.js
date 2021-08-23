@@ -16,7 +16,8 @@ const INIT = {
   I: { coll: '' },
   old: { coll: '' },
 }
-const format = (num) => ethers.utils.formatEther(num)
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
+const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Exit() {
   const {
@@ -29,22 +30,24 @@ export default function Exit() {
     handleClick,
   } = useContext(liteContext)
   INIT.tip.apy = data.apy.toPrecision(3)
-  const [state, setState] = useReducer((s, ns) => ({ ...s, ...ns }), INIT)
+  const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
     if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
-      const coll = ethers.utils.parseUnits(state.I.coll || '0', 18)
+      const coll = parse(state.I.coll)
       if (!coll.eq(state.input.coll)) {
-        const want = await controller.ct(pool.addr).get_dy(coll)
-        const tip = {
-          fee: (format(want) * (1 - format(data.swap.fee))).toFixed(4),
-          min: (format(want) * 0.995).toFixed(3),
-          slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
-          apy: data.apy.toPrecision(3),
+        const want = await controller.get_dy(coll, pool)
+        if (want) {
+          const tip = {
+            fee: (format(want, pool.want.decimals) * (1 - format(data.swap.fee))).toFixed(4),
+            min: (format(want, pool.want.decimals) * 0.995).toFixed(3),
+            slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+            apy: data.apy.toPrecision(3),
+          }
+          setState({ input: { coll }, output: { want }, tip })
         }
-        setState({ input: { coll }, output: { want }, tip })
       }
     })()
   }, [state])
@@ -61,7 +64,7 @@ export default function Exit() {
                 setState,
                 token: coll,
                 max: data.balance.coll,
-                maxCondition: () => data.balance.coll.gt('0'),
+                if_max: data.balance.coll.gt('0'),
               }}
               style={{ height: '90px' }}
             />

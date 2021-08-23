@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'Helvetica',
     fontSize: '0.8em',
     display: 'block',
-    margin: '10px 0',
+    margin: '20px 0 5px',
     color: '#30384B',
   },
   formControlList: {
@@ -52,13 +52,11 @@ export default function PoolSelector() {
     setLiteState,
   } = useContext(liteContext)
 
-  const getPool = (bond, want) => poolSelect[`${bond}-${want}-${round[0]}`]
-
   const setPool = (b, w) => {
     const _pool = poolSelect[`${b}-${w}-${round[0]}`]
-    const [pool, r] = _pool ? [_pool, round] : [poolSelect[`${b}-${w}-0`], [0, true]]
+    const [pool, _round] = _pool ? [_pool, round] : [poolSelect[`${b}-${w}-0`], [0, true]]
     const { bond, want, coll } = pool
-    setLiteState({ pool, bond, want, coll, round: r })
+    setLiteState({ pool, bond, want, coll, round: _round })
   }
 
   return useMemo(

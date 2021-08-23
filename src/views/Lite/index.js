@@ -158,10 +158,10 @@ export default function Lite() {
     state: { signer },
   } = useContext(context)
   const [loading, setLoading] = useState(false)
-  const [liteState, setLiteState] = useReducer((s, ns) => ({ ...s, ...ns }), {
+  const [liteState, setLiteState] = useReducer((o, n) => ({ ...o, ...n }), {
     tabs: 0,
     tabsChild: 0,
-    round: [0, true],
+    round: [0, !pools[0].r2],
     pool: pools[0].r1,
     coll: pools[0].r1.coll,
     bond: pools[0].r1.bond,
@@ -197,26 +197,32 @@ export default function Lite() {
 
   useEffect(() => {
     const poolName = `${pool.bond.addr}-${pool.want.addr}`
-    setLiteState({ pool: poolSelect[`${poolName}-${round[0]}`] })
+    setLiteState({ pool: poolSelect[`${poolName}-${round[0]}`], forceUpdate: {} })
   }, [round[0]])
 
   useEffect(() => {
+    const poolName = `${pool.bond.addr}-${pool.want.addr}`
+    const poolRound = !poolSelect[`${poolName}-1`]
+    const newRound = [poolRound ? 0 : round[0], poolRound]
     if (signer) {
       ;(async () => {
         setLoading(true)
         const controller = CT(signer)
-        const poolName = `${pool.bond.addr}-${pool.want.addr}`
-        const poolRound = !poolSelect[`${poolName}-1`]
         const newData = await controller.fetch_state(pool)
         setLiteState({
           controller,
           data: newData,
-          round: [poolRound ? 0 : round[0], poolRound],
+          round: newRound,
         })
         setLoading(false)
       })()
     } else {
-      if (data !== data_zero) setLiteState({ data: data_zero, controller: null, round: [0, true] })
+      if (data !== data_zero || round[1] !== poolRound)
+        setLiteState({
+          controller: null,
+          data: data_zero,
+          round: newRound,
+        })
     }
   }, [signer, pool])
 

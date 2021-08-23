@@ -10,7 +10,7 @@ import DynamicFont from 'react-dynamic-font'
 const useStyles = makeStyles((theme) => ({
   root: {
     '&>div:first-child': {
-      margin: '10px 0',
+      margin: '5px 0',
       height: '25px',
       display: 'flex',
       alignItems: 'center',
@@ -51,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
     margin: '5px',
   },
 }))
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 
 export default function AmountShow({ state: { state, token }, title, style }) {
   const classes = useStyles()
@@ -70,11 +71,11 @@ export default function AmountShow({ state: { state, token }, title, style }) {
 
       <div className={classes.AmountShow} style={style}>
         <div>
-          <DynamicFont content={parseFloat(ethers.utils.formatEther(state.output[title])).toFixed(3)} />
+          <DynamicFont content={parseFloat(format(state.output[title], token.decimals)).toFixed(3)} />
         </div>
         <span>{token.symbol}</span>
         <span className={classes.dollar}>
-          ~${(Price[token.addr] * ethers.utils.formatEther(state.output[title])).toFixed(3)}
+          ~${(Price[token.addr] * format(state.output[title], token.decimals)).toFixed(3)}
         </span>
       </div>
     </div>

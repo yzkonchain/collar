@@ -108,10 +108,10 @@ export default function Navigator() {
           <List style={{ padding: 0 }}>
             <MyListItem onClick={() => changePage('lite')} item="Lite" icon={LiteIcon} cur={curpage} />
             <MyListItem onClick={() => changePage('mypage')} item="MyPage" icon={MypageIcon} cur={curpage} />
-            <MyListItem onClick={() => changePage('faucet')} item="Faucet" icon={LiteIcon} cur={curpage} />
+            <MyListItem onClick={() => changePage('faucet')} item="Faucet" icon={ProIcon} cur={curpage} />
             <MyListItem onClick={() => changePage('term')} item="Term" icon={TermIcon} cur={curpage} />
             <MyListItem onClick={() => changePage('pro')} item="Pro" icon={ProIcon} cur={curpage} />
-            <MyListItemUrl url="https://collar.org" item="Home" icon={LiteIcon} />
+            <MyListItemUrl url="https://collar.org" item="Home" icon={ProIcon} />
           </List>
         </Box>
       </Drawer>

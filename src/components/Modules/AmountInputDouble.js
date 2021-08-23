@@ -74,13 +74,14 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '12px',
   },
 }))
+const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 
 const MyTabs = withStyles({
   root: {
     minHeight: '0',
   },
   flexContainer: {
-    margin: '10px 0',
+    margin: '5px 0',
     height: '25px',
     '&>button': {
       minHeight: '0',
@@ -129,7 +130,7 @@ const MyTabs = withStyles({
   )
 })
 
-const MyInput = ({ state, setState, title, max, maxCondition, token, style }) => {
+const MyInput = ({ state, setState, title, max, if_max, token, style }) => {
   const [fontSize, setFontSize] = useState(35)
   const classes = useStyles({ fontSize })
   const inputRef = useRef()
@@ -178,11 +179,11 @@ const MyInput = ({ state, setState, title, max, maxCondition, token, style }) =>
                   setState({
                     I: {
                       ...state.I,
-                      [title]: `${ethers.utils.formatEther(max)}`,
+                      [title]: `${format(max, token.decimals)}`,
                     },
                   })
                 }
-                disabled={!maxCondition()}
+                disabled={!if_max}
               >
                 MAX
                 <span>balance</span>
@@ -199,7 +200,7 @@ const MyInput = ({ state, setState, title, max, maxCondition, token, style }) =>
 
 export default function AmountInputDouble({ State, title, style }) {
   const [tabs, setTabs] = useState(0)
-  const { state, setState, token, max, maxCondition } = State
+  const { state, setState, token, max, if_max } = State
   return useMemo(
     () => (
       <div>
@@ -208,7 +209,7 @@ export default function AmountInputDouble({ State, title, style }) {
           {...{
             title: title[tabs],
             token: token[tabs],
-            maxCondition: maxCondition[tabs],
+            if_max: if_max[tabs],
             max: max[tabs],
             tabs,
             state,

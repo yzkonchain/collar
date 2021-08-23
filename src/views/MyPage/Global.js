@@ -49,7 +49,12 @@ const useStyles = makeStyles({
       },
     },
     '&>div:last-child': {
-      fontSize: '30px',
+      [STYLE.MOBILE]: {
+        fontSize: '25px',
+      },
+      [STYLE.PC]: {
+        fontSize: '40px',
+      },
     },
   },
   globalValue: {

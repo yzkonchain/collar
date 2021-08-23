@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useEffect, useMemo, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { context, liteContext, pools, poolSelect } from '@/config'
+import { context, liteContext, pools, poolSelect, STYLE } from '@/config'
 import { contract } from '@/hooks'
 
 import Borrow from './Borrow'
@@ -43,12 +43,10 @@ const useStyles = makeStyles((theme) => ({
         height: '20px',
         width: 'calc(100% - 80px)',
       },
-      //Mobile
-      '@media screen and (max-width:960px)': {
+      [STYLE.MOBILE]: {
         width: 'calc(100% - 40px)',
       },
-      //PC
-      '@media screen and (min-width:960px)': {
+      [STYLE.PC]: {
         width: '900px',
         '&:nth-child(2)': {
           width: '880px',
@@ -107,7 +105,7 @@ const useStylesChild = makeStyles((theme) => ({
           marginBottom: '15px',
         },
       },
-      '@media screen and (min-width:960px)': {
+      [STYLE.PC]: {
         '&:first-child': {
           flexDirection: 'row',
           justifyContent: 'space-between',

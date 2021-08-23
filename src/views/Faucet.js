@@ -1,123 +1,131 @@
 import { ethers } from 'ethers'
 import { contract } from '@/hooks'
-import { context } from '@/config'
+import { context, tokenList, STYLE } from '@/config'
 import { useState, useContext, useRef } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { TextField, Button } from '@material-ui/core'
 import { ButtonGroup, Paper, Popper, MenuItem, MenuList, ClickAwayListener } from '@material-ui/core'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
+import { Loading } from '@/components/Modules'
 
 const useStyles = makeStyles({
   root: {
-    height: 'calc(90vh - 100px)',
+    height: 'calc(100vh - 76px)',
+    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     color: 'white',
-    margin: '10px',
+    padding: '10px',
     fontFamily: 'Gillsans',
-    '&>div': {
-      margin: '10px',
+  },
+  title: {
+    margin: '-100px 0 10px',
+    [STYLE.PC]: {
+      fontSize: '50px',
+    },
+    [STYLE.MOBILE]: {
+      fontSize: '40px',
+    },
+  },
+  describe: {
+    display: 'flex',
+    fontSize: '18px',
+    margin: '5px',
+    [STYLE.MOBILE]: {
+      flexDirection: 'column',
+      alignItems: 'center',
     },
   },
   input: {
     backgroundColor: 'white',
-    marginTop: '30px !important',
+    margin: '30px 0',
     width: '600px',
-    '@media screen and (max-width:960px)': {
+    [STYLE.MOBILE]: {
       width: '80vw',
     },
   },
 })
 
-const addr = {
-  usdt: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
-  usdc: '0x67C9a0830d922C80A96408EEdF606c528836880C',
-}
-
-const options = ['Create a merge commit', 'Squash and merge', 'Rebase and merge']
+const tokens = Object.keys(tokenList)
+  .filter((addr) => ['COLLAR', 'CLPT', 'CALL', 'COLL'].indexOf(tokenList[addr].symbol) === -1)
+  .map((addr) => tokenList[addr])
 
 export default function Faucet() {
   const classes = useStyles()
-  const { state } = useContext(context)
   const CT = contract()
+  const { state } = useContext(context)
+
   const [amount, setAmount] = useState('')
-  const sendMe = async (token) => {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState(tokens[0])
+  const [loading, setLoading] = useState(false)
+  const anchorRef = useRef(null)
+
+  const sendMe = async () => {
     if (state.signer) {
       const ct = CT(state.signer)
       const value = ethers.utils.parseEther(String(amount || 0))
+      setLoading(true)
       if (value.eq('0')) ct.notify('faucet', 'empty')
-      else if (await ct.faucet(addr[token], value)) setAmount('')
+      else if (await ct.faucet(selected.addr, value)) setAmount('')
     } else CT()
+    setLoading(false)
   }
-
-  const anchorRef = useRef(null)
-  const [open, setOpen] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(1)
-  const handleClick = () => console.log(selectedIndex)
 
   return (
     <div className={classes.root}>
-      <div style={{ fontSize: '40px' }}>Collar Faucet</div>
-      <div style={{ fontSize: '20px', maxWidth: 'calc(80vw)' }}>
-        Claim your test token for Collar open alpha product
+      <div className={classes.title}>Collar Faucet</div>
+      <div className={classes.describe}>
+        <span>Claim your test token</span>
+        <span>for Collar open alpha product</span>
       </div>
       <TextField
         className={classes.input}
+        value={amount}
         label={amount === '' ? 'The amount of ETH needed.' : `You will get ${(133337 * amount || 0) + 13.37} testcoin`}
         type="number"
         variant="filled"
-        value={amount}
         onChange={({ target: { value: v } }) => setAmount(v)}
       />
-      <div style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          disableElevation
-          style={{ width: '200px', maxWidth: '40%', margin: '10px' }}
-          onClick={() => sendMe('usdt')}
-        >
-          Send me USDT
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          disableElevation
-          style={{ width: '200px', maxWidth: '40%', margin: '10px' }}
-          onClick={() => sendMe('usdc')}
-        >
-          Send me USDC
-        </Button>
-      </div>
 
       <ButtonGroup variant="contained" color="primary" ref={anchorRef}>
-        <Button onClick={handleClick}>{options[selectedIndex]}</Button>
+        <Button onClick={sendMe} style={{ padding: '0 50px' }}>
+          SEND ME {selected.symbol}
+        </Button>
         <Button onClick={() => setOpen((v) => !v)}>
           <ArrowDropDownIcon />
         </Button>
       </ButtonGroup>
-      <Popper open={open} anchorEl={anchorRef.current} transition disablePortal>
+      <Popper
+        open={open}
+        anchorEl={anchorRef.current}
+        style={{ margin: '10px 0', zIndex: '1' }}
+        transition
+        disablePortal
+      >
         <Paper>
           <ClickAwayListener onClickAway={() => setOpen(false)}>
             <MenuList>
-              {options.map((option, index) => (
+              {tokens.map((token) => (
                 <MenuItem
-                  key={option}
-                  selected={index === selectedIndex}
+                  key={token.addr}
+                  selected={token === selected}
                   onClick={() => {
-                    setSelectedIndex(index)
+                    setSelected(token)
                     setOpen(false)
                   }}
                 >
-                  {option}
+                  <img alt="" src={token.icon} style={{ width: '20px', marginLeft: '10px' }} />
+                  <span style={{ fontFamily: 'Gillsans', margin: '0 20px' }}>{token.symbol}</span>
                 </MenuItem>
               ))}
             </MenuList>
           </ClickAwayListener>
         </Paper>
       </Popper>
+      {loading && <Loading />}
     </div>
   )
 }

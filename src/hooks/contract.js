@@ -55,8 +55,8 @@ const calc_slip = ({ swap: { sx, sy, sk } }, [bond, want], { swap_sqp, expiry_ti
   (expiry_time * 1000 - new Date())
 
 const fetch_state = async (pool, signer) => {
-  const init = { balance: {}, allowance: {}, earned: {}, swap: {} }
   const me = await signer.getAddress()
+  const init = { balance: {}, allowance: {}, earned: {}, swap: {} }
   const collar = controller(poolConfig.collar, signer, abiToken)
   const bond = controller(pool.bond.addr, signer, abiToken)
   const want = controller(pool.want.addr, signer, abiToken)
@@ -299,6 +299,12 @@ const callbackInfo = (method, status) => {
             title: 'Fail.',
             message: 'The amount of ETH is necessary.',
           }
+        case 'insufficient':
+          return {
+            type: 'failed',
+            title: 'Fail.',
+            message: `You dont't have enough ETH to exchange.`,
+          }
         default:
           return failed
       }
@@ -334,11 +340,11 @@ export default function contract() {
           switch (err.code) {
             case 4001:
               notify('cancel')
-              return false
+              break
             default:
-              console.log(err)
-              return false
+              break
           }
+          return false
         }
       default:
         return console.log
@@ -346,7 +352,7 @@ export default function contract() {
   }
 
   return (signer, command) => {
-    if (signer)
+    if (signer) {
       return {
         calc_apy,
         calc_slip,
@@ -477,9 +483,19 @@ export default function contract() {
           })
           return false
         },
-        faucet: async (to, value) => {
-          return await signer.sendTransaction({ to, value }).then(callback(true)('withdraw')).catch(callback(false))
-        },
+        faucet: async (to, value) =>
+          await signer
+            .getBalance()
+            .then((balance) => {
+              if (balance.gt(value)) {
+                return signer.sendTransaction({ to, value })
+              } else {
+                notify('faucet', 'insufficient')
+                throw new Error('insufficient')
+              }
+            })
+            .then(callback(true)('faucet'))
+            .catch(callback(false)),
         error: () => {
           enqueueSnackbar({
             type: 'failed',
@@ -488,7 +504,7 @@ export default function contract() {
           })
         },
       }
-    else {
+    } else {
       if (command)
         return {
           notify,

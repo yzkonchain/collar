@@ -13,7 +13,7 @@ const INIT = {
   output: {
     clpt: ZERO,
   },
-  tip: { share: '0.000', poolBalance: '0.00', slip: '0.00' },
+  tip: { share: 0, poolBalance: 0, slip: 0 },
   I: { want: '', coll: '' },
   old: { want: '', coll: '' },
 }
@@ -40,8 +40,8 @@ export default function Repay() {
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
         const clpt = await controller.ct(pool.addr).get_dk(coll, want)
         const tip = {
+          share: ((format(clpt) / format(data.swap.sk)) * 100).toPrecision(3),
           poolBalance: (format(data.swap.sx) / format(data.swap.sy)).toPrecision(3),
-          share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
           slip: controller.calc_slip(data, [coll, want], pool).toPrecision(3),
         }
         setState({ input: { want, coll }, output: { clpt }, tip })

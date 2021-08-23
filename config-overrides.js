@@ -1,10 +1,3 @@
-// const { override, addWebpackAlias } = require('customize-cra')
-// module.exports = override(
-//   addWebpackAlias({
-//     "@": resolve("src"),
-//   })
-// );
-
 const { resolve } = require('path')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 // const CompressionPlugin = require('compression-webpack-plugin')

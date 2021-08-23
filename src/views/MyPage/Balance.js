@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { STYLE } from '@/config'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import DynamicFont from 'react-dynamic-font'
 
@@ -21,7 +22,7 @@ const useStyles = makeStyles({
           width: 'calc(50% - 10px)',
         },
       },
-      '@media screen and (max-width:960px)': {
+      [STYLE.MOBILE]: {
         flexDirection: 'column',
         '&>div': {
           width: '100%',

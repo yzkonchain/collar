@@ -1,7 +1,7 @@
 import { makeStyles } from '@material-ui/core/styles'
 import { useState } from 'react'
 import { iconInfo, GlobalIcon } from '@/assets/svg'
-import { textInfo } from '@/config'
+import { textInfo, STYLE } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
 import DynamicFont from 'react-dynamic-font'
 
@@ -27,10 +27,10 @@ const useStyles = makeStyles({
   },
   data: {
     display: 'flex',
-    '@media screen and (max-width:960px)': {
+    [STYLE.MOBILE]: {
       justifyContent: 'space-between',
     },
-    '@media screen and (min-width:960px)': {
+    [STYLE.PC]: {
       flexDirection: 'column',
     },
   },
@@ -54,19 +54,19 @@ const useStyles = makeStyles({
   },
   globalValue: {
     display: 'flex',
-    '@media screen and (max-width:960px)': {
+    [STYLE.MOBILE]: {
       width: '40%',
       flexDirection: 'column',
     },
-    '@media screen and (min-width:960px)': {
+    [STYLE.PC]: {
       justifyContent: 'space-between',
     },
   },
   globalValueInfo: {
-    '@media screen and (max-width:960px)': {
+    [STYLE.MOBILE]: {
       marginBottom: '10px',
     },
-    '@media screen and (min-width:960px)': {
+    [STYLE.PC]: {
       width: '48%',
     },
     '&>div:first-child span': {

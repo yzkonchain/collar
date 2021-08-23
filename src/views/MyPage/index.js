@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useMemo } from 'react'
-import { context, mypageDetail } from '@/config'
+import { context, mypageDetail, STYLE } from '@/config'
 import { makeStyles } from '@material-ui/core/styles'
 import { Price, contract } from '@/hooks'
 
@@ -18,13 +18,11 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     margin: 'auto',
-    //Mobile
-    '@media screen and (max-width:960px)': {
+    [STYLE.MOBILE]: {
       width: 'calc(100% - 40px)',
       padding: '0 20px',
     },
-    //PC
-    '@media screen and (min-width:960px)': {
+    [STYLE.PC]: {
       width: '900px',
     },
   },

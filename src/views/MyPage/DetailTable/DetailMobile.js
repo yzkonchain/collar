@@ -1,14 +1,15 @@
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { Table, TableBody, TableCell as OldTableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import { MyButtonWhite } from '@/components/Modules'
+import { STYLE } from '@/config'
 import { Price } from '@/hooks'
 
 const useStyles = makeStyles({
   root: {
-    '@media screen and (min-width:960px)': {
+    [STYLE.PC]: {
       display: 'none',
     },
-    '@media screen and (max-width:960px)': {
+    [STYLE.MOBILE]: {
       '&>div:first-child': {
         '& tr': {
           borderBottom: '#D8D8D8 1px solid',

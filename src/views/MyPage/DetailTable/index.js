@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
+import { STYLE } from '@/config'
 import DetailPC from './DetailPC'
 import DetailMobile from './DetailMobile'
 
@@ -36,10 +37,10 @@ const useStyles = makeStyles({
       alignItems: 'center',
       justifyContent: 'center',
     },
-    '@media screen and (max-width:960px)': {
+    [STYLE.MOBILE]: {
       flexDirection: 'column',
     },
-    '@media screen and (min-width:960px)': {
+    [STYLE.PC]: {
       justifyContent: 'space-between',
       alignItems: 'center',
     },

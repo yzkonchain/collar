@@ -9,6 +9,7 @@ const poolConfig = {
   chainid: 3,
   infuraid: '9180c5a422ac44f9b21ad7927b6b662c',
   collar: '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE',
+  gasAdjustment: 120,
 }
 
 tokenList = {

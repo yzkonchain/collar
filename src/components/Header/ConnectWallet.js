@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react'
-import { context } from '@/config'
 import { Button, LinearProgress, Box } from '@material-ui/core'
+import { context } from '@/config'
 
 export default function ConnectWallet({ click_address, click_connect }) {
   const {
@@ -24,6 +24,7 @@ export default function ConnectWallet({ click_address, click_connect }) {
     >
       <Box textOverflow="ellipsis" fontFamily="Monospace" fontWeight="fontWeightBold" overflow="hidden" maxWidth="25vw">
         {address}
+        {/* {`${address.slice(0, 7)}...`} */}
       </Box>
     </Button>
   ) : signer ? (

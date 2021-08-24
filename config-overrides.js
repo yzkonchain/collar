@@ -4,9 +4,18 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = function override(config, env) {
   config.resolve.alias['@'] = resolve('src')
-  //deploy
+
   config.devtool = false
   config.optimization.minimizer.push(new UglifyJsPlugin())
+  config.externals = {
+    web3: 'Web3',
+    ethers: 'ethers',
+    react: 'React',
+    'react-dom': 'ReactDOM',
+    'react-router-dom': 'ReactRouterDOM',
+    // '@material-ui/core': 'MaterialUI',
+  }
+
   // config.plugins.push(
   //   new CompressionPlugin({
   //     filename: '[path].gz[query]',
@@ -29,9 +38,5 @@ module.exports = function override(config, env) {
   //     },
   //   },
   // })
-  // config.externals = {
-  //   react: 'React',
-  //   'react-dom': 'ReactDOM',
-  // }
   return config
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core'
 import { FloatMessage2 } from '.'
 import { iconInfo } from '@/assets/svg'
 

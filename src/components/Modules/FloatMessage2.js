@@ -1,5 +1,4 @@
-import { makeStyles } from '@material-ui/core/styles'
-import { Popover } from '@material-ui/core'
+import { makeStyles, Popover } from '@material-ui/core'
 
 const useStyles = makeStyles((theme) => ({
   popover: {

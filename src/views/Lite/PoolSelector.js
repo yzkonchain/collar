@@ -1,11 +1,9 @@
 import { useContext, useMemo } from 'react'
+import { makeStyles, Icon, FormControl, Select, MenuItem } from '@material-ui/core'
 import { liteContext, bondList, wantList, poolSelect } from '@/config'
-import { makeStyles } from '@material-ui/core/styles'
-import { FormControl, Select, MenuItem } from '@material-ui/core'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   root: {},
   formControlTitle: {
     fontFamily: 'Helvetica',
@@ -43,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-}))
+})
 
 export default function PoolSelector() {
   const classes = useStyles()
@@ -69,7 +67,6 @@ export default function PoolSelector() {
               value={bond.addr}
               onChange={({ target: { value } }) => setPool(value, wantList[value][0].addr)}
               className={classes.select}
-              IconComponent={ExpandMoreIcon}
             >
               {bondList.map(({ addr, icon, symbol }) => (
                 <MenuItem value={addr} key={addr}>
@@ -87,7 +84,6 @@ export default function PoolSelector() {
               value={want.addr}
               onChange={({ target: { value } }) => setPool(bond.addr, value)}
               className={classes.select}
-              IconComponent={ExpandMoreIcon}
             >
               {wantList[bond.addr].map(({ addr, icon, symbol }) => (
                 <MenuItem value={addr} key={addr}>

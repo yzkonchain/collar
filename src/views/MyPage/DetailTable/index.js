@@ -1,8 +1,10 @@
-import { useMemo } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import { STYLE } from '@/config'
+import { useMemo, useState, useCallback, useContext } from 'react'
+import { makeStyles } from '@material-ui/core'
+import { STYLE, context, mypageContext } from '@/config'
+
 import DetailPC from './DetailPC'
 import DetailMobile from './DetailMobile'
+import Confirm from './Confirm'
 
 const useStyles = makeStyles({
   root: {
@@ -47,9 +49,33 @@ const useStyles = makeStyles({
   },
 })
 
-export default function DetailTable(props) {
+const Detail = (props) => (
+  <div>
+    <DetailPC {...props} />
+    <DetailMobile {...props} />
+  </div>
+)
+
+export default function DetailTable({ pools }) {
+  const {
+    state: { signer, controller },
+  } = useContext(context)
+  const {
+    mypageState: { confirm, type, pool, checked },
+    setMypageState: set,
+  } = useContext(mypageContext)
   const classes = useStyles()
-  const { pools, handleClick } = props
+
+  const handleClick = async (type, pool) => {
+    set({ loading: true })
+    if (!signer) controller.notify('noaccount')
+    else {
+      const checked = await controller.mypage_check(type, pool)
+      if (checked) set({ confirm: true, type, pool, checked })
+    }
+    set({ loading: false })
+  }
+
   return useMemo(
     () => (
       <div className={classes.root}>
@@ -69,13 +95,21 @@ export default function DetailTable(props) {
                   <span>Expiry: {new Date(pool.expiry_time * 1000).toLocaleString()}</span>
                 </div>
               </div>
-              <DetailPC {...{ pool, val, handleClick }} />
-              <DetailMobile {...{ pool, val, handleClick }} />
+              <Detail {...{ pool, val, handleClick }} />
             </div>
           )
         })}
+        <Confirm
+          open={confirm}
+          {...{ type, pool, pools, checked }}
+          onClose={() => set({ confirm: false })}
+          handleClick={async () => {
+            set({ confirm: false })
+            ;(await controller[type].call(controller, pool)) && set({ update: {} })
+          }}
+        />
       </div>
     ),
-    [props],
+    [pools, confirm, type, pool],
   )
 }

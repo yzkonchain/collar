@@ -1,12 +1,12 @@
-import { useContext, useEffect, useState, useMemo } from 'react'
-import { context, mypageDetail, STYLE } from '@/config'
-import { makeStyles } from '@material-ui/core/styles'
-import { Price, contract } from '@/hooks'
+import { useContext, useEffect, useState, useMemo, useReducer } from 'react'
+import { makeStyles } from '@material-ui/core'
+import { context, mypageDetail, mypageContext, STYLE } from '@/config'
+import { Loading } from '@/components/Modules'
+import { Price } from '@/hooks'
 
 import Global from './Global'
 import Balance from './Balance'
 import DetailTable from './DetailTable/index'
-import { Loading } from '@/components/Modules'
 
 const useStyles = makeStyles({
   root: {
@@ -38,61 +38,66 @@ const INIT = {
     receivables: 0,
     rewards: 0,
   },
-  timer: new Date().getTime(),
 }
 
 export default function MyPage() {
   const classes = useStyles()
   const {
-    state: { signer },
+    state: { signer, controller },
   } = useContext(context)
-  const controller = contract()(signer, true)
-  const [loading, setLoading] = useState(false)
-  const [update, setUpdate] = useState({})
-  const [count, setCount] = useState(INIT)
-  const { pools, total } = count
 
-  const handleClick = async (type, pool) => {
-    if (signer && (await controller[type](pool))) setUpdate({})
-  }
+  const [mypageState, setMypageState] = useReducer((o, n) => ({ ...o, ...n }), {
+    loading: false,
+    confirm: false,
+    type: '',
+    pool: { want: {}, bond: {}, coll: {}, call: {} },
+    checked: {},
+    update: {},
+  })
+  const [data, setData] = useState(INIT)
+  const { pools, total } = data
+  const { loading, update } = mypageState
 
-  useEffect(() => {
-    ;(async () => {
-      setLoading(true)
-      const timer = new Date().getTime()
-      const pools = signer ? await controller.mypage_data() : await controller.mypage_data_noaccount()
-      const total = { ...INIT.total }
-      pools.forEach(({ pool, coll_total, want_total, bond_total, call, receivables, earned }) => {
-        const getPrice = (token) => Price[pool[token].addr]
-        total.totalValueLocked +=
-          coll_total * getPrice('coll') + want_total * getPrice('want') + bond_total * getPrice('bond')
-        total.totalBorrowed += coll_total * getPrice('coll')
-        total.totalCollateral += bond_total * getPrice('bond')
-        total.outstandingDebt += call * getPrice('want')
-        total.depostBalance += call * getPrice('bond')
-        total.receivables += receivables
-        total.rewards += earned * Price['COLLAR']
-      })
-      setCount((count) => {
-        if (timer > count.timer) {
-          setLoading(false)
-          return { pools, total, timer: new Date().getTime() }
-        } else return count
-      })
-    })()
-  }, [signer, update])
+  useEffect(
+    () =>
+      (async () => {
+        setMypageState({ loading: true })
+        const pools = signer ? await controller.mypage_data() : await controller.mypage_data_noaccount()
+        const total = { ...INIT.total }
+        pools.forEach(({ pool, coll_total, want_total, bond_total, call, receivables, earned }) => {
+          const getPrice = (token) => Price[pool[token].addr]
+          total.totalValueLocked +=
+            coll_total * getPrice('coll') + want_total * getPrice('want') + bond_total * getPrice('bond')
+          total.totalBorrowed += coll_total * getPrice('coll')
+          total.totalCollateral += bond_total * getPrice('bond')
+          total.outstandingDebt += call * getPrice('want')
+          total.depostBalance += call * getPrice('bond')
+          total.receivables += receivables
+          total.rewards += earned * Price['COLLAR']
+        })
+        setData((_data) =>
+          signer || INIT === _data || (INIT !== data && total.outstandingDebt + total.receivables == 0)
+            ? { pools, total }
+            : _data,
+        )
+        setMypageState({ loading: false })
+      })(),
+    [signer, update],
+  )
 
   return useMemo(
     () => (
-      <div className={classes.root}>
-        <div className={classes.mypage}>
-          <Global {...total} />
-          <Balance {...total} />
-          <DetailTable {...{ pools, handleClick }} />
+      <mypageContext.Provider value={{ mypageState, setMypageState, data }}>
+        <div className={classes.root}>
+          <div className={classes.mypage}>
+            <Global {...total} />
+            <Balance {...total} />
+            <DetailTable {...{ pools }} />
+          </div>
+          <Loading open={loading} />
         </div>
-        {loading && <Loading />}
-      </div>
+      </mypageContext.Provider>
     ),
-    [count, loading],
+    [data, mypageState],
   )
 }

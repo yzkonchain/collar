@@ -1,11 +1,18 @@
 import { ethers } from 'ethers'
-import { contract } from '@/hooks'
-import { context, tokenList, STYLE } from '@/config'
 import { useState, useContext, useRef } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import { TextField, Button } from '@material-ui/core'
-import { ButtonGroup, Paper, Popper, MenuItem, MenuList, ClickAwayListener } from '@material-ui/core'
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
+import {
+  makeStyles,
+  Icon,
+  TextField,
+  Button,
+  ButtonGroup,
+  Paper,
+  Popper,
+  MenuItem,
+  MenuList,
+  ClickAwayListener,
+} from '@material-ui/core'
+import { context, tokenList, STYLE } from '@/config'
 import { Loading } from '@/components/Modules'
 
 const useStyles = makeStyles({
@@ -54,8 +61,9 @@ const tokens = Object.keys(tokenList)
 
 export default function Faucet() {
   const classes = useStyles()
-  const CT = contract()
-  const { state } = useContext(context)
+  const {
+    state: { signer, controller },
+  } = useContext(context)
 
   const [amount, setAmount] = useState('')
   const [open, setOpen] = useState(false)
@@ -64,13 +72,12 @@ export default function Faucet() {
   const anchorRef = useRef(null)
 
   const sendMe = async () => {
-    if (state.signer) {
-      const ct = CT(state.signer)
+    if (signer) {
       const value = ethers.utils.parseEther(String(amount || 0))
       setLoading(true)
-      if (value.eq('0')) ct.notify('faucet', 'empty')
-      else if (await ct.faucet(selected.addr, value)) setAmount('')
-    } else CT()
+      if (value.eq('0')) controller.notify('faucet', 'empty')
+      else if (await controller.faucet(selected.addr, value)) setAmount('')
+    } else controller.notify('noaccount')
     setLoading(false)
   }
 
@@ -99,7 +106,7 @@ export default function Faucet() {
           SEND ME {selected.symbol}
         </Button>
         <Button onClick={() => setOpen((v) => !v)}>
-          <ArrowDropDownIcon />
+          <Icon>arrow_drop_down</Icon>
         </Button>
       </ButtonGroup>
       <Popper
@@ -129,7 +136,7 @@ export default function Faucet() {
           </ClickAwayListener>
         </Paper>
       </Popper>
-      {loading && <Loading />}
+      <Loading open={loading} />
     </div>
   )
 }

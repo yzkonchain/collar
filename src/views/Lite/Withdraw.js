@@ -1,8 +1,8 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
+import { makeStyles } from '@material-ui/core'
 import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
-import { makeStyles } from '@material-ui/core/styles'
 import { ArrowForwardIosIcon } from '@/assets/svg'
 
 const ZERO = ethers.constants.Zero
@@ -23,10 +23,10 @@ const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Withdraw() {
   const {
-    state: { signer },
+    state: { signer, controller },
   } = useContext(context)
   const {
-    liteState: { bond, want, coll, pool, data, controller },
+    liteState: { bond, want, coll, pool, data },
     classesChild: classes,
     setLiteState,
     handleClick,

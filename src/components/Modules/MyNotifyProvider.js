@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
+import { makeStyles, withStyles } from '@material-ui/core'
 import { SnackbarContent, SnackbarProvider } from 'notistack'
-import { makeStyles, withStyles } from '@material-ui/core/styles'
 import { SuccessIcon, FailedIcon, ConnectErrorIcon, NewroundLeftIcon, NewroundRightIcon, AnyIcon } from '@/assets/svg'
 
 const useStyles = makeStyles((theme) => ({
@@ -17,8 +17,9 @@ const useStyles = makeStyles((theme) => ({
     padding: '15px',
     border: '#979797 1px solid',
     backgroundColor: 'rgba(255,255,255,0.9)',
-    boxShadow:
-      '0px 5px 5px -3px rgb(38 111 239 / 10%), 0px 8px 10px 1px rgb(38 111 239 / 8%), 0px 3px 14px 2px rgb(38 111 239 / 10%)',
+    boxShadow: `0px 5px 5px -3px rgb(38 111 239 / 10%), 
+      0px 8px 10px 1px rgb(38 111 239 / 8%), 
+      0px 3px 14px 2px rgb(38 111 239 / 10%)`,
     '& img': {
       marginRight: '15px',
     },

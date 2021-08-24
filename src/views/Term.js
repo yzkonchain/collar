@@ -1,11 +1,9 @@
 import { ethers } from 'ethers'
 import { useContext, useRef } from 'react'
-import { context } from '@/config'
-
+import { makeStyles, Typography, Box, Fab } from '@material-ui/core'
 import { ReactTerminal } from 'react-terminal'
 import { TerminalContextProvider } from 'react-terminal'
-import { Typography, Box, Fab } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
+import { context } from '@/config'
 
 const ABI = {
   ERC20: [

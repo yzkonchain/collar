@@ -21,10 +21,10 @@ const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Borrow() {
   const {
-    state: { signer },
+    state: { signer, controller },
   } = useContext(context)
   const {
-    liteState: { pool, bond, want, data, controller },
+    liteState: { pool, bond, want, data },
     classesChild: classes,
     setLiteState,
     handleClick,

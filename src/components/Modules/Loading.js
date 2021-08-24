@@ -1,26 +1,25 @@
-import { CircularProgress } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles, CircularProgress, Dialog } from '@material-ui/core'
 
 const useStyles = makeStyles(() => ({
   root: {
-    zIndex: '9997 !important',
-    position: 'absolute !important',
-    top: '0 !important',
-    width: '100% !important',
-    height: '100% !important',
-    textAlign: 'center !important',
-    backgroundColor: 'rgba(0,0,0,0.2) !important',
-    '&>div': {
-      marginTop: '40vh !important',
+    '&>div:first-child': {
+      backgroundColor: 'rgba(30,44,87,0.69)',
     },
   },
+  wrap: {
+    border: 'none',
+    background: 'none',
+    boxShadow: 'none',
+    padding: '100px',
+  },
+  content: {},
 }))
 
-export default function Loading() {
+export default function Loading({ open }) {
   const classes = useStyles()
   return (
-    <div className={classes.root}>
+    <Dialog open={open} className={classes.root} classes={{ paper: classes.wrap }}>
       <CircularProgress color="primary" size={80} />
-    </div>
+    </Dialog>
   )
 }

@@ -1,9 +1,9 @@
-import { makeStyles } from '@material-ui/core/styles'
 import { useState } from 'react'
-import { iconInfo, GlobalIcon } from '@/assets/svg'
+import { makeStyles } from '@material-ui/core'
+import DynamicFont from 'react-dynamic-font'
 import { textInfo, STYLE } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
-import DynamicFont from 'react-dynamic-font'
+import { iconInfo, GlobalIcon } from '@/assets/svg'
 
 const useStyles = makeStyles({
   root: {

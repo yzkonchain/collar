@@ -1,8 +1,7 @@
 import { ethers } from 'ethers'
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
+import { TextField, makeStyles } from '@material-ui/core'
 import { iconInfo } from '@/assets/svg'
-import { TextField } from '@material-ui/core'
 import { FloatMessage2 } from '@/components/Modules'
 import { textInfo, tokenList } from '@/config'
 import { Price } from '@/hooks'
@@ -38,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
       fontFamily: 'Gillsans',
       padding: '0',
       margin: '0 5px 0 0',
-      fontSize: (props) => `${props.fontSize}px`,
+      fontSize: ({ fontSize }) => `${fontSize}px`,
       fontWeight: 'bold',
       border: 'none',
       width: '100%',
@@ -93,42 +92,43 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
+const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function AmountInput({ State, title, style }) {
+  const { enqueueSnackbar } = useSnackbar()
   const [fontSize, setFontSize] = useState(35)
   const [anchorEl, setAnchorEl] = useState(null)
+  const { state, setState, token, max, if_max } = State
   const classes = useStyles({ fontSize })
   const inputRef = useRef()
-  const { enqueueSnackbar } = useSnackbar()
-  const { state, setState, token, max, if_max } = State
+
   const changInput = useCallback(
     ({ target: { value }, nativeEvent: { data } }) => {
-      const old = state.I[title]
-      if (max.lt(ethers.utils.parseEther(value || '0'))) {
-        enqueueSnackbar({ type: 'failed', title: 'Fail.', message: 'Maximum range exceeded.' })
-        return
-      }
-      if (
-        ((value.length === 1 || old.indexOf('.') !== -1) && data === '.') ||
-        (old === '0' && ['.', null].indexOf(data) === -1)
-      )
-        return
-      if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', null].indexOf(data) > -1)
+      if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', null].indexOf(data) > -1) {
+        const old = state.I[title]
+        if (
+          (data === '.' && (value.length === 1 || old.indexOf('.') !== -1)) ||
+          (old === '0' && ['.', null].indexOf(data) === -1) ||
+          (value.indexOf('.') == -1 ? 0 : value.length - value.indexOf('.') - 1) > token.decimals
+        )
+          return
+        if (max.lt(parse(value))) {
+          enqueueSnackbar({ type: 'failed', title: 'Fail.', message: 'Maximum range exceeded.' })
+          return
+        }
         setState({ I: { ...state.I, [title]: value }, old: { ...state.old, [title]: old } })
+      }
     },
     [state.I, max],
   )
+
   useEffect(() => {
-    const e = inputRef.current
-    const [newV, oldV] = [state.I[title], state.old[title]]
-    if (newV.length > (oldV || '').length) {
-      if (e.offsetWidth == e.scrollWidth || fontSize < 8) return
-      setFontSize(fontSize * 0.8)
-    } else if (newV.length < (oldV || '').length) {
-      if (e.offsetWidth < e.scrollWidth || fontSize > 35) return
-      setFontSize(fontSize * 1.25)
-    }
+    const [_new, _old] = [state.I[title], state.old[title]]
+    const { offsetWidth: o, scrollWidth: s } = inputRef.current
+    if (_new.length > (_old || '').length && o != s && fontSize >= 8) setFontSize(fontSize * 0.91)
+    else if (_new.length < (_old || '').length && o >= s && fontSize < 35) setFontSize(fontSize * 1.1)
   }, [fontSize, state.I[title]])
+
   return useMemo(
     () => (
       <div className={classes.root}>

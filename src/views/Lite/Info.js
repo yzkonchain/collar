@@ -1,7 +1,8 @@
 import { ethers } from 'ethers'
 import { useContext, useEffect, useState, useMemo } from 'react'
+import { makeStyles } from '@material-ui/core'
 import { context, liteContext, poolList } from '@/config'
-import { makeStyles } from '@material-ui/core/styles'
+
 import { InfoCard1, InfoCard2, InfoCard3 } from '@/components/Modules'
 
 const useStyles = makeStyles((theme) => ({
@@ -25,16 +26,16 @@ const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 export default function Info() {
   const classes = useStyles()
   const {
-    state: { signer },
+    state: { signer, controller },
   } = useContext(context)
   const {
-    liteState: { forceUpdate, pool, bond, want, data, controller },
+    liteState: { forceUpdate, pool, bond, want, data },
     setLiteState,
   } = useContext(liteContext)
   const [update, setUpdate] = useState({})
   useEffect(() => {
     ;(async () => {
-      if (controller) setLiteState({ data: await controller.fetch_state(pool) })
+      if (signer) setLiteState({ data: await controller.fetch_state(pool) })
       setUpdate({})
     })()
   }, [forceUpdate])
@@ -64,7 +65,7 @@ export default function Info() {
 
           <InfoCard1
             token={'COLLAR'}
-            status={`${parseFloat(format(data.earned.collar)).toFixed(4)} EARNED`}
+            status={`${parseFloat(format(data.earned.collar)).toFixed(3)} EARNED`}
             amount={format(data.balance.collar)}
           />
         </div>

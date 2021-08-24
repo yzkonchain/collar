@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { useMemo, useState } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core'
 import { iconInfo } from '@/assets/svg'
 import { FloatMessage2 } from '@/components/Modules'
 import { textInfo, tokenList } from '@/config'
@@ -75,7 +75,11 @@ export default function AmountShow({ state: { state, token }, title, style }) {
         </div>
         <span>{token.symbol}</span>
         <span className={classes.dollar}>
-          ~${(Price[token.addr] * format(state.output[title], token.decimals)).toFixed(3)}
+          ~$
+          {(token.symbol == 'CLPT'
+            ? 1 * format(state.output.clpt)
+            : Price[token.addr] * format(state.output[title], token.decimals)
+          ).toFixed(3)}
         </span>
       </div>
     </div>

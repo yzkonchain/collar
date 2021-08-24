@@ -15,8 +15,10 @@ var poolConfig = {},
     want_total: 0,
     bond_total: 0,
     clpt: 0,
-    call: 0,
     coll: 0,
+    call: 0,
+    coll_total_supply: 0,
+    call_total_supply: 0,
     earned: 0,
     receivables: 0,
     shareOfPoll: 0,
@@ -63,5 +65,5 @@ export { default as abi } from './abi'
 export { default as textInfo } from './textInfo'
 export { default as signerNoAccount } from './signerNoAccount'
 export { STYLE } from './style'
-export { context, liteContext, proContext } from './store'
-export { poolConfig, pools, tokenList, poolList, bondList, wantList, poolSelect, mypageDetail }
+export { context, liteContext, mypageContext, proContext } from './store'
+export { poolConfig, pools, tokenList, poolList, bondList, wantList, poolSelect, mypageDetailInit, mypageDetail }

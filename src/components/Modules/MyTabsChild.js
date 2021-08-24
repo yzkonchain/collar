@@ -1,10 +1,18 @@
 import { useState } from 'react'
-import { makeStyles, withStyles } from '@material-ui/core/styles'
-import { Accordion, AccordionSummary, AccordionDetails, Tabs, Tab, Switch } from '@material-ui/core'
-
+import {
+  makeStyles,
+  withStyles,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Tabs,
+  Tab,
+  Switch,
+} from '@material-ui/core'
+import { textInfo, STYLE } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
 import { TabsArrow, iconInfo } from '@/assets/svg'
-import { textInfo } from '@/config'
+
 const timer = (time) => {
   const dtime = new Date(time) - new Date()
   return [
@@ -13,11 +21,35 @@ const timer = (time) => {
     Math.floor(((dtime % 86400000) % 3600000) / 60000),
   ]
 }
-const Timer = ({ timer: [d, h, m] }) => (
-  <div
-    style={{ position: 'absolute', right: 0, top: '-16px', width: 'max-content', fontSize: '10px', color: 'grey' }}
-  >{`${d}days ${h}hours ${m}mints`}</div>
-)
+const Timer = withStyles({
+  root: {
+    [STYLE.MOBILE]: {
+      display: 'none',
+    },
+    [STYLE.PC]: {
+      width: 'max-content',
+      fontSize: '20px',
+      fontFamily: 'Gillsans',
+      '&>span:nth-child(odd)': {
+        fontSize: '20px',
+        marginLeft: '10px',
+      },
+      '&>span:nth-child(even)': {
+        fontSize: '12px',
+      },
+    },
+  },
+})(({ classes, timer: [d, h, m] }) => (
+  <div className={classes.root}>
+    Expiry:
+    <span>{d}</span>
+    <span> d </span>
+    <span>{h}</span>
+    <span> h </span>
+    <span>{m}</span>
+    <span> m </span>
+  </div>
+))
 
 const MyAccordion = withStyles({
   root: {
@@ -103,16 +135,18 @@ const MyTabs = withStyles({
       right: 0,
     },
     switch: {
-      transform: 'translateY(-8px)',
+      transform: 'translate(8px,-8px)',
     },
     switchInfo: {
-      color: '#C4C4C4',
       transform: 'translateY(-8px)',
       display: 'flex',
       alignItems: 'center',
       '& img': {
         width: '14px',
         marginLeft: '4px',
+      },
+      '&>span': {
+        fontSize: '14px',
       },
     },
     expanded: {
@@ -132,14 +166,16 @@ const MyTabs = withStyles({
   return (
     <div className={classes.root}>
       <div className={classes.button}>
+        <Timer timer={count_time} />
         <Switch
           className={classes.switch}
+          color="primary"
           checked={!!round[0]}
           onChange={() => setRound([round[0] ? 0 : 1, round[1]])}
           disabled={round[1]}
         />
         <div className={classes.switchInfo}>
-          <span>NewRound</span>
+          <span style={{ color: round[1] ? '#C4C4C4' : '#000' }}>NewRound</span>
           <img
             onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
             onMouseLeave={() => setAnchorEl(null)}
@@ -148,7 +184,6 @@ const MyTabs = withStyles({
           />
           <FloatMessage2 anchorEl={anchorEl} info={textInfo['round']} />
         </div>
-        <Timer timer={count_time} />
       </div>
       <Tabs {...props} variant="standard">
         {labels[tabs].map((v, k) => (

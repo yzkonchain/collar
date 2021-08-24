@@ -1,8 +1,7 @@
 import { ethers } from 'ethers'
 import { useContext, useReducer, useEffect, useMemo, useState } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core'
 import { context, liteContext, pools, poolSelect, STYLE } from '@/config'
-import { contract } from '@/hooks'
 
 import Borrow from './Borrow'
 import Repay from './Repay'
@@ -153,9 +152,8 @@ const data_zero = {
 export default function Lite() {
   const classes = useStyles()
   const classesChild = useStylesChild()
-  const CT = contract()
   const {
-    state: { signer },
+    state: { signer, controller },
   } = useContext(context)
   const [loading, setLoading] = useState(false)
   const [liteState, setLiteState] = useReducer((o, n) => ({ ...o, ...n }), {
@@ -167,20 +165,19 @@ export default function Lite() {
     bond: pools[0].r1.bond,
     want: pools[0].r1.want,
     data: data_zero,
-    controller: null,
     forceUpdate: {},
   })
-  const { tabs, tabsChild, pool, data, round, controller } = liteState
+  const { tabs, tabsChild, pool, data, round } = liteState
 
   const handleClick = (type) =>
     async function () {
-      if (controller) {
+      if (signer) {
         // setLoading(true)
         const res = await controller[type].call(null, ...arguments, pool)
         if (res) setLiteState({ forceUpdate: {} })
         // setLoading(false)
         return res
-      } else CT()
+      } else controller.notify('noaccount')
     }
 
   const tabsList = ['LOAN', 'FARM', 'SWAP']
@@ -207,22 +204,12 @@ export default function Lite() {
     if (signer) {
       ;(async () => {
         setLoading(true)
-        const controller = CT(signer)
         const newData = await controller.fetch_state(pool)
-        setLiteState({
-          controller,
-          data: newData,
-          round: newRound,
-        })
+        setLiteState({ data: newData, round: newRound })
         setLoading(false)
       })()
     } else {
-      if (data !== data_zero || round[1] !== poolRound)
-        setLiteState({
-          controller: null,
-          data: data_zero,
-          round: newRound,
-        })
+      if (data !== data_zero || round[1] !== poolRound) setLiteState({ data: data_zero, round: newRound })
     }
   }, [signer, pool])
 
@@ -248,7 +235,7 @@ export default function Lite() {
           <div></div>
           <div></div>
           <Info />
-          {loading && <Loading />}
+          <Loading open={loading} />
         </div>
       </liteContext.Provider>
     ),

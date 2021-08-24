@@ -1,14 +1,9 @@
 import { ethers } from 'ethers'
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
-import { context, poolConfig } from '@/config'
-
-import { useSnackbar } from 'notistack'
-
 import { useContext, useEffect, useState } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import { Box, AppBar, Toolbar, IconButton, Typography } from '@material-ui/core'
-import MenuIcon from '@material-ui/icons/Menu'
+import { makeStyles, Icon, Box, AppBar, Toolbar, IconButton, Typography } from '@material-ui/core'
+import { context, poolConfig } from '@/config'
 
 import ConnectWallet from './ConnectWallet'
 import AccountDialog from './AccountDialog'
@@ -46,11 +41,11 @@ const web3Modal = new Web3Modal({
 export default function Header() {
   const classes = useStyles()
   const {
-    state: { menu_open },
+    state: { menu_open, CT },
     setState,
   } = useContext(context)
+  const _CT = CT()
   const [dialog, setDialog] = useState(false)
-  const { enqueueSnackbar } = useSnackbar()
 
   const connect_wallet = async () => {
     const web3provider = await web3Modal.connect()
@@ -58,48 +53,39 @@ export default function Header() {
     const signer = provider.getSigner()
     const network = await provider.getNetwork()
     if (network.chainId !== poolConfig.chainid) {
-      enqueueSnackbar({
-        type: 'failed',
-        title: 'Fail.',
-        message: `not support this network, chainId: ${network.chainId}`,
-      })
-      setState({ signer: null })
+      _CT.notify('network', { chainId: network.chainId })
+      setState({ signer: null, controller: _CT })
       return
     }
-    setState({ signer })
-    if (!web3provider.on) {
-      return
-    }
+
+    setState({ signer, controller: CT(signer) })
+    if (!web3provider.on) return
+
     web3provider.on('disconnect', () => {
       web3Modal.clearCachedProvider()
-      setState({ signer: null })
+      setState({ signer: null, controller: _CT })
       setDialog(false)
     })
+
     web3provider.on('accountsChanged', async (accounts) => {
       if (accounts.length === 0) {
         web3Modal.clearCachedProvider()
-        setState({ signer: null })
+        setState({ signer: null, controller: _CT })
         setDialog(false)
         return
       }
       await connect_wallet()
     })
+
     web3provider.on('chainChanged', async (chainId) => {
       if (chainId !== poolConfig.chainid) {
-        enqueueSnackbar({
-          type: 'failed',
-          title: 'Fail.',
-          message: `not support this network, chainId: ${network.chainId}`,
-        })
-        setState({ signer: null })
-      } else {
-        await connect_wallet()
-      }
+        _CT.notify('network', { chainId: network.chainId })
+        setState({ signer: null, controller: _CT })
+      } else await connect_wallet()
     })
   }
-  useEffect(() => {
-    if (web3Modal.cachedProvider) connect_wallet()
-  }, [])
+
+  useEffect(() => web3Modal.cachedProvider && connect_wallet(), [])
 
   return (
     <div>
@@ -108,7 +94,7 @@ export default function Header() {
           <Toolbar className={classes.toolbar}>
             <Box maxWidth="10vw" display={menu_open ? 'none' : 'block'}>
               <IconButton color="inherit" onClick={() => setState({ menu_open: true })} edge="start">
-                <MenuIcon />
+                <Icon>menu_icon</Icon>
               </IconButton>
             </Box>
             <Box flexGrow={1} textOverflow="ellipsis">
@@ -124,7 +110,7 @@ export default function Header() {
       <AccountDialog
         disconnect={() => {
           web3Modal.clearCachedProvider()
-          setState({ signer: null })
+          setState({ signer: null, controller: _CT })
           setDialog(false)
         }}
         open={dialog}

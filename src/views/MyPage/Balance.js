@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { STYLE } from '@/config'
-import { makeStyles, withStyles } from '@material-ui/core/styles'
+import { makeStyles, withStyles } from '@material-ui/core'
 import DynamicFont from 'react-dynamic-font'
+import { STYLE } from '@/config'
 
 const useStyles = makeStyles({
   root: {

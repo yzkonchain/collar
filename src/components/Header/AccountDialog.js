@@ -1,7 +1,5 @@
 import { ethers } from 'ethers'
 import { useContext, useState } from 'react'
-import { context } from '@/config'
-
 import {
   Button,
   LinearProgress,
@@ -20,6 +18,7 @@ import {
   TableCell,
   TableBody,
 } from '@material-ui/core'
+import { context } from '@/config'
 
 export default function AccountDialog({ open, onClose, disconnect }) {
   const [address, setAddress] = useState(null)

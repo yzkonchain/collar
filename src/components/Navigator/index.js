@@ -1,8 +1,7 @@
 import { useContext, useState } from 'react'
-import { context } from '@/config'
-import { makeStyles } from '@material-ui/core/styles'
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
-import { Drawer, Box, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
+import { makeStyles, Drawer, Box, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
+import { context } from '@/config'
 import { LiteIcon, TermIcon, ProIcon, MypageIcon, CloseMenuIcon } from '@/assets/svg'
 
 import Lite from '@/views/Lite'

@@ -1,11 +1,17 @@
 {
   "files": {
+    "static/js/0.0e8fb2a3.chunk.js": "./static/js/0.0e8fb2a3.chunk.js",
+    "static/js/1.8323ce3e.chunk.js": "./static/js/1.8323ce3e.chunk.js",
+    "static/js/2.476ed273.chunk.js": "./static/js/2.476ed273.chunk.js",
+    "static/js/3.59e9d909.chunk.js": "./static/js/3.59e9d909.chunk.js",
+    "static/js/4.0c535dfc.chunk.js": "./static/js/4.0c535dfc.chunk.js",
+    "static/js/5.91e05158.chunk.js": "./static/js/5.91e05158.chunk.js",
     "main.css": "./static/css/main.5551b8a4.chunk.css",
-    "main.js": "./static/js/main.6c084641.chunk.js",
-    "runtime-main.js": "./static/js/runtime-main.67678677.js",
-    "static/js/2.8e9e4ac0.chunk.js": "./static/js/2.8e9e4ac0.chunk.js",
+    "main.js": "./static/js/main.d19c43a2.chunk.js",
+    "runtime-main.js": "./static/js/runtime-main.44afc95f.js",
+    "static/js/8.a161cd00.chunk.js": "./static/js/8.a161cd00.chunk.js",
     "index.html": "./index.html",
-    "static/js/2.8e9e4ac0.chunk.js.LICENSE.txt": "./static/js/2.8e9e4ac0.chunk.js.LICENSE.txt",
+    "static/js/8.a161cd00.chunk.js.LICENSE.txt": "./static/js/8.a161cd00.chunk.js.LICENSE.txt",
     "static/media/index.css": "./static/media/helvetica.0796970a.ttf",
     "static/media/CALL.fa5dcf83.svg": "./static/media/CALL.fa5dcf83.svg",
     "static/media/COLL.18017a76.svg": "./static/media/COLL.18017a76.svg",
@@ -13,8 +19,8 @@
     "static/media/USDC.d3666452.svg": "./static/media/USDC.d3666452.svg",
     "static/media/USDT.a12a2441.svg": "./static/media/USDT.a12a2441.svg",
     "static/media/arrowForwardIosIcon.3a03ef61.svg": "./static/media/arrowForwardIosIcon.3a03ef61.svg",
-    "static/media/buttonAble.81d585e8.svg": "./static/media/buttonAble.81d585e8.svg",
-    "static/media/buttonDisabled.73e4eb6d.svg": "./static/media/buttonDisabled.73e4eb6d.svg",
+    "static/media/buttonAble.svg": "./static/media/buttonAble.81d585e8.svg",
+    "static/media/buttonDisabled.svg": "./static/media/buttonDisabled.73e4eb6d.svg",
     "static/media/buttonWhite.fc4b11a8.svg": "./static/media/buttonWhite.fc4b11a8.svg",
     "static/media/buttonWhiteHover.b17273db.svg": "./static/media/buttonWhiteHover.b17273db.svg",
     "static/media/closeMenu.1dada3f4.svg": "./static/media/closeMenu.1dada3f4.svg",
@@ -34,9 +40,9 @@
     "static/media/totalValue.6d208828.svg": "./static/media/totalValue.6d208828.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.67678677.js",
-    "static/js/2.8e9e4ac0.chunk.js",
+    "static/js/runtime-main.44afc95f.js",
+    "static/js/8.a161cd00.chunk.js",
     "static/css/main.5551b8a4.chunk.css",
-    "static/js/main.6c084641.chunk.js"
+    "static/js/main.d19c43a2.chunk.js"
   ]
 }

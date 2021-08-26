@@ -2,10 +2,9 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useEffect, useMemo, useState, useCallback, Suspense, lazy } from 'react'
 import { makeStyles } from '@material-ui/core'
 import { context, liteContext, pools, poolSelect, STYLE } from '@/config'
-
+import { MyTabs, MyTabsChild, Loading } from '@/components/Modules'
 import Info from './Info'
 import PoolSelector from './PoolSelector'
-import { MyTabs, MyTabsChild, Loading } from '@/components/Modules'
 
 const useStyles = makeStyles({
   root: {
@@ -64,16 +63,16 @@ const useStylesChild = makeStyles({
   amount: {
     display: 'flex',
     justifyContent: 'space-between',
-    // marginBottom: '15px',
     '&>div': {
       width: '50%',
     },
-    '&>img': {
-      marginTop: '40px',
-    },
   },
   icon: {
-    margin: '0 10px',
+    fontFamily: 'Material Icons',
+    marginTop: '35px',
+    fontSize: '24px',
+    display: 'flex',
+    alignItems: 'center',
   },
   buttonOne: {
     display: 'flex',
@@ -150,7 +149,7 @@ export default function Lite() {
     state: { signer, controller },
   } = useContext(context)
   const [loading, setLoading] = useState(false)
-  const [liteState, setLiteState] = useReducer((o, n) => ({ ...o, ...n }), {
+  const [liteState, setLiteState] = useReducer((o, n) => (typeof n === 'function' ? n(o) : { ...o, ...n }), {
     tabs: 0,
     tabsChild: 0,
     round: [0, !pools[0].r2],
@@ -159,7 +158,6 @@ export default function Lite() {
     bond: pools[0].r1.bond,
     want: pools[0].r1.want,
     data: data_zero,
-    forceUpdate: {},
   })
   const { tabs, tabsChild, pool, data, round } = liteState
   const tabsList = ['LOAN', 'FARM', 'SWAP']
@@ -177,32 +175,36 @@ export default function Lite() {
   const handleClick = useCallback(
     (type) =>
       async function () {
-        return await controller[type].call(null, ...arguments, pool).then((res) => {
-          if (res) setLiteState({ forceUpdate: {} })
-          return res
-        })
+        return await controller[type]
+          .call(null, ...arguments, pool)
+          .then((res) => {
+            if (res) return controller.fetch_state(pool)
+            else throw new Error()
+          })
+          .then((data) => setLiteState({ data }))
+          .catch(() => false)
       },
-    [controller, pool],
+    [pool.addr],
   )
 
   useEffect(() => {
     const poolName = `${pool.bond.addr}-${pool.want.addr}`
-    setLiteState({ pool: poolSelect[`${poolName}-${round[0]}`], forceUpdate: {} })
+    setLiteState({ pool: poolSelect[`${poolName}-${round[0]}`] })
   }, [round[0]])
 
   useEffect(() => {
     const poolName = `${pool.bond.addr}-${pool.want.addr}`
     const poolRound = !poolSelect[`${poolName}-1`]
     const newRound = [poolRound ? 0 : round[0], poolRound]
-    if (signer) {
-      ;(async () => {
-        setLoading(true)
-        const newData = await controller.fetch_state(pool)
-        setLiteState({ data: newData, round: newRound })
-        setLoading(false)
-      })()
-    } else if (data !== data_zero || round[1] !== poolRound) setLiteState({ data: data_zero, round: newRound })
-  }, [signer, pool])
+    ;(async () => {
+      setLoading(true)
+      const newData = await controller.fetch_state(pool)
+      setLiteState((o) =>
+        !signer && data === data_zero && o.data !== data_zero ? o : { ...o, data: newData, round: newRound },
+      )
+      setLoading(false)
+    })()
+  }, [signer, pool.addr])
 
   return useMemo(
     () => (

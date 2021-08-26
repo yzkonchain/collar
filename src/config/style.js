@@ -1,6 +1,9 @@
+const WIDTH = 960
+
 const STYLE = {
-  PC: '@media screen and (min-width:960px)',
-  MOBILE: '@media screen and (max-width:960px)',
+  WIDTH,
+  PC: `@media screen and (min-width:${WIDTH}px)`,
+  MOBILE: `@media screen and (max-width:${WIDTH}px)`,
 }
 
 export { STYLE }

@@ -3,14 +3,10 @@ import buttonDisabled from './button/buttonDisabled.svg'
 import buttonWhite from './button/buttonWhite.svg'
 import buttonWhiteHover from './button/buttonWhiteHover.svg'
 
-import ArrowForwardIosIcon from './arrowForwardIosIcon.svg'
-import TabsArrow from './tabsArrow.svg'
-
-import LiteIcon from './liteIcon.svg'
-import TermIcon from './termIcon.svg'
-import ProIcon from './proIcon.svg'
-import MypageIcon from './mypageIcon.svg'
-import CloseMenuIcon from './closeMenu.svg'
+import LiteIcon from './navigator/liteIcon.svg'
+import TermIcon from './navigator/termIcon.svg'
+import ProIcon from './navigator/proIcon.svg'
+import MypageIcon from './navigator/mypageIcon.svg'
 
 import SuccessIcon from './status/statusApproved.svg'
 import FailedIcon from './status/statusUnapproved.svg'
@@ -19,22 +15,22 @@ import NewroundLeftIcon from './status/statusNewroundLeft.svg'
 import NewroundRightIcon from './status/statusNewroundRight.svg'
 import AnyIcon from './status/statusAny.svg'
 
+import TabsArrow from './other/tabsArrow.svg'
+
 export {
   buttonAble,
   buttonDisabled,
   buttonWhite,
   buttonWhiteHover,
-  ArrowForwardIosIcon,
-  TabsArrow,
   LiteIcon,
   TermIcon,
   ProIcon,
   MypageIcon,
-  CloseMenuIcon,
   SuccessIcon,
   FailedIcon,
   ConnectErrorIcon,
   NewroundLeftIcon,
   NewroundRightIcon,
   AnyIcon,
+  TabsArrow,
 }

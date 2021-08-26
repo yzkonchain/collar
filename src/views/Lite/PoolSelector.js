@@ -1,7 +1,6 @@
 import { useContext, useMemo } from 'react'
 import { makeStyles, Icon, FormControl, Select, MenuItem } from '@material-ui/core'
 import { liteContext, bondList, wantList, poolSelect } from '@/config'
-import { ArrowForwardIosIcon } from '@/assets/svg'
 
 const useStyles = makeStyles({
   root: {},
@@ -33,6 +32,12 @@ const useStyles = makeStyles({
   },
   icon: {
     margin: '0 10px',
+  },
+  icon_arrow: {
+    fontFamily: 'Material Icons',
+    fontSize: '24px',
+    display: 'flex',
+    alignItems: 'center',
   },
   select: {
     '&>div': {
@@ -77,7 +82,7 @@ export default function PoolSelector() {
             </Select>
           </FormControl>
 
-          <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
+          <span className={classes.icon_arrow}>navigate_next</span>
 
           <FormControl className={classes.formControl}>
             <Select

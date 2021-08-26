@@ -2,7 +2,6 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
-import { ArrowForwardIosIcon } from '@/assets/svg'
 
 const ZERO = ethers.constants.Zero
 const INIT = {
@@ -26,7 +25,6 @@ export default function Lend() {
   const {
     liteState: { bond, want, coll, pool, data },
     classesChild: classes,
-    setLiteState,
     handleClick,
   } = useContext(liteContext)
   INIT.tip.apy = data.apy.toPrecision(3)
@@ -34,11 +32,13 @@ export default function Lend() {
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
-    if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const want = parse(state.I.want, pool.want.decimals)
       if (!want.eq(state.input.want)) {
-        const coll = await controller.get_dx(want, pool)
+        const coll = await pool.ct.get_dx(want).catch(() => {
+          controller.notify('balance', 'insufficient')
+          return false
+        })
         if (coll) {
           const tip = {
             fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
@@ -69,7 +69,7 @@ export default function Lend() {
               style={{ height: '90px' }}
             />
           </div>
-          <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
+          <span className={classes.icon}>navigate_next</span>
           <div>
             <AmountShow title="coll" state={{ state, token: coll }} style={{ height: '90px' }} />
           </div>
@@ -94,7 +94,7 @@ export default function Lend() {
           <div>
             <MyButton
               name="Approve"
-              onClick={() => handleClick('approve')(want.addr)}
+              onClick={() => handleClick('approve')(want)}
               disabled={!signer || data.allowance.want.gt('100000000000000000000000000000000')}
             />
             <MyButton
@@ -102,7 +102,11 @@ export default function Lend() {
               onClick={async () =>
                 (await handleClick('lend')(state.input.want, state.output.coll)) && setState({ I: { want: '' } })
               }
-              disabled={ZERO.eq(state.output.coll)}
+              disabled={
+                ZERO.eq(state.output.coll) ||
+                parse(state.I.want, pool.want.decimals).gt(data.balance.want) ||
+                !parse(state.I.want, pool.want.decimals).eq(state.input.want)
+              }
             />
           </div>
         </div>

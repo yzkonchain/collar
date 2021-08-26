@@ -2,7 +2,6 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
-import { ArrowForwardIosIcon } from '@/assets/svg'
 
 const ZERO = ethers.constants.Zero
 const INIT = {
@@ -27,19 +26,20 @@ export default function Repay() {
   const {
     liteState: { bond, want, coll, pool, data },
     classesChild: classes,
-    setLiteState,
     handleClick,
   } = useContext(liteContext)
   const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
-    if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const want = parse(state.I.want, pool.want.decimals)
       const coll = parse(state.I.coll)
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
-        const clpt = await controller.get_dk(coll, want, pool)
+        const clpt = await pool.ct.get_dk(coll, want).catch(() => {
+          controller.notify('balance', 'insufficient')
+          return false
+        })
         if (clpt) {
           const tip = {
             share: ((format(clpt) / format(data.swap.sk)) * 100).toPrecision(3),
@@ -80,8 +80,7 @@ export default function Repay() {
               style={{ height: '90px' }}
             />
           </div>
-          <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
-
+          <span className={classes.icon}>navigate_next</span>
           <div>
             <AmountShow title="clpt" state={{ state, token: pool }} style={{ height: '239px' }} />
           </div>
@@ -100,7 +99,7 @@ export default function Repay() {
           <div>
             <MyButton
               name="Approve"
-              onClick={() => handleClick('approve')(want.addr)}
+              onClick={() => handleClick('approve')(want)}
               disabled={!signer || data.allowance.want.gt('100000000000000000000000000000000')}
             />
             <MyButton
@@ -109,7 +108,13 @@ export default function Repay() {
                 (await handleClick('deposit')(state.input.want, state.input.coll, state.output.clpt)) &&
                 setState({ I: { want: '', coll: '' } })
               }
-              disabled={ZERO.eq(state.output.clpt)}
+              disabled={
+                ZERO.eq(state.output.clpt) ||
+                parse(state.I.want, pool.want.decimals).gt(data.balance.want) ||
+                parse(state.I.coll).gt(data.balance.coll) ||
+                !parse(state.I.want, pool.want.decimals).eq(state.input.want) ||
+                !parse(state.I.coll).eq(state.input.coll)
+              }
             />
           </div>
           <div>

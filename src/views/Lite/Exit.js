@@ -2,7 +2,6 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
-import { ArrowForwardIosIcon } from '@/assets/svg'
 
 const ZERO = ethers.constants.Zero
 const INIT = {
@@ -26,7 +25,6 @@ export default function Exit() {
   const {
     liteState: { bond, want, coll, pool, data },
     classesChild: classes,
-    setLiteState,
     handleClick,
   } = useContext(liteContext)
   INIT.tip.apy = data.apy.toPrecision(3)
@@ -34,11 +32,13 @@ export default function Exit() {
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
-    if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const coll = parse(state.I.coll)
       if (!coll.eq(state.input.coll)) {
-        const want = await controller.get_dy(coll, pool)
+        const want = await pool.ct.get_dy(coll).catch(() => {
+          controller.notify('balance', 'insufficient')
+          return false
+        })
         if (want) {
           const tip = {
             fee: (format(want, pool.want.decimals) * (1 - format(data.swap.fee))).toFixed(4),
@@ -69,7 +69,7 @@ export default function Exit() {
               style={{ height: '90px' }}
             />
           </div>
-          <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
+          <span className={classes.icon}>navigate_next</span>
           <div>
             <AmountShow title="want" state={{ state, token: want }} style={{ height: '90px' }} />
           </div>
@@ -102,7 +102,11 @@ export default function Exit() {
               onClick={async () =>
                 (await handleClick('redeem')(state.output.want, state.input.coll)) && setState({ I: { coll: '' } })
               }
-              disabled={ZERO.eq(state.output.want)}
+              disabled={
+                ZERO.eq(state.output.want) ||
+                parse(state.I.coll).gt(data.balance.coll) ||
+                !parse(state.I.coll).eq(state.input.coll)
+              }
             />
           </div>
         </div>

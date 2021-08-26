@@ -8,31 +8,25 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core'
-import { STYLE } from '@/config'
 import { Price } from '@/hooks'
 import { MyButtonWhite } from '@/components/Modules'
 
 const useStyles = makeStyles({
   root: {
-    [STYLE.MOBILE]: {
-      display: 'none',
-    },
-    [STYLE.PC]: {
-      '&>div>table': {
-        '& tr': {
-          borderBottom: '#D8D8D8 1px solid',
-        },
-        '& th,& td': {
-          color: 'white',
-          padding: 0,
-          border: 'none',
-          fontSize: '18px',
-          fontFamily: 'Frutiger',
-          whiteSpace: 'nowrap',
-        },
-        '& button': {
-          width: '133px',
-        },
+    '&>div>table': {
+      '& tr': {
+        borderBottom: '#D8D8D8 1px solid',
+      },
+      '& th,& td': {
+        color: 'white',
+        padding: 0,
+        border: 'none',
+        fontSize: '18px',
+        fontFamily: 'Frutiger',
+        whiteSpace: 'nowrap',
+      },
+      '& button': {
+        width: '133px',
       },
     },
   },

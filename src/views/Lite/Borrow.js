@@ -2,7 +2,6 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
-import { ArrowForwardIosIcon } from '@/assets/svg'
 
 const ZERO = ethers.constants.Zero
 const INIT = {
@@ -21,12 +20,11 @@ const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
 export default function Borrow() {
   const {
-    state: { signer, controller },
+    state: { controller },
   } = useContext(context)
   const {
     liteState: { pool, bond, want, coll, data },
     classesChild: classes,
-    setLiteState,
     handleClick,
   } = useContext(liteContext)
   INIT.tip.apy = data.apy.toPrecision(3)
@@ -34,11 +32,13 @@ export default function Borrow() {
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
-    if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const bond = parse(state.I.bond, pool.bond.decimals)
       if (!bond.eq(state.input.bond)) {
-        const want = await controller.get_dy(bond, pool)
+        const want = await pool.ct.get_dy(bond).catch((bond) => {
+          controller.notify('balance', 'insufficient')
+          return false
+        })
         if (want) {
           const tip = {
             fee: (format(want, pool.want.decimals) * (1 - format(data.swap.fee))).toFixed(4),
@@ -69,7 +69,7 @@ export default function Borrow() {
               style={{ height: '90px' }}
             />
           </div>
-          <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
+          <span className={classes.icon}>navigate_next</span>
           <div>
             <AmountShow title="want" state={{ state, token: want }} style={{ height: '90px' }} />
           </div>
@@ -100,15 +100,19 @@ export default function Borrow() {
           <div>
             <MyButton
               name="Approve"
-              onClick={() => handleClick('approve')(bond.addr)}
-              disabled={!signer || data.allowance.bond.gt('100000000000000000000000000000000')}
+              onClick={() => handleClick('approve')(bond)}
+              disabled={!pool.ct.signer || data.allowance.bond.gt('100000000000000000000000000000000')}
             />
             <MyButton
               name="Deposit & Borrow"
               onClick={async () =>
                 (await handleClick('borrow')(state.input.bond, state.output.want)) && setState({ I: { bond: '' } })
               }
-              disabled={ZERO.eq(state.output.want)}
+              disabled={
+                ZERO.eq(state.output.want) ||
+                parse(state.I.bond, pool.bond.decimals).gt(data.balance.bond) ||
+                !parse(state.I.bond, pool.bond.decimals).eq(state.input.bond)
+              }
             />
           </div>
         </div>

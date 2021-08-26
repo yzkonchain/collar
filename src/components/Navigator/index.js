@@ -2,7 +2,7 @@ import { useContext, useState } from 'react'
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { makeStyles, Drawer, List, ListItem } from '@material-ui/core'
 import { context } from '@/config'
-import { LiteIcon, TermIcon, ProIcon, MypageIcon, CloseMenuIcon } from '@/assets/svg'
+import { LiteIcon, TermIcon, ProIcon, MypageIcon } from '@/assets/svg'
 
 import Lite from '@/views/Lite'
 import MyPage from '@/views/MyPage'

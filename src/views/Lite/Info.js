@@ -1,8 +1,7 @@
 import { ethers } from 'ethers'
-import { useContext, useEffect, useState, useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import { makeStyles } from '@material-ui/core'
-import { context, liteContext, poolList } from '@/config'
-
+import { liteContext } from '@/config'
 import { InfoCard1, InfoCard2, InfoCard3 } from '@/components/Modules'
 
 const useStyles = makeStyles((theme) => ({
@@ -26,19 +25,8 @@ const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 export default function Info() {
   const classes = useStyles()
   const {
-    state: { signer, controller },
-  } = useContext(context)
-  const {
-    liteState: { forceUpdate, pool, bond, want, data },
-    setLiteState,
+    liteState: { pool, bond, want, data },
   } = useContext(liteContext)
-  const [update, setUpdate] = useState({})
-  useEffect(() => {
-    ;(async () => {
-      if (signer) setLiteState({ data: await controller.fetch_state(pool) })
-      setUpdate({})
-    })()
-  }, [forceUpdate])
 
   return useMemo(
     () => (
@@ -94,6 +82,6 @@ export default function Info() {
         </div>
       </div>
     ),
-    [data, update],
+    [data],
   )
 }

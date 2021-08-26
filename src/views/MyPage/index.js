@@ -62,7 +62,7 @@ export default function MyPage() {
     () =>
       (async () => {
         setMypageState({ loading: true })
-        const pools = signer ? await controller.mypage_data() : await controller.mypage_data_noaccount()
+        const pools = await controller.mypage_data()
         const total = { ...INIT.total }
         pools.forEach(({ pool, coll_total, want_total, bond_total, call, receivables, earned }) => {
           const getPrice = (token) => Price[pool[token].addr]

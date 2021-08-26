@@ -3,7 +3,6 @@ import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core'
 import { context, liteContext } from '@/config'
 import { MyButton, AmountInput, AmountShow, ApyFloatMessage } from '@/components/Modules'
-import { ArrowForwardIosIcon } from '@/assets/svg'
 
 const ZERO = ethers.constants.Zero
 const INIT = {
@@ -28,28 +27,31 @@ export default function Withdraw() {
   const {
     liteState: { bond, want, coll, pool, data },
     classesChild: classes,
-    setLiteState,
     handleClick,
   } = useContext(liteContext)
   const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
-    if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const clpt = parse(state.I.clpt)
       if (!clpt.eq(state.input.clpt)) {
-        const res = await controller.ct(pool.addr).get_dxdy(clpt)
-        const tip = {
-          poolBalance: (format(data.swap.sx) / format(data.swap.sy, pool.want.decimals)).toPrecision(3),
-          share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
-          rate: {
-            coll: clpt.eq(ZERO) ? 0 : parseFloat(format(res[0]) / state.I.clpt).toPrecision(3),
-            want: clpt.eq(ZERO) ? 0 : parseFloat(format(res[1], pool.want.decimals) / state.I.clpt).toPrecision(3),
-          },
-          fee: (format(res[0]) * (1 - format(data.swap.fee))).toFixed(4),
+        const res = await pool.ct.get_dxdy(clpt).catch((res) => {
+          controller.notify('balance', 'insufficient')
+          return false
+        })
+        if (res) {
+          const tip = {
+            poolBalance: (format(data.swap.sx) / format(data.swap.sy, pool.want.decimals)).toPrecision(3),
+            share: ((format(data.balance.clpt) / format(data.swap.sk)) * 100).toPrecision(3),
+            rate: {
+              coll: clpt.eq(ZERO) ? 0 : parseFloat(format(res[0]) / state.I.clpt).toPrecision(3),
+              want: clpt.eq(ZERO) ? 0 : parseFloat(format(res[1], pool.want.decimals) / state.I.clpt).toPrecision(3),
+            },
+            fee: (format(res[0]) * (1 - format(data.swap.fee))).toFixed(4),
+          }
+          setState({ input: { clpt }, output: { coll: res[0], want: res[1] }, tip })
         }
-        setState({ input: { clpt }, output: { coll: res[0], want: res[1] }, tip })
       }
     })()
   }, [state])
@@ -71,7 +73,7 @@ export default function Withdraw() {
               style={{ height: '239px' }}
             />
           </div>
-          <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
+          <span className={classes.icon}>navigate_next</span>
           <div>
             <AmountShow title="want" state={{ state, token: want }} style={{ height: '90px' }} />
             <AmountShow title="coll" state={{ state, token: coll }} style={{ height: '90px' }} />
@@ -93,7 +95,11 @@ export default function Withdraw() {
             <MyButton
               name="Withdraw"
               onClick={async () => (await handleClick('withdraw')(state.input.clpt)) && setState({ I: { clpt: '' } })}
-              disabled={ZERO.eq(state.output.want)}
+              disabled={
+                ZERO.eq(state.output.want) ||
+                parse(state.I.clpt).gt(data.balance.clpt) ||
+                !parse(state.I.clpt).eq(state.input.clpt)
+              }
             />
             <MyButton name="Claim" onClick={() => handleClick('claim')()} disabled={ZERO.eq(data.earned.collar)} />
           </div>
@@ -103,7 +109,12 @@ export default function Withdraw() {
               onClick={async () =>
                 (await handleClick('burn_and_claim')(state.input.clpt)) && setState({ I: { clpt: '' } })
               }
-              disabled={ZERO.eq(state.output.want) || ZERO.eq(data.earned.collar)}
+              disabled={
+                ZERO.eq(state.output.want) ||
+                ZERO.eq(data.earned.collar) ||
+                parse(state.I.clpt).gt(data.balance.clpt) ||
+                !parse(state.I.clpt).eq(state.input.clpt)
+              }
             />
           </div>
         </div>

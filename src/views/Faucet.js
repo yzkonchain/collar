@@ -59,7 +59,7 @@ const useStyles = makeStyles({
 })
 
 const tokens = Object.keys(tokenList)
-  .filter((addr) => ['COLLAR', 'CLPT', 'CALL', 'COLL'].indexOf(tokenList[addr].symbol) === -1)
+  .filter((addr) => ['COLLAR', 'CLPT', 'CALL', 'COLL', 'SWAP'].indexOf(tokenList[addr].symbol) === -1)
   .map((addr) => tokenList[addr])
 
 export default function Faucet() {
@@ -77,11 +77,11 @@ export default function Faucet() {
   const sendMe = async () => {
     if (signer) {
       const value = ethers.utils.parseEther(String(amount || 0))
-      setLoading(true)
+      // setLoading(true)
       if (value.eq('0')) controller.notify('faucet', 'empty')
-      else if (await controller.faucet(selected.addr, value)) setAmount('')
+      else if (await controller.faucet(selected.addr, value, signer)) setAmount('')
     } else controller.notify('noaccount')
-    setLoading(false)
+    // setLoading(false)
   }
 
   return (

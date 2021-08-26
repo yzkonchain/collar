@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react'
 import { makeStyles, Icon, Box, AppBar, Toolbar, IconButton, Typography } from '@material-ui/core'
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
-import { context, poolConfig } from '@/config'
+import { context, poolConfig, tokenList, poolList, signerNoAccount, abi } from '@/config'
 
 import ConnectWallet from './ConnectWallet'
 import AccountDialog from './AccountDialog'
@@ -38,39 +38,52 @@ const web3Modal = new Web3Modal({
   },
 })
 
+const setTokenCT = (signer) => {
+  const _signer = signer || signerNoAccount
+  ;[tokenList, poolList].forEach((list) =>
+    Object.keys(list).forEach((addr) => (list[addr].ct = new ethers.Contract(addr, abi, _signer))),
+  )
+}
+
 export default function Header() {
   const classes = useStyles()
   const {
-    state: { menu_open, CT },
+    state: { menu_open, controller },
     setState,
   } = useContext(context)
-  const _CT = CT()
   const [dialog, setDialog] = useState(false)
+
+  const setSigner = (signer) => {
+    setState({ signer })
+    setTokenCT(signer)
+  }
 
   const connect_wallet = async () => {
     const web3provider = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(web3provider)
     const signer = provider.getSigner()
     const network = await provider.getNetwork()
+
     if (network.chainId !== poolConfig.chainid) {
-      _CT.notify('network', { chainId: network.chainId })
-      setState({ signer: null, controller: _CT })
+      controller.notify('network', { chainId: network.chainId })
+      setSigner(null)
       return
     }
 
-    setState({ signer, controller: CT(signer) })
+    setSigner(signer)
+
     if (!web3provider.on) return
 
     web3provider.on('disconnect', () => {
       web3Modal.clearCachedProvider()
-      setState({ signer: null, controller: _CT })
+      setSigner(null)
       setDialog(false)
     })
 
     web3provider.on('accountsChanged', async (accounts) => {
       if (accounts.length === 0) {
         web3Modal.clearCachedProvider()
-        setState({ signer: null, controller: _CT })
+        setSigner(null)
         setDialog(false)
         return
       }
@@ -78,9 +91,9 @@ export default function Header() {
     })
 
     web3provider.on('chainChanged', async (chainId) => {
-      if (chainId !== poolConfig.chainid) {
-        _CT.notify('network', { chainId: network.chainId })
-        setState({ signer: null, controller: _CT })
+      if (parseInt(chainId) !== poolConfig.chainid) {
+        controller.notify('network', { chainId })
+        setSigner(null)
       } else await connect_wallet()
     })
   }
@@ -110,7 +123,7 @@ export default function Header() {
       <AccountDialog
         disconnect={() => {
           web3Modal.clearCachedProvider()
-          setState({ signer: null, controller: _CT })
+          setSigner(null)
           setDialog(false)
         }}
         open={dialog}

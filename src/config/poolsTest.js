@@ -1,4 +1,5 @@
 import { USDT, USDC } from '@/assets/svg/token'
+import { ethers } from 'ethers'
 import { Token, Pool } from './makePool'
 
 var tokenList = {},
@@ -9,13 +10,19 @@ const poolConfig = {
   chainid: 3,
   infuraid: '9180c5a422ac44f9b21ad7927b6b662c',
   factory: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
+  pricePool: '0x5BBBE4Da8b5AF36482F75747Ee38ddFDf3F6e4D9',
   collar: '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE',
   stablecoin: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
   gasAdjustment: 120,
 }
 
+// new ethers.Contract(poolConfig.factory, abi, signerNoAccount)
+//   .getPool(poolConfig.collar, poolConfig.stablecoin, 3000)
+//   .then((pricePool) => new ethers.Contract(pricePool, abi, signerNoAccount).slot0())
+
 tokenList = {
   ...Token('COLLAR', poolConfig.collar),
+  ...Token('SWAP', poolConfig.pricePool),
   ...Token('USDT', '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0', USDT),
   ...Token('USDC', '0x67C9a0830d922C80A96408EEdF606c528836880C', USDC),
 }

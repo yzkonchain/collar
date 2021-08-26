@@ -1,7 +1,10 @@
+import { ethers } from 'ethers'
+import abi from '@/config/abi'
+import signerNoAccount from '@/config/signerNoAccount'
 import { COLLAR, COLL, CALL } from '@/assets/svg/token'
 
 const Token = (symbol, addr, icon, decimals) => {
-  const token = { symbol, addr, decimals: 18 }
+  const token = { symbol, addr, decimals: 18, ct: new ethers.Contract(addr, abi, signerNoAccount) }
   switch (symbol) {
     case 'COLLAR':
     case 'CLPT':
@@ -37,6 +40,7 @@ const Pool = ({ bond, want, r1, r2 }, list) => {
         call: list[call],
         swap_sqp: swap_sqp || 992187500,
         symbol: symbol || 'CLPT',
+        ct: new ethers.Contract(addr, abi, signerNoAccount),
       }
     } else return null
   })

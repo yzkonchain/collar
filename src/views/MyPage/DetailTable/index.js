@@ -49,16 +49,12 @@ const useStyles = makeStyles({
   },
 })
 
-const Detail = (props) => (
-  <div>
-    <DetailPC {...props} />
-    <DetailMobile {...props} />
-  </div>
-)
+const Detail = (props) => (props.ifPC ? <DetailPC {...props} /> : <DetailMobile {...props} />)
 
 export default function DetailTable({ pools }) {
   const {
     state: { signer, controller },
+    ifPC,
   } = useContext(context)
   const {
     mypageState: { confirm, type, pool, checked },
@@ -95,7 +91,8 @@ export default function DetailTable({ pools }) {
                   <span>Expiry: {new Date(pool.expiry_time * 1000).toLocaleString()}</span>
                 </div>
               </div>
-              <Detail {...{ pool, val, handleClick }} />
+
+              <Detail {...{ pool, val, handleClick, ifPC }} />
             </div>
           )
         })}
@@ -110,6 +107,6 @@ export default function DetailTable({ pools }) {
         />
       </div>
     ),
-    [pools, confirm, type, pool],
+    [pools, confirm, type, pool, ifPC],
   )
 }

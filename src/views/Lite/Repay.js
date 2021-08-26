@@ -2,7 +2,6 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { context, liteContext } from '@/config'
 import { MyButton, AmountInputDouble, AmountShow, ApyFloatMessage } from '@/components/Modules'
-import { ArrowForwardIosIcon } from '@/assets/svg'
 
 const ZERO = ethers.constants.Zero
 const INIT = {
@@ -27,7 +26,6 @@ export default function Repay() {
   const {
     liteState: { bond, want, coll, pool, data },
     classesChild: classes,
-    setLiteState,
     handleClick,
   } = useContext(liteContext)
   INIT.tip.apy = data.apy.toPrecision(3)
@@ -35,7 +33,6 @@ export default function Repay() {
 
   useEffect(() => state == INIT || setState(INIT), [pool])
   useEffect(() => {
-    if (!signer || ZERO.eq(data.swap.sk)) return
     ;(async () => {
       const want = parse(state.I.want, pool.want.decimals)
       const coll = parse(state.I.coll)
@@ -76,7 +73,7 @@ export default function Repay() {
               style={{ height: '90px' }}
             />
           </div>
-          <img alt="" src={ArrowForwardIosIcon} className={classes.icon} />
+          <span className={classes.icon}>navigate_next</span>
           <div>
             <AmountShow title="bond" state={{ state, token: bond }} style={{ height: '90px' }} />
           </div>
@@ -114,7 +111,7 @@ export default function Repay() {
           <div>
             <MyButton
               name="Approve"
-              onClick={() => handleClick('approve')(want.addr)}
+              onClick={() => handleClick('approve')(want)}
               disabled={!signer || data.allowance.want.gt('100000000000000000000000000000000')}
             />
             <MyButton

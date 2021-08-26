@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core'
 import { textInfo, STYLE } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
-import { TabsArrow, iconInfo } from '@/assets/svg'
+import { TabsArrow } from '@/assets/svg'
 
 const timer = (time) => {
   const dtime = new Date(time) - new Date()
@@ -27,27 +27,35 @@ const Timer = withStyles({
       display: 'none',
     },
     [STYLE.PC]: {
+      display: 'flex',
       width: 'max-content',
-      fontSize: '20px',
-      fontFamily: 'Gillsans',
-      '&>span:nth-child(odd)': {
-        fontSize: '20px',
+      fontSize: '18px',
+      fontFamily: 'Frutiger',
+      color: '#303848',
+      marginRight: '10px',
+      '&>div': {
         marginLeft: '10px',
-      },
-      '&>span:nth-child(even)': {
-        fontSize: '12px',
+        '&>span:nth-child(odd)': {
+          fontSize: '18px',
+          marginLeft: '2px',
+        },
+        '&>span:nth-child(even)': {
+          fontSize: '12px',
+        },
       },
     },
   },
 })(({ classes, timer: [d, h, m] }) => (
   <div className={classes.root}>
-    Expiry:
-    <span>{d}</span>
-    <span> d </span>
-    <span>{h}</span>
-    <span> h </span>
-    <span>{m}</span>
-    <span> m </span>
+    <span>Expiry :</span>
+    <div>
+      <span>{d}</span>
+      <span> Days </span>
+      <span>{h}</span>
+      <span> Hours </span>
+      <span>{m}</span>
+      <span> Mins </span>
+    </div>
   </div>
 ))
 
@@ -79,7 +87,7 @@ const MyAccordion = withStyles({
 ))
 const MyTab = withStyles({
   root: {
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     minHeight: '0',
     padding: '0',
     textTransform: 'capitalize',
@@ -128,26 +136,12 @@ const MyTabs = withStyles({
   const count_time = timer(expiry)
   const classes = makeStyles((theme) => ({
     root: { position: 'relative' },
-    button: {
-      position: 'absolute',
+    roundInfo: {
       display: 'flex',
-      top: '2px',
-      right: 0,
-    },
-    switch: {
-      transform: 'translate(8px,-8px)',
-    },
-    switchInfo: {
-      transform: 'translateY(-8px)',
-      display: 'flex',
+      justifyContent: 'flex-end',
       alignItems: 'center',
-      '& img': {
-        width: '14px',
-        marginLeft: '4px',
-      },
-      '&>span': {
-        fontSize: '14px',
-      },
+      position: 'absolute',
+      right: 0,
     },
     expanded: {
       background: 'none',
@@ -165,23 +159,28 @@ const MyTabs = withStyles({
   }))()
   return (
     <div className={classes.root}>
-      <div className={classes.button}>
+      <div className={classes.roundInfo}>
         <Timer timer={count_time} />
         <Switch
-          className={classes.switch}
           color="primary"
+          size="small"
           checked={!!round[0]}
           onChange={() => setRound([round[0] ? 0 : 1, round[1]])}
           disabled={round[1]}
         />
-        <div className={classes.switchInfo}>
-          <span style={{ color: round[1] ? '#C4C4C4' : '#000' }}>NewRound</span>
-          <img
+        <div style={{ display: 'flex', alignItems: 'center', fontSize: '16px' }}>
+          <span style={{ color: round[1] ? '#C4C4C4' : '#303848', fontFamily: 'Frutiger' }}>NewRound</span>
+          <span
+            style={{
+              fontFamily: 'Material Icons Outlined',
+              color: '#B2B2B2',
+              marginLeft: '2px',
+            }}
             onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
             onMouseLeave={() => setAnchorEl(null)}
-            alt=""
-            src={iconInfo}
-          />
+          >
+            info
+          </span>
           <FloatMessage2 anchorEl={anchorEl} info={textInfo['round']} />
         </div>
       </div>

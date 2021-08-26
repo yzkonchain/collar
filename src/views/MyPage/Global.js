@@ -3,12 +3,11 @@ import { makeStyles } from '@material-ui/core'
 import DynamicFont from 'react-dynamic-font'
 import { textInfo, STYLE } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
-import { iconInfo, GlobalIcon } from '@/assets/svg'
 
 const useStyles = makeStyles({
   root: {
     color: 'white',
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     '&>hr': {
       border: '#3B54A0 1px solid',
       width: '100%',
@@ -17,13 +16,9 @@ const useStyles = makeStyles({
   },
   header: {
     display: 'flex',
-    alignItems: 'center',
     fontSize: '25px',
+    alignItems: 'center',
     marginBottom: '20px',
-    '&>img': {
-      width: '20px',
-      marginRight: '5px',
-    },
   },
   data: {
     display: 'flex',
@@ -43,10 +38,6 @@ const useStyles = makeStyles({
       display: 'flex',
       alignItems: 'center',
       marginBottom: '5px',
-      '&>span': { color: '#7B96EB', marginRight: '5px' },
-      '&>img': {
-        width: '16px',
-      },
     },
     '&>div:last-child': {
       [STYLE.MOBILE]: {
@@ -101,19 +92,25 @@ export default function Global({ totalValueLocked, totalBorrowed, totalCollatera
   return (
     <div className={classes.root}>
       <div className={classes.header}>
-        <img src={GlobalIcon} alt="" />
+        <span className="material-icons-outlined">language</span>
         <span>Global</span>
       </div>
       <div className={classes.data}>
         <div className={classes.totalValue}>
           <div>
-            <span>Total Value Locked</span>
-            <img
-              src={iconInfo}
-              alt=""
+            <span style={{ color: '#7B96EB' }}>Total Value Locked</span>
+            <span
+              style={{
+                fontFamily: 'Material Icons Outlined',
+                fontSize: '18px',
+                marginLeft: '5px',
+                color: '#B2B2B2',
+              }}
               onMouseEnter={({ currentTarget: e }) => setAnchorEl(e)}
               onMouseLeave={() => setAnchorEl(null)}
-            />
+            >
+              info
+            </span>
             <FloatMessage2 anchorEl={anchorEl} info={textInfo['TotalValueLocked']} />
           </div>
           <div>$ {parseFloat(totalValueLocked || 0).toFixed(dec.tvl)}</div>

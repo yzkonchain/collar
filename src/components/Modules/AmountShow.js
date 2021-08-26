@@ -1,7 +1,6 @@
 import { ethers } from 'ethers'
 import { useMemo, useState } from 'react'
 import { makeStyles } from '@material-ui/core'
-import { iconInfo } from '@/assets/svg'
 import { FloatMessage2 } from '@/components/Modules'
 import { textInfo, tokenList } from '@/config'
 import { Price } from '@/hooks'
@@ -14,16 +13,6 @@ const useStyles = makeStyles((theme) => ({
       height: '25px',
       display: 'flex',
       alignItems: 'center',
-      '&>span': {
-        fontFamily: 'Helvetica',
-        fontSize: '0.8em',
-        verticalAlign: 'middle',
-      },
-      '&>img': {
-        marginLeft: '5px',
-        width: '14px',
-        verticalAlign: 'middle',
-      },
     },
   },
   AmountShow: {
@@ -33,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     color: '#30384B',
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     fontWeight: 'bold',
     '&>div': {
       maxWidth: 'calc(50vw - 85.5px)',
@@ -59,13 +48,26 @@ export default function AmountShow({ state: { state, token }, title, style }) {
   return (
     <div className={classes.root}>
       <div>
-        <span>{title.toUpperCase()}</span>
-        <img
+        <span
+          style={{
+            fontFamily: 'Helvetica',
+            fontSize: '14px',
+          }}
+        >
+          {title.toUpperCase()}
+        </span>
+        <span
+          style={{
+            fontFamily: 'Material Icons Outlined',
+            fontSize: '16px',
+            marginLeft: '5px',
+            color: '#B2B2B2',
+          }}
           onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
           onMouseLeave={() => setAnchorEl(null)}
-          alt=""
-          src={iconInfo}
-        />
+        >
+          info
+        </span>
         <FloatMessage2 anchorEl={anchorEl} info={textInfo[title]} />
       </div>
 

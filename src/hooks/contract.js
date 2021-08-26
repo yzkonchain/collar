@@ -4,21 +4,6 @@ import { useSnackbar } from 'notistack'
 import { Price } from '@/hooks'
 
 const ZERO = ethers.constants.Zero
-const abiToken = [
-  'function transfer(address, uint256) external',
-  'function approve(address, uint256) external',
-  'function balanceOf(address) external view returns (uint256)',
-  'function allowance(address, address) external view returns (uint256)',
-  'function totalSupply() public view returns (uint256)',
-]
-const abiPool = [
-  'function earned(address) external view returns (uint256)',
-  'function sx() external view returns (uint256)',
-  'function sy() external view returns (uint256)',
-  'function sk() external view returns (uint256)',
-  'function swap_fee() public pure returns (uint256)',
-]
-
 const controller = (address, signer, abi) => {
   return new ethers.Contract(address, abi || collar, signer)
 }
@@ -279,13 +264,13 @@ export default function contract() {
         fetch_state: async (pool) => {
           const me = await signer.getAddress()
           const init = { balance: {}, allowance: {}, earned: {}, swap: {} }
-          const collar = controller(poolConfig.collar, signer, abiToken)
-          const bond = controller(pool.bond.addr, signer, abiToken)
-          const want = controller(pool.want.addr, signer, abiToken)
-          const call = controller(pool.call.addr, signer, abiToken)
-          const coll = controller(pool.coll.addr, signer, abiToken)
-          const clpt = controller(pool.addr, signer, abiToken)
-          const poolCt = controller(pool.addr, signer, abiPool)
+          const collar = controller(poolConfig.collar, signer)
+          const bond = controller(pool.bond.addr, signer)
+          const want = controller(pool.want.addr, signer)
+          const call = controller(pool.call.addr, signer)
+          const coll = controller(pool.coll.addr, signer)
+          const clpt = controller(pool.addr, signer)
+          const poolCt = controller(pool.addr, signer)
           ;[
             init.balance.bond,
             init.balance.want,
@@ -300,6 +285,7 @@ export default function contract() {
             init.swap.sy,
             init.swap.sk,
             init.swap.fee,
+            init.reward_rate,
           ] = await Promise.all([
             bond.balanceOf(me),
             want.balanceOf(me),
@@ -314,7 +300,23 @@ export default function contract() {
             poolCt.sy(),
             poolCt.sk(),
             poolCt.swap_fee(),
+            poolCt.reward_rate(),
           ])
+          ;[init.farm_apy, init.collar_price, init.clpt_price] = await controller(poolConfig.factory, signer)
+            .getPool(poolConfig.collar, poolConfig.stablecoin, 3000)
+            .then((swap) => controller(swap, signer).slot0())
+            .then((data) => data[0])
+            .then((sqrtPrice) => (sqrtPrice * sqrtPrice) / 2 ** 192)
+            .then((res) => (poolConfig.factory > poolConfig.stablecoin ? 1 / res : res))
+            .then((collar_price) => {
+              let clpt_price = format(init.swap.sx.add(init.swap.sy)) / format(init.swap.sk)
+              return [
+                (format(init.reward_rate) / format(init.swap.sk)) * (collar_price / clpt_price) * 3153600000,
+                collar_price,
+                clpt_price,
+              ]
+            })
+            .catch(() => [0, 0, 0])
           init.apy = calc_apy(init, [null, null], pool)
           return init
         },
@@ -326,10 +328,10 @@ export default function contract() {
               if (pool) {
                 const ct = {
                   pool: controller(pool.addr, signer),
-                  bond: controller(pool.bond.addr, signer, abiToken),
-                  want: controller(pool.want.addr, signer, abiToken),
-                  coll: controller(pool.coll.addr, signer, abiToken),
-                  call: controller(pool.call.addr, signer, abiToken),
+                  bond: controller(pool.bond.addr, signer),
+                  want: controller(pool.want.addr, signer),
+                  coll: controller(pool.coll.addr, signer),
+                  call: controller(pool.call.addr, signer),
                 }
                 let [
                   coll_total,
@@ -342,6 +344,7 @@ export default function contract() {
                   call,
                   coll_total_supply,
                   call_total_supply,
+                  reward_rate,
                 ] = await Promise.all([
                   ct.pool.sx(),
                   ct.pool.sy(),
@@ -353,6 +356,7 @@ export default function contract() {
                   ct.call.balanceOf(me),
                   ct.coll.totalSupply(),
                   ct.call.totalSupply(),
+                  ct.pool.reward_rate(),
                 ])
                   .then((data) => formatMap(data, [null, pool.want.decimals, null, pool.bond.decimals]))
                   .catch(() => [0, 0, 0, 0, 0, 0, 0, 0])
@@ -363,6 +367,21 @@ export default function contract() {
                         .get_dxdy(unformat(clpt))
                         .then((data) => formatMap(data, [null, pool.want.decimals]))
                         .catch(() => [0, 0])
+                let [clpt_apy, collar_price, clpt_price] = await controller(poolConfig.factory, signer)
+                  .getPool(poolConfig.collar, poolConfig.stablecoin, 3000)
+                  .then((swap) => controller(swap, signer).slot0())
+                  .then((data) => data[0])
+                  .then((sqrtPrice) => (sqrtPrice * sqrtPrice) / 2 ** 192)
+                  .then((res) => (poolConfig.factory > poolConfig.stablecoin ? 1 / res : res))
+                  .then((collar_price) => {
+                    let clpt_price = (coll_total + want_total) / clpt_total
+                    return [
+                      (reward_rate / clpt_total) * (collar_price / clpt_price) * 3153600000,
+                      collar_price,
+                      clpt_price,
+                    ]
+                  })
+                  .catch(() => [0, 0, 0])
                 res.push({
                   pool: pool,
                   coll_total,
@@ -378,8 +397,8 @@ export default function contract() {
                   shareOfPoll: clpt_total ? (clpt / clpt_total) * 100 : 0,
                   coll_apy: 0,
                   call_apy: 0,
-                  clpt_apy: 0,
                   clpt_apr: 0,
+                  clpt_apy,
                 })
               }
             }
@@ -635,7 +654,7 @@ export default function contract() {
               if (pool) {
                 const ct = {
                   pool: controller(pool.addr, signerNoAccount),
-                  bond: controller(pool.bond.addr, signerNoAccount, abiToken),
+                  bond: controller(pool.bond.addr, signerNoAccount),
                 }
                 const [coll_total, want_total, bond_total] = await Promise.all([
                   ct.pool.sx(),

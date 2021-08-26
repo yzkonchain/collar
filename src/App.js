@@ -1,7 +1,8 @@
 import { useReducer, useState } from 'react'
+import { MyNotifyProvider } from '@/components/Modules'
 import { context } from '@/config'
 import { contract } from '@/hooks'
-import { MyNotifyProvider } from '@/components/Modules'
+
 import Header from './components/Header'
 import Navigator from './components/Navigator'
 
@@ -20,10 +21,8 @@ export default function App() {
   return (
     <MyNotifyProvider>
       <Root>
-        <div style={{ position: 'relative' }}>
-          <Header />
-          <Navigator />
-        </div>
+        <Header />
+        <Navigator />
       </Root>
     </MyNotifyProvider>
   )

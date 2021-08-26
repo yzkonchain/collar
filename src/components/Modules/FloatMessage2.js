@@ -7,8 +7,9 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     overflow: 'hidden',
-    boxShadow:
-      '0px 5px 5px -3px rgb(38 111 239 / 10%), 0px 8px 10px 1px rgb(38 111 239 / 8%), 0px 3px 14px 2px rgb(38 111 239 / 60%)',
+    boxShadow: `0px 5px 5px -3px rgb(38 111 239 / 10%), 
+      0px 8px 10px 1px rgb(38 111 239 / 8%), 
+      0px 3px 14px 2px rgb(38 111 239 / 60%)`,
     '&>div': {
       backgroundColor: 'white',
       color: '#495EB6',

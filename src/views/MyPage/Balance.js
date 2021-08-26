@@ -7,7 +7,7 @@ const useStyles = makeStyles({
   root: {
     '&>div:first-child': {
       fontSize: '25px',
-      fontFamily: 'Gillsans',
+      fontFamily: 'Frutiger',
       color: '#fff',
       marginBottom: '10px',
     },

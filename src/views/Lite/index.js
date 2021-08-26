@@ -1,19 +1,13 @@
 import { ethers } from 'ethers'
-import { useContext, useReducer, useEffect, useMemo, useState } from 'react'
+import { useContext, useReducer, useEffect, useMemo, useState, useCallback, Suspense, lazy } from 'react'
 import { makeStyles } from '@material-ui/core'
 import { context, liteContext, pools, poolSelect, STYLE } from '@/config'
 
-import Borrow from './Borrow'
-import Repay from './Repay'
-import Deposit from './Deposit'
-import Withdraw from './Withdraw'
-import Lend from './Lend'
-import Exit from './Exit'
 import Info from './Info'
 import PoolSelector from './PoolSelector'
 import { MyTabs, MyTabsChild, Loading } from '@/components/Modules'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   root: {
     position: 'relative',
     display: 'flex',
@@ -64,13 +58,13 @@ const useStyles = makeStyles((theme) => ({
     borderTop: 'none',
     padding: '15px',
   },
-}))
-const useStylesChild = makeStyles((theme) => ({
+})
+const useStylesChild = makeStyles({
   root: {},
   amount: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '15px',
+    // marginBottom: '15px',
     '&>div': {
       width: '50%',
     },
@@ -122,7 +116,7 @@ const useStylesChild = makeStyles((theme) => ({
       },
     },
   },
-}))
+})
 
 const ZERO = ethers.constants.Zero
 const data_zero = {
@@ -168,29 +162,28 @@ export default function Lite() {
     forceUpdate: {},
   })
   const { tabs, tabsChild, pool, data, round } = liteState
-
-  const handleClick = (type) =>
-    async function () {
-      if (signer) {
-        // setLoading(true)
-        const res = await controller[type].call(null, ...arguments, pool)
-        if (res) setLiteState({ forceUpdate: {} })
-        // setLoading(false)
-        return res
-      } else controller.notify('noaccount')
-    }
-
   const tabsList = ['LOAN', 'FARM', 'SWAP']
   const tabsChildList = [
     ['Borrow', 'Repay'],
     ['Deposit', 'Withdraw'],
     ['Lend', 'Exit'],
   ]
-  const Content = [
-    [Borrow, Repay],
-    [Deposit, Withdraw],
-    [Lend, Exit],
-  ][tabs][tabsChild]
+
+  const Content = useCallback(
+    lazy(() => import(`./${tabsChildList[tabs][tabsChild]}`)),
+    [tabs, tabsChild],
+  )
+
+  const handleClick = useCallback(
+    (type) =>
+      async function () {
+        return await controller[type].call(null, ...arguments, pool).then((res) => {
+          if (res) setLiteState({ forceUpdate: {} })
+          return res
+        })
+      },
+    [controller, pool],
+  )
 
   useEffect(() => {
     const poolName = `${pool.bond.addr}-${pool.want.addr}`
@@ -208,9 +201,7 @@ export default function Lite() {
         setLiteState({ data: newData, round: newRound })
         setLoading(false)
       })()
-    } else {
-      if (data !== data_zero || round[1] !== poolRound) setLiteState({ data: data_zero, round: newRound })
-    }
+    } else if (data !== data_zero || round[1] !== poolRound) setLiteState({ data: data_zero, round: newRound })
   }, [signer, pool])
 
   return useMemo(
@@ -229,7 +220,9 @@ export default function Lite() {
                 expiry={pool.expiry_time * 1000}
               />
               <PoolSelector />
-              <Content />
+              <Suspense fallback={<div style={{ height: tabs == 1 ? '389px' : '240px' }} />}>
+                <Content />
+              </Suspense>
             </div>
           </div>
           <div></div>

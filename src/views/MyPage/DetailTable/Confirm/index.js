@@ -26,7 +26,7 @@ const useStyles = makeStyles(() => ({
     '&>thead': {
       '& th': {
         color: '#275BFF',
-        fontFamily: 'Gillsans',
+        fontFamily: 'Frutiger',
         fontWeight: 'bold',
         paddingBottom: '15px',
         width: '200px',
@@ -66,7 +66,7 @@ const useStyles = makeStyles(() => ({
     },
   },
   loan: {
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     fontSize: '20px',
     margin: '5px 0',
     color: '#495EB6',

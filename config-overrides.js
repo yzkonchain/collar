@@ -25,6 +25,7 @@ module.exports = function override(config, env) {
   //     minRatio: 0.8,
   //   }),
   // )
+
   // config.module.rules.push({
   //   test: /\.js$/,
   //   exclude: /node_modules/,

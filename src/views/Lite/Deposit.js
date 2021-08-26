@@ -87,12 +87,14 @@ export default function Repay() {
           </div>
         </div>
         <ApyFloatMessage
-          APY={`todo`}
-          info={[
-            { 'Share of Pool': `${state.tip.share} %` },
-            { 'Pool Balance': `1 ${want.symbol} = ${state.tip.poolBalance} COLL` },
-            { 'Slippage tolerance': `${state.tip.slip} %` },
-          ]}
+          apy={`todo`}
+          info={
+            <div>
+              <div>Share of Pool: {state.tip.share} %</div>
+              <div>Pool Balance: {`1 ${want.symbol} = ${state.tip.poolBalance} COLL`}</div>
+              <div>Slippage tolerance: {state.tip.slip} %</div>
+            </div>
+          }
         />
         <div className={classes.buttonTwo}>
           <div>

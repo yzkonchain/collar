@@ -82,17 +82,32 @@ export default function Repay() {
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ margin: '-8px 0 8px 0', fontFamily: 'Helvetica', fontSize: '0.8em' }}>
-            Maximum debt = {format(data.balance.call)}
+          <div style={{ margin: '10px 0', fontFamily: 'Helvetica', fontSize: '12px' }}>
+            Maximum debt = {format(data.balance.call)} {want.symbol}
           </div>
           <ApyFloatMessage
-            APY={state.tip.apy}
-            info={[
-              { 'Slippage tolerance': `${state.tip.slip} %` },
-              { 'Minimum recieved': `${state.tip.min} ${bond.symbol}` },
-              { Route: `COLL-> ${bond.symbol} / ${want.symbol}->${bond.symbol}` },
-              { 'Nominal swap fee': `${state.tip.fee} ${want.symbol} ` },
-            ]}
+            apy={state.tip.apy}
+            info={
+              <div>
+                <div>Slippage tolerance: {state.tip.slip} %</div>
+                <div>
+                  Minimum recieved: {state.tip.min} {bond.symbol}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ marginRight: '5px' }}>Route:</span>
+                  <span>{coll.symbol}</span>
+                  <span className="material-icons">keyboard_double_arrow_right</span>
+                  <span>{bond.symbol}</span>
+                  <span style={{ margin: '0 5px' }}>/</span>
+                  <span>{want.symbol}</span>
+                  <span className="material-icons">keyboard_double_arrow_right</span>
+                  <span>{bond.symbol}</span>
+                </div>
+                <div>
+                  Nominal swap fee: {state.tip.fee} {want.symbol}
+                </div>
+              </div>
+            }
           />
         </div>
         <div className={classes.buttonOne}>

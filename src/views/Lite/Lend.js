@@ -75,13 +75,20 @@ export default function Lend() {
           </div>
         </div>
         <ApyFloatMessage
-          APY={state.tip.apy}
-          info={[
-            { 'Slippage tolerance': `${state.tip.slip} %` },
-            { 'Minimum recieved': `${state.tip.min} COLL` },
-            { Route: `${want.symbol} -> COLL` },
-            { 'Nominal swap fee': `${state.tip.fee} COLL` },
-          ]}
+          apy={state.tip.apy}
+          info={
+            <div>
+              <div>Slippage tolerance: {state.tip.slip} %</div>
+              <div>Minimum recieved: {state.tip.min} COLL</div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ marginRight: '5px' }}>Route:</span>
+                <span>{want.symbol}</span>
+                <span className="material-icons">keyboard_double_arrow_right</span>
+                <span>{coll.symbol}</span>
+              </div>
+              <div>Nominal swap fee: {state.tip.fee} COLL</div>
+            </div>
+          }
         />
         <div className={classes.buttonOne}>
           <div>

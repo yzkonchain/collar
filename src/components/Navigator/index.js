@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react'
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
-import { makeStyles, Drawer, Box, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
+import { makeStyles, Drawer, List, ListItem } from '@material-ui/core'
 import { context } from '@/config'
 import { LiteIcon, TermIcon, ProIcon, MypageIcon, CloseMenuIcon } from '@/assets/svg'
 
@@ -23,12 +23,14 @@ const useStyles = makeStyles((theme) => ({
   listItem: {
     flexDirection: 'column',
   },
+  icon: {
+    margin: '8px 0',
+  },
   fontSpan: {
-    '& span': {
-      fontFamily: 'Gillsans',
-      color: 'white',
-      fontSize: '18px',
-    },
+    fontFamily: 'Frutiger',
+    margin: '0 0',
+    color: 'white',
+    fontSize: '18px',
   },
   blurbg: {
     '&, &:before': {
@@ -58,10 +60,8 @@ const MyListItem = ({ onClick, item, icon, cur }) => {
       className={classes.listItem}
       style={{ backgroundColor: cur == item.toLowerCase() ? '#1E2C57' : '#4C76F9', marginBottom: '20px' }}
     >
-      <ListItemIcon style={{ display: 'inline-block', textAlign: 'center' }}>
-        <img src={icon} alt="" />
-      </ListItemIcon>
-      <ListItemText primary={item} className={classes.fontSpan} style={{ margin: '0 0' }} />
+      <img src={icon} className={classes.icon} alt="" />
+      <span className={classes.fontSpan}>{item}</span>
     </ListItem>
   )
 }
@@ -74,10 +74,8 @@ const MyListItemUrl = ({ url, item, icon }) => {
       className={classes.listItem}
       style={{ backgroundColor: '#4C76F9', marginBottom: '20px' }}
     >
-      <ListItemIcon style={{ display: 'inline-block', textAlign: 'center' }}>
-        <img src={icon} alt="" />
-      </ListItemIcon>
-      <ListItemText primary={item} className={classes.fontSpan} style={{ margin: '0 0' }} />
+      <img src={icon} className={classes.icon} alt="" />
+      <span className={classes.fontSpan}>{item}</span>
     </ListItem>
   )
 }
@@ -96,14 +94,11 @@ export default function Navigator() {
   return (
     <Router>
       <Drawer variant="persistent" anchor="left" open={menu_open} className={classes.drawer}>
-        <Box width="30vw" style={{ backgroundColor: '#4975FF' }}>
-          <Box
-            display="flex"
-            style={{ minHeight: '56px', justifyContent: 'center' }}
+        <div style={{ width: '30vw', backgroundColor: '#4975FF' }}>
+          <div
+            style={{ display: 'flex', minHeight: '56px', justifyContent: 'center' }}
             onClick={() => setState({ menu_open: false })}
-          >
-            <img src={CloseMenuIcon} alt="" />
-          </Box>
+          />
           <List style={{ padding: 0 }}>
             <MyListItem onClick={() => changePage('lite')} item="Lite" icon={LiteIcon} cur={curpage} />
             <MyListItem onClick={() => changePage('mypage')} item="MyPage" icon={MypageIcon} cur={curpage} />
@@ -112,35 +107,33 @@ export default function Navigator() {
             <MyListItem onClick={() => changePage('pro')} item="Pro" icon={ProIcon} cur={curpage} />
             <MyListItemUrl url="https://collar.org" item="Home" icon={ProIcon} />
           </List>
-        </Box>
+        </div>
       </Drawer>
       <div
         className={classes.blurbg}
         style={{ display: menu_open ? 'block' : 'none' }}
         onClick={() => setState({ menu_open: false })}
       ></div>
-      <Box>
-        <Switch>
-          <Route path="/lite">
-            <Lite />
-          </Route>
-          <Route path="/pro">
-            <Pro />
-          </Route>
-          <Route path="/term">
-            <Term />
-          </Route>
-          <Route path="/mypage">
-            <MyPage />
-          </Route>
-          <Route path="/faucet">
-            <Faucet />
-          </Route>
-          <Route path="/">
-            <Lite />
-          </Route>
-        </Switch>
-      </Box>
+      <Switch>
+        <Route path="/lite">
+          <Lite />
+        </Route>
+        <Route path="/pro">
+          <Pro />
+        </Route>
+        <Route path="/term">
+          <Term />
+        </Route>
+        <Route path="/mypage">
+          <MyPage />
+        </Route>
+        <Route path="/faucet">
+          <Faucet />
+        </Route>
+        <Route path="/">
+          <Lite />
+        </Route>
+      </Switch>
     </Router>
   )
 }

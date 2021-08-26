@@ -1,7 +1,6 @@
 import { ethers } from 'ethers'
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { TextField, makeStyles } from '@material-ui/core'
-import { iconInfo } from '@/assets/svg'
 import { FloatMessage2 } from '@/components/Modules'
 import { textInfo, tokenList } from '@/config'
 import { Price } from '@/hooks'
@@ -14,16 +13,6 @@ const useStyles = makeStyles((theme) => ({
       height: '25px',
       display: 'flex',
       alignItems: 'center',
-      '&>span': {
-        fontFamily: 'Helvetica',
-        fontSize: '0.8em',
-        verticalAlign: 'middle',
-      },
-      '&>img': {
-        marginLeft: '5px',
-        width: '14px',
-        verticalAlign: 'middle',
-      },
     },
   },
   AmountInput: {
@@ -34,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     position: 'relative',
     '& input': {
-      fontFamily: 'Gillsans',
+      fontFamily: 'Frutiger',
       padding: '0',
       margin: '0 5px 0 0',
       fontSize: ({ fontSize }) => `${fontSize}px`,
@@ -44,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
       color: '#30384B',
     },
     '& button': {
-      fontFamily: 'Gillsans',
+      fontFamily: 'Frutiger',
       fontSize: '0.8em',
       color: 'white',
       background: '#30384B',
@@ -77,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   token: {
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     fontSize: '12px',
     fontWeight: 'bold',
     color: '#30384B',
@@ -87,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
     color: '#99A8C9',
     margin: '5px',
     fontWeight: 'bold',
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     fontSize: '12px',
   },
 }))
@@ -112,10 +101,10 @@ export default function AmountInput({ State, title, style }) {
           (value.indexOf('.') == -1 ? 0 : value.length - value.indexOf('.') - 1) > token.decimals
         )
           return
-        if (max.lt(parse(value))) {
-          enqueueSnackbar({ type: 'failed', title: 'Fail.', message: 'Maximum range exceeded.' })
-          return
-        }
+        // if (max.lt(parse(value))) {
+        //   enqueueSnackbar({ type: 'failed', title: 'Fail.', message: 'Maximum range exceeded.' })
+        //   return
+        // }
         setState({ I: { ...state.I, [title]: value }, old: { ...state.old, [title]: old } })
       }
     },
@@ -133,13 +122,26 @@ export default function AmountInput({ State, title, style }) {
     () => (
       <div className={classes.root}>
         <div>
-          <span>{title.toUpperCase()}</span>
-          <img
+          <span
+            style={{
+              fontFamily: 'Helvetica',
+              fontSize: '14px',
+            }}
+          >
+            {title.toUpperCase()}
+          </span>
+          <span
+            style={{
+              fontFamily: 'Material Icons Outlined',
+              fontSize: '16px',
+              marginLeft: '5px',
+              color: '#B2B2B2',
+            }}
             onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
             onMouseLeave={() => setAnchorEl(null)}
-            alt={title}
-            src={iconInfo}
-          />
+          >
+            info
+          </span>
           <FloatMessage2 anchorEl={anchorEl} info={textInfo[title]} />
         </div>
         <div className={classes.AmountInput} style={style}>
@@ -170,7 +172,9 @@ export default function AmountInput({ State, title, style }) {
             ></TextField>
           </div>
           <span className={classes.token}>{token.symbol}</span>
-          <span className={classes.dollar}>~${(Price[token.addr] * state.I[title]).toFixed(3)}</span>
+          {token.symbol != 'CLPT' && (
+            <span className={classes.dollar}>~${(Price[token.addr] * state.I[title]).toFixed(3)}</span>
+          )}
         </div>
       </div>
     ),

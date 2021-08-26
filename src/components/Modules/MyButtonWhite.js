@@ -1,7 +1,7 @@
 import { makeStyles } from '@material-ui/core'
 import { buttonWhite, buttonWhiteHover } from '@/assets/svg'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   button: {
     padding: '0',
     background: 'none',
@@ -14,12 +14,12 @@ const useStyles = makeStyles((theme) => ({
     color: 'white',
     margin: '5px 0',
     fontSize: '14px',
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     '&:hover': {
-      backgroundImage: `url(${buttonWhiteHover})`,
+      backgroundImage: ({ disabled }) => (disabled ? `url(${buttonWhite})` : `url(${buttonWhiteHover})`),
     },
     '&:active': {
-      transform: 'translateY(3px)',
+      transform: ({ disabled }) => (disabled ? 'none' : 'translateY(3px)'),
     },
     '&:focus': {},
   },
@@ -27,10 +27,10 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     transform: 'translate(-50%, -70%)',
   },
-}))
+})
 
 export default function Button({ name, onClick, disabled }) {
-  const classes = useStyles()
+  const classes = useStyles({ disabled })
   return (
     <button className={classes.button} {...{ onClick, disabled }}>
       <span className={classes.span}>{name}</span>

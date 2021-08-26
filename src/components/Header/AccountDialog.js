@@ -52,7 +52,7 @@ export default function AccountDialog({ open, onClose, disconnect }) {
           <CardContent>
             {address ? (
               <Box
-                fontFamily="Monospace"
+                fontFamily="Avenir"
                 textOverflow="ellipsis"
                 overflow="hidden"
                 m={1}

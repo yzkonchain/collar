@@ -25,7 +25,7 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     color: 'white',
     padding: '10px',
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
   },
   title: {
     margin: '-100px 0 10px',
@@ -40,6 +40,9 @@ const useStyles = makeStyles({
     display: 'flex',
     fontSize: '18px',
     margin: '5px',
+    '&>span': {
+      margin: '2px',
+    },
     [STYLE.MOBILE]: {
       flexDirection: 'column',
       alignItems: 'center',
@@ -129,7 +132,7 @@ export default function Faucet() {
                   }}
                 >
                   <img alt="" src={token.icon} style={{ width: '20px', marginLeft: '10px' }} />
-                  <span style={{ fontFamily: 'Gillsans', margin: '0 20px' }}>{token.symbol}</span>
+                  <span style={{ fontFamily: 'Frutiger', margin: '0 20px' }}>{token.symbol}</span>
                 </MenuItem>
               ))}
             </MenuList>

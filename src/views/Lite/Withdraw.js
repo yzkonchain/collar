@@ -78,15 +78,15 @@ export default function Withdraw() {
           </div>
         </div>
         <ApyFloatMessage
-          APY={`todo`}
-          info={[
-            {
-              'Exchange Rate': `1CLPT = ${state.tip.rate.want} ${want.symbol} + ${state.tip.rate.coll} COLL`,
-            },
-            { 'Share of Pool': `${state.tip.share} %` },
-            { 'Pool Balance': `1 ${want.symbol} = ${state.tip.poolBalance} COLL` },
-            { 'Nominal swap fee': `${state.tip.fee} COLL` },
-          ]}
+          apy={`todo`}
+          info={
+            <div>
+              <div>Exchange Rate: {`1CLPT = ${state.tip.rate.want} ${want.symbol} + ${state.tip.rate.coll} COLL`}</div>
+              <div>Share of Pool: {state.tip.share} %</div>
+              <div>Pool Balance: {`1 ${want.symbol} = ${state.tip.poolBalance} COLL`}</div>
+              <div>Nominal swap fee: {state.tip.fee} COLL</div>
+            </div>
+          }
         />
         <div className={classes.buttonTwo}>
           <div>

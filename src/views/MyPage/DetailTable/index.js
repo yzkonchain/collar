@@ -8,7 +8,7 @@ import Confirm from './Confirm'
 
 const useStyles = makeStyles({
   root: {
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     color: 'white',
     '&>div': {
       marginBottom: '40px',

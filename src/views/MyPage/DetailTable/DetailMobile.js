@@ -27,7 +27,7 @@ const useStyles = makeStyles({
           padding: 0,
           border: 'none',
           fontSize: '18px',
-          fontFamily: 'Gillsans',
+          fontFamily: 'Frutiger',
           whiteSpace: 'nowrap',
         },
         '& button': {
@@ -46,7 +46,7 @@ const useStyles = makeStyles({
     paddingRight: '25px !important',
   },
   clpt: {
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     fontSize: '18px',
     color: 'white',
     display: 'flex',

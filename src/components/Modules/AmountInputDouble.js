@@ -1,7 +1,6 @@
 import { ethers } from 'ethers'
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { makeStyles, withStyles, TextField, Tabs, Tab } from '@material-ui/core'
-import { iconInfo } from '@/assets/svg'
 import { FloatMessage2 } from '@/components/Modules'
 import { textInfo } from '@/config'
 import { Price } from '@/hooks'
@@ -16,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     position: 'relative',
     '& input': {
-      fontFamily: 'Gillsans',
+      fontFamily: 'Frutiger',
       padding: '0',
       margin: '0 5px 0 0',
       fontSize: (props) => props.fontSize,
@@ -26,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
       color: '#30384B',
     },
     '& button': {
-      fontFamily: 'Gillsans',
+      fontFamily: 'Frutiger',
       fontSize: '0.8em',
       color: 'white',
       background: '#30384B',
@@ -59,20 +58,21 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   token: {
-    fontFamily: 'Gillsans',
-    fontSize: '12px',
+    fontFamily: 'Frutiger',
     fontWeight: 'bold',
+    fontSize: '12px',
     color: '#30384B',
     marginLeft: '2px',
   },
   dollar: {
+    fontFamily: 'Frutiger',
+    fontWeight: 'bold',
+    fontSize: '12px',
     color: '#99A8C9',
     margin: '5px',
-    fontWeight: 'bold',
-    fontFamily: 'Gillsans',
-    fontSize: '12px',
   },
 }))
+
 const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
@@ -84,17 +84,10 @@ const MyTabs = withStyles({
     margin: '5px 0',
     height: '25px',
     '&>button': {
-      minHeight: '0',
-      minWidth: '0',
-      padding: '0',
-      marginRight: '15px',
-      border: 'none !important',
-      fontFamily: 'Helvetica',
-      fontSize: '0.8em',
-      textTransform: 'uppercase',
-      '&>span': {
-        alignItems: 'start',
-      },
+      minHeight: 0,
+      minWidth: 0,
+      padding: 0,
+      marginRight: '10px',
     },
   },
   indicator: {
@@ -112,14 +105,20 @@ const MyTabs = withStyles({
             classes={{ selected: makeStyles({ s: { fontWeight: 'bold', color: '#275bff' } })().s }}
             label={
               <div>
-                <span style={{ verticalAlign: 'middle' }}>{v}</span>
-                <img
+                <span style={{ fontFamily: 'Helvetica', fontSize: '14px' }}>{v}</span>
+                <span
+                  style={{
+                    fontFamily: 'Material Icons Outlined',
+                    fontSize: '16px',
+                    textTransform: 'none',
+                    marginLeft: '5px',
+                    color: '#B2B2B2',
+                  }}
                   onMouseEnter={(e) => setAnchorEl({ [k]: e.currentTarget })}
                   onMouseLeave={() => setAnchorEl({})}
-                  alt=""
-                  src={iconInfo}
-                  style={{ width: '14px', marginLeft: '5px', verticalAlign: 'middle' }}
-                />
+                >
+                  info
+                </span>
                 <FloatMessage2 anchorEl={anchorEl[k]} info={props.info[k]} />
               </div>
             }
@@ -145,10 +144,10 @@ const MyInput = ({ state, setState, title, max, if_max, token, style }) => {
           (value.indexOf('.') == -1 ? 0 : value.length - value.indexOf('.') - 1) > token.decimals
         )
           return
-        if (max.lt(parse(value))) {
-          enqueueSnackbar({ type: 'failed', title: 'Fail.', message: 'Maximum range exceeded.' })
-          return
-        }
+        // if (max.lt(parse(value))) {
+        //   enqueueSnackbar({ type: 'failed', title: 'Fail.', message: 'Maximum range exceeded.' })
+        //   return
+        // }
         setState({ I: { ...state.I, [title]: value }, old: { ...state.old, [title]: old } })
       }
     },

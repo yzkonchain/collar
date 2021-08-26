@@ -75,13 +75,24 @@ export default function Exit() {
           </div>
         </div>
         <ApyFloatMessage
-          APY={state.tip.apy}
-          info={[
-            { 'Slippage tolerance': `${state.tip.slip} %` },
-            { 'Minimum recieved': `${state.tip.min} ${want.symbol}` },
-            { Route: `COLL -> ${want.symbol}` },
-            { 'Nominal swap fee': `${state.tip.fee} ${want.symbol} ` },
-          ]}
+          apy={state.tip.apy}
+          info={
+            <div>
+              <div>Slippage tolerance: {state.tip.slip} %</div>
+              <div>
+                Minimum recieved: {state.tip.min} {want.symbol}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ marginRight: '5px' }}>Route:</span>
+                <span>{coll.symbol}</span>
+                <span className="material-icons">keyboard_double_arrow_right</span>
+                <span>{want.symbol}</span>
+              </div>
+              <div>
+                Nominal swap fee: {state.tip.fee} {want.symbol}
+              </div>
+            </div>
+          }
         />
         <div className={classes.buttonOne}>
           <div>

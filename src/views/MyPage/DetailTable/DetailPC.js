@@ -27,7 +27,7 @@ const useStyles = makeStyles({
           padding: 0,
           border: 'none',
           fontSize: '18px',
-          fontFamily: 'Gillsans',
+          fontFamily: 'Frutiger',
           whiteSpace: 'nowrap',
         },
         '& button': {
@@ -147,8 +147,16 @@ export default function PC({ pool, val, handleClick }) {
               <TableCell />
               <TableCell />
               <TableCell className={classes.button}>
-                <MyButtonWhite name="Redeem All" onClick={() => handleClick('redeemAll', pool)} />
-                <MyButtonWhite name="Settle" onClick={() => handleClick('settle', pool)} />
+                <MyButtonWhite
+                  name="Redeem All"
+                  onClick={() => handleClick('redeemAll', pool)}
+                  disabled={pool.expiry_time * 1000 < new Date()}
+                />
+                <MyButtonWhite
+                  name="Settle"
+                  onClick={() => handleClick('settle', pool)}
+                  disabled={pool.expiry_time * 1000 > new Date()}
+                />
               </TableCell>
             </TableRow>
             <TableRow>

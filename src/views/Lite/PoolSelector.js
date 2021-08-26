@@ -7,9 +7,9 @@ const useStyles = makeStyles({
   root: {},
   formControlTitle: {
     fontFamily: 'Helvetica',
-    fontSize: '0.8em',
+    fontSize: '14px',
     display: 'block',
-    margin: '20px 0 5px',
+    margin: '15px 0 5px',
     color: '#30384B',
   },
   formControlList: {
@@ -28,7 +28,7 @@ const useStyles = makeStyles({
   formControl: {
     width: '50%',
     '& span': {
-      fontFamily: 'Gillsans',
+      fontFamily: 'Frutiger',
     },
   },
   icon: {
@@ -71,7 +71,7 @@ export default function PoolSelector() {
               {bondList.map(({ addr, icon, symbol }) => (
                 <MenuItem value={addr} key={addr}>
                   <img alt="" src={icon} className={classes.icon} style={{ width: '20px' }} />
-                  <span style={{ fontFamily: 'Gillsans' }}>{symbol}</span>
+                  <span style={{ fontFamily: 'Frutiger' }}>{symbol}</span>
                 </MenuItem>
               ))}
             </Select>
@@ -88,7 +88,7 @@ export default function PoolSelector() {
               {wantList[bond.addr].map(({ addr, icon, symbol }) => (
                 <MenuItem value={addr} key={addr}>
                   <img alt="" src={icon} className={classes.icon} style={{ width: '20px' }} />
-                  <span style={{ fontFamily: 'Gillsans' }}>{symbol}</span>
+                  <span style={{ fontFamily: 'Frutiger' }}>{symbol}</span>
                 </MenuItem>
               ))}
             </Select>

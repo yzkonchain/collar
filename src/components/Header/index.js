@@ -1,8 +1,8 @@
 import { ethers } from 'ethers'
-import Web3Modal from 'web3modal'
-import WalletConnectProvider from '@walletconnect/web3-provider'
 import { useContext, useEffect, useState } from 'react'
 import { makeStyles, Icon, Box, AppBar, Toolbar, IconButton, Typography } from '@material-ui/core'
+import Web3Modal from 'web3modal'
+import WalletConnectProvider from '@walletconnect/web3-provider'
 import { context, poolConfig } from '@/config'
 
 import ConnectWallet from './ConnectWallet'
@@ -93,7 +93,7 @@ export default function Header() {
         <AppBar position="static" className={classes.appbar}>
           <Toolbar className={classes.toolbar}>
             <Box maxWidth="10vw" display={menu_open ? 'none' : 'block'}>
-              <IconButton color="inherit" onClick={() => setState({ menu_open: true })} edge="start">
+              <IconButton color="inherit" onClick={() => setState({ menu_open: true })}>
                 <Icon>menu_icon</Icon>
               </IconButton>
             </Box>

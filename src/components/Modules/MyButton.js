@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
       position: 'absolute',
       display: 'flex',
       '& span': {
-        fontFamily: 'Gillsans',
+        fontFamily: 'Frutiger',
         fontSize: '1.1em',
         margin: 'auto',
       },

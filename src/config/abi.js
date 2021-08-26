@@ -1,4 +1,4 @@
-const collar = [
+const abi = [
   'function sx() external view returns (uint256)',
   'function sy() external view returns (uint256)',
   'function sk() external view returns (uint256)',
@@ -23,6 +23,12 @@ const collar = [
   'function mint_dual(uint256) public',
   'function balanceOf(address) external view returns (uint256)',
   'function totalSupply() public view returns (uint256)',
+  'function reward_rate() public view returns (uint256)',
+  'function getPool(address,address,uint24) external view returns (address)',
+  'function slot0() external view returns (uint160,int24,uint16,uint16,uint16,uint8,bool)',
+  'function transfer(address, uint256) external',
+  'function approve(address, uint256) external',
+  'function allowance(address, address) external view returns (uint256)',
 ]
 
-export default collar
+export default abi

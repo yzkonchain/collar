@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   title: {
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     color: 'white',
     display: 'flex',
     justifyContent: 'space-between',
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
   },
   amount: {
     width: '100%',
-    fontFamily: 'Gillsans',
+    fontFamily: 'Frutiger',
     fontSize: '1.5em',
     marginTop: '5px',
     color: 'white',

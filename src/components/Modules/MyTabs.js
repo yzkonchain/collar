@@ -9,7 +9,7 @@ const MyTab = withStyles({
     border: '#c1c1c1 2px solid',
     borderBottom: '#4c4c4c 2px solid',
     '&>span': {
-      fontFamily: 'Gillsans',
+      fontFamily: 'Frutiger',
       color: '#fff',
       alignItems: 'start',
     },

@@ -8,7 +8,9 @@ const poolConfig = {
   network: 'ropsten',
   chainid: 3,
   infuraid: '9180c5a422ac44f9b21ad7927b6b662c',
+  factory: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
   collar: '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE',
+  stablecoin: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
   gasAdjustment: 120,
 }
 

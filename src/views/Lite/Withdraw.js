@@ -37,7 +37,9 @@ export default function Withdraw() {
       const clpt = parse(state.I.clpt)
       if (!clpt.eq(state.input.clpt)) {
         const res = await pool.ct.get_dxdy(clpt).catch((res) => {
-          controller.notify('balance', 'insufficient')
+          if (state.I.clpt.length > state.old.clpt.length && state.I.clpt.length < format(state.input.clpt).length) {
+            controller.notify('balance', 'insufficient')
+          }
           return false
         })
         if (res) {

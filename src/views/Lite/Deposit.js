@@ -37,7 +37,12 @@ export default function Repay() {
       const coll = parse(state.I.coll)
       if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
         const clpt = await pool.ct.get_dk(coll, want).catch(() => {
-          controller.notify('balance', 'insufficient')
+          if (
+            (state.I.want.length > state.old.want.length && state.I.want.length < format(state.input.want).length) ||
+            (state.I.coll.length > state.old.coll.length && state.I.coll.length < format(state.input.coll).length)
+          ) {
+            controller.notify('balance', 'insufficient')
+          }
           return false
         })
         if (clpt) {

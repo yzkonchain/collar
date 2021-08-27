@@ -68,7 +68,11 @@ export default function Repay() {
                     ? data.balance.coll
                     : data.balance.call.sub(state.input.want),
                 ],
-                if_max: [data.allowance.want.gt('100000000000000000000000000000000'), data.balance.coll.gt('0')],
+                if_max: [
+                  data.allowance.want.gt('100000000000000000000000000000000') &&
+                    state.output.bond.lt(data.balance.call),
+                  data.balance.coll.gt('0') && state.output.bond.lt(data.balance.call),
+                ],
               }}
               style={{ height: '90px' }}
             />
@@ -80,7 +84,7 @@ export default function Repay() {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ margin: '10px 0', fontFamily: 'Helvetica', fontSize: '12px' }}>
-            Maximum debt = {format(data.balance.call)} {want.symbol}
+            Maximum debt = {format(data.balance.call)} {pool.call.symbol}
           </div>
           <ApyFloatMessage
             apy={state.tip.apy}
@@ -120,7 +124,12 @@ export default function Repay() {
                 (await handleClick('repay')(state.input.want, state.input.coll)) &&
                 setState({ I: { want: '', coll: '' } })
               }
-              disabled={ZERO.eq(state.output.bond)}
+              disabled={
+                ZERO.eq(state.output.bond) ||
+                state.output.bond.gt(data.balance.call) ||
+                parse(state.I.want, pool.want.decimals).gt(data.balance.want) ||
+                parse(state.I.coll).gt(data.balance.coll)
+              }
             />
           </div>
         </div>

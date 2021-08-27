@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@material-ui/core'
 import { Price } from '@/hooks'
+import { poolConfig } from '@/config'
 import { MyButtonWhite } from '@/components/Modules'
 
 const useStyles = makeStyles({
@@ -117,7 +118,9 @@ export default function PC({ pool, val, handleClick }) {
               <TableCell align="center">{parseFloat(val.shareOfPoll).toFixed(dec.sop)}%</TableCell>
               <TableCell align="center">
                 <div>{parseFloat(val.earned).toFixed(dec.earned)}</div>
-                <div className={classes.price}>~${parseFloat(val.earned * Price['COLLAR']).toFixed(dec.price)}</div>
+                <div className={classes.price}>
+                  ~${parseFloat(val.earned * Price[poolConfig.collar]).toFixed(dec.price)}
+                </div>
               </TableCell>
               <TableCell className={classes.button}>
                 <MyButtonWhite name={'Withdraw All'} onClick={() => handleClick('withdrawAll', pool)} />
@@ -134,7 +137,7 @@ export default function PC({ pool, val, handleClick }) {
               </TableCell>
               <TableCell align="center">
                 <div>{parseFloat(val.coll).toFixed(dec.balance)}</div>
-                <div className={classes.price}>~${parseFloat(val.coll * Price['COLL']).toFixed(dec.price)}</div>
+                <div className={classes.price}>~${parseFloat(val.coll * Price[pool.coll.addr]).toFixed(dec.price)}</div>
               </TableCell>
               <TableCell align="center">{parseFloat(val.coll_apy).toFixed(dec.apy)}%</TableCell>
               <TableCell />

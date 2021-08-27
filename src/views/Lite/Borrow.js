@@ -36,7 +36,9 @@ export default function Borrow() {
       const bond = parse(state.I.bond, pool.bond.decimals)
       if (!bond.eq(state.input.bond)) {
         const want = await pool.ct.get_dy(bond).catch((bond) => {
-          controller.notify('balance', 'insufficient')
+          if (state.I.bond.length > state.old.bond.length && state.I.bond.length < format(state.input.bond).length) {
+            controller.notify('balance', 'insufficient')
+          }
           return false
         })
         if (want) {
@@ -50,7 +52,7 @@ export default function Borrow() {
         }
       }
     })()
-  }, [state])
+  }, [state.I])
 
   return useMemo(
     () => (

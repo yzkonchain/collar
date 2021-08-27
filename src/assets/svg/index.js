@@ -15,8 +15,6 @@ import NewroundLeftIcon from './status/statusNewroundLeft.svg'
 import NewroundRightIcon from './status/statusNewroundRight.svg'
 import AnyIcon from './status/statusAny.svg'
 
-import TabsArrow from './other/tabsArrow.svg'
-
 export {
   buttonAble,
   buttonDisabled,
@@ -32,5 +30,4 @@ export {
   NewroundLeftIcon,
   NewroundRightIcon,
   AnyIcon,
-  TabsArrow,
 }

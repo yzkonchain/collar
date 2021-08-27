@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@material-ui/core'
 import { Price } from '@/hooks'
+import { poolConfig } from '@/config'
 import { MyButtonWhite } from '@/components/Modules'
 
 const useStyles = makeStyles({
@@ -34,10 +35,6 @@ const useStyles = makeStyles({
     '& th': {
       paddingBottom: '10px !important',
     },
-  },
-  rowApy: {
-    width: 0,
-    paddingRight: '25px !important',
   },
   clpt: {
     fontFamily: 'Frutiger',
@@ -65,11 +62,11 @@ const useStyles = makeStyles({
     },
   },
   button: {
-    width: 0,
-    padding: '10px 0 !important',
-    '& button': {
-      display: 'block',
-    },
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    padding: '15px 0 !important',
   },
   token: {
     fontSize: '12px',
@@ -84,9 +81,6 @@ const useStyles = makeStyles({
         left: '-15px',
       },
     },
-  },
-  cellWidthEmpty: {
-    width: 0,
   },
   price: {
     fontSize: '10px',
@@ -115,7 +109,7 @@ export default function Mobile({ pool, val, handleClick }) {
             <TableRow>
               <TableCell>Token</TableCell>
               <TableCell align="center">Balance</TableCell>
-              <TableCell>APY</TableCell>
+              <TableCell align="center">APY</TableCell>
               <TableCell />
             </TableRow>
           </TableHead>
@@ -130,14 +124,20 @@ export default function Mobile({ pool, val, handleClick }) {
               </TableCell>
               <TableCell align="center">
                 <div>{parseFloat(val.coll).toFixed(dec.balance)}</div>
-                <div className={classes.price}>~${parseFloat(val.coll * Price['COLL']).toFixed(dec.price)}</div>
+                <div className={classes.price}>~${parseFloat(val.coll * Price[pool.coll.addr]).toFixed(dec.price)}</div>
               </TableCell>
-              <TableCell align="center" className={classes.rowApy}>
-                {parseFloat(val.coll_apy).toFixed(dec.apy)}%
-              </TableCell>
+              <TableCell align="center">{parseFloat(val.coll_apy).toFixed(dec.apy)}%</TableCell>
               <TableCell className={classes.button}>
-                <MyButtonWhite name="Redeem All" onClick={() => handleClick('redeemAll', pool)} />
-                <MyButtonWhite name="Settle" onClick={() => handleClick('settle', pool)} />
+                <MyButtonWhite
+                  name="Redeem All"
+                  onClick={() => handleClick('redeemAll', pool)}
+                  disabled={pool.expiry_time * 1000 < new Date()}
+                />
+                <MyButtonWhite
+                  name="Settle"
+                  onClick={() => handleClick('settle', pool)}
+                  disabled={pool.expiry_time * 1000 > new Date()}
+                />
               </TableCell>
             </TableRow>
             <TableRow>
@@ -150,11 +150,8 @@ export default function Mobile({ pool, val, handleClick }) {
               </TableCell>
               <TableCell align="center">
                 <div>{parseFloat(val.call).toFixed(dec.balance)}</div>
-                <div className={classes.price}>~${parseFloat(val.call * Price['COLL']).toFixed(dec.price)}</div>
               </TableCell>
-              <TableCell align="center" className={classes.rowApy}>
-                {parseFloat(val.call_apy).toFixed(dec.apy)}%
-              </TableCell>
+              <TableCell />
               <TableCell className={classes.button}>
                 <MyButtonWhite name="Repay All" onClick={() => handleClick('repayAll', pool)} />
               </TableCell>
@@ -172,9 +169,7 @@ export default function Mobile({ pool, val, handleClick }) {
                 <div>{parseFloat(val.clpt).toFixed(dec.balance)}</div>
                 <div className={classes.price}>~${parseFloat(val.receivables).toFixed(dec.price)}</div>
               </TableCell>
-              <TableCell align="center" className={classes.rowApy}>
-                {parseFloat(val.clpt_apy).toFixed(dec.apy)}%
-              </TableCell>
+              <TableCell align="center">{parseFloat(val.clpt_apy).toFixed(dec.apy)}%</TableCell>
               <TableCell className={classes.button}>
                 <MyButtonWhite name={'Withdraw'} onClick={() => handleClick('withdrawAll', pool)} />
               </TableCell>
@@ -195,7 +190,10 @@ export default function Mobile({ pool, val, handleClick }) {
           </div>
           <div>
             <span>Claimable COLLAR</span>
-            <span>{parseFloat(val.earned).toFixed(dec.earned)}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
+              <span>{parseFloat(val.earned).toFixed(dec.earned)}</span>
+              <span className={classes.price}>~${(val.earned * Price[poolConfig.collar]).toFixed(dec.price)}</span>
+            </div>
           </div>
         </div>
         <MyButtonWhite name={'Claim'} onClick={() => handleClick('claim', pool)} />

@@ -1,18 +1,26 @@
-const price = {
-  COLLAR: 1,
-  '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE': 1,
-  USDT: 1,
-  '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0': 1,
-  USDC: 1,
-  '0x67C9a0830d922C80A96408EEdF606c528836880C': 1,
-  COLL: 1,
-  '0x25a722fbd8c4080937CAD2A4DFa2eeeA29539231': 1,
-  '0x61E04744eD53E1Ae61A9325A5Eba31AEA24eca4D': 1,
-  '0x38C4A0d539F8e9AFA5EFBD46aAA6b31013480c00': 1,
-  CALL: 1,
-  '0x9D8FEb661AFc92b83c45fC21836C114164beB285': 1,
-  '0x404Ced902eE6d630db51969433ea7DD2EE3524B8': 1,
-  '0xEA84958BAC11f7665e339599595c425A81E894d6': 1,
+import { tokenList } from '@/config'
+import CoinGecko from 'coingecko-api'
+const CoinGeckoClient = new CoinGecko()
+
+const Price = {}
+Object.keys(tokenList).forEach((addr) => (Price[addr] = 1))
+
+const coinMap = {
+  tether: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
+  'usd-coin': '0x67C9a0830d922C80A96408EEdF606c528836880C',
+}
+const coinList = Object.keys(coinMap)
+
+async function getPrice() {
+  CoinGeckoClient.simple
+    .price({ ids: coinList })
+    .then(({ code, data }) => {
+      if (code === 200) coinList.forEach((coin) => (Price[coinMap[coin]] = data[coin].usd))
+      else throw new Error()
+    })
+    .catch(console.log)
 }
 
-export default price
+getPrice()
+
+export { Price, getPrice }

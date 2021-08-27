@@ -36,7 +36,9 @@ export default function Exit() {
       const coll = parse(state.I.coll)
       if (!coll.eq(state.input.coll)) {
         const want = await pool.ct.get_dy(coll).catch(() => {
-          controller.notify('balance', 'insufficient')
+          if (state.I.coll.length > state.old.coll.length && state.I.coll.length < format(state.input.coll).length) {
+            controller.notify('balance', 'insufficient')
+          }
           return false
         })
         if (want) {

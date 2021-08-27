@@ -11,7 +11,6 @@ import {
 } from '@material-ui/core'
 import { textInfo, STYLE } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
-import { TabsArrow } from '@/assets/svg'
 
 const timer = (time) => {
   const dtime = new Date(time) - new Date()
@@ -92,7 +91,7 @@ const MyTab = withStyles({
     padding: '0',
     textTransform: 'capitalize',
     fontWeight: 'bold',
-    fontSize: '1.1em',
+    fontSize: '18px',
     color: '#30384B',
     '&>span': {
       alignItems: 'start',
@@ -143,11 +142,6 @@ const MyTabs = withStyles({
       position: 'absolute',
       right: 0,
     },
-    expanded: {
-      background: 'none',
-      border: 'none',
-      padding: 0,
-    },
     hr: {
       position: 'absolute',
       top: '24px',
@@ -192,17 +186,25 @@ const MyTabs = withStyles({
             label={
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span>{v}</span>
-                <img
-                  onClick={() => setExpanded({ ...expanded, [v]: !expanded[v] })}
-                  className={classes.expanded}
+                <span
                   style={{
-                    margin: '0 6px',
-                    width: '30px',
-                    display: v === selected ? 'inline' : 'none',
-                    transform: expanded[v] ? 'initial' : 'rotateX(180deg)',
+                    display: v === selected ? 'flex' : 'none',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#275BFF',
+                    color: 'white',
+                    textTransform: 'none',
+                    fontFamily: 'Material Icons',
+                    fontSize: '18px',
+                    margin: '0 8px',
+                    height: '14px',
+                    width: '24px',
+                    borderRadius: '8px',
                   }}
-                  src={TabsArrow}
-                />
+                  onClick={() => setExpanded({ ...expanded, [v]: !expanded[v] })}
+                >
+                  {expanded[v] ? 'expand_less' : 'expand_more'}
+                </span>
               </div>
             }
           />

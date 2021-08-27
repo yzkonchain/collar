@@ -36,7 +36,9 @@ export default function Lend() {
       const want = parse(state.I.want, pool.want.decimals)
       if (!want.eq(state.input.want)) {
         const coll = await pool.ct.get_dx(want).catch(() => {
-          controller.notify('balance', 'insufficient')
+          if (state.I.want.length > state.old.want.length && state.I.want.length < format(state.input.want).length) {
+            controller.notify('balance', 'insufficient')
+          }
           return false
         })
         if (coll) {

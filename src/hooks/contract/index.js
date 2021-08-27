@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { abi as collar, pools, poolList, tokenList, poolConfig, signerNoAccount, mypageDetailInit } from '@/config'
+import { pools, tokenList, poolConfig } from '@/config'
 import { useSnackbar } from 'notistack'
 import { Price } from '@/hooks'
 
@@ -39,6 +39,13 @@ const calc_slip = ({ swap: { sx, sy, sk } }, [bond, want], { swap_sqp, expiry_ti
   ) *
     3155692600000) /
   (expiry_time * 1000 - new Date())
+const calc_collar_price = async () => {
+  return await pricePool_ct
+    .slot0()
+    .then((data) => data[0])
+    .then((sqrtPrice) => sqrtPrice ** 2 / 2 ** 192)
+    .then((res) => 1 / res)
+}
 
 const callbackInfo = (method, status) => {
   const failed = {
@@ -259,8 +266,9 @@ export default function contract() {
     calc_slip,
     notify,
     fetch_state: async (pool) => {
-      const me = pool.ct.signer ? await pool.ct.signer.getAddress() : null
       const init = { balance: {}, allowance: {}, earned: {}, swap: {} }
+      const me = pool.ct.signer ? pool.ct.signer.getAddress() : null
+      const collar_price = await calc_collar_price()
       ;[
         init.balance.collar,
         init.balance.bond,
@@ -292,29 +300,19 @@ export default function contract() {
         pool.ct.swap_fee(),
         pool.ct.reward_rate(),
       ])
-      ;[init.farm_apy, init.collar_price, init.clpt_price] = await pricePool_ct
-        .slot0()
-        .then((data) => data[0])
-        .then((sqrtPrice) => sqrtPrice ** 2 / 2 ** 192)
-        .then((res) => 1 / res)
-        .then((collar_price) => {
-          let clpt_price = format(init.swap.sx.add(init.swap.sy)) / format(init.swap.sk)
-          return [
-            (format(init.reward_rate) / format(init.swap.sk)) * (collar_price / clpt_price) * 3153600000,
-            collar_price,
-            clpt_price,
-          ]
-        })
-        .catch(() => [0, 0, 0])
+      init.clpt_price = format(init.swap.sx.add(init.swap.sy)) / format(init.swap.sk)
+      init.farm_apy = (format(init.reward_rate) / format(init.swap.sk)) * (collar_price / init.clpt_price) * 3153600000
       init.apy = calc_apy(init, [null, null], pool)
+      Price[poolConfig.collar] = init.collar_price
       return init
     },
     mypage_data: async () => {
       const res = []
+      const collar_price = await calc_collar_price()
       for (let { r1, r2 } of pools) {
         for (let pool of [r1, r2]) {
           if (pool) {
-            const me = pool.ct.signer ? await pool.ct.signer.getAddress() : null
+            const me = pool.ct.signer ? pool.ct.signer.getAddress() : null
             let [
               bond_total,
               want_total,
@@ -349,18 +347,9 @@ export default function contract() {
                     .get_dxdy(unformat(clpt))
                     .then((data) => formatMap(data, [null, pool.want.decimals]))
                     .catch(() => [0, 0])
-            let [clpt_apy, collar_price, clpt_price] = await pricePool_ct
-              .slot0()
-              .then((data) => data[0])
-              .then((sqrtPrice) => sqrtPrice ** 2 / 2 ** 192)
-              .then((res) => 1 / res)
-              .then((collar_price) => {
-                let clpt_price = (coll_total + want_total) / clpt_total
-                return [(reward_rate / clpt_total) * (collar_price / clpt_price) * 3153600000, collar_price, clpt_price]
-              })
-              .catch(() => [0, 0, 0])
+            let clpt_price = (coll_total + want_total) / clpt_total
             res.push({
-              pool: pool,
+              pool,
               coll_total,
               want_total,
               bond_total,
@@ -375,11 +364,12 @@ export default function contract() {
               coll_apy: 0,
               call_apy: 0,
               clpt_apr: 0,
-              clpt_apy,
+              clpt_apy: (reward_rate / clpt_total) * (collar_price / clpt_price) * 3153600000,
             })
           }
         }
       }
+      Price[poolConfig.collar] = collar_price
       return res
     },
     approve: async (token, pool) => {

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useMemo, useReducer } from 'react'
 import { makeStyles } from '@material-ui/core'
-import { context, mypageDetail, mypageContext, STYLE } from '@/config'
+import { context, mypageDetail, mypageContext, STYLE, poolConfig } from '@/config'
 import { Loading } from '@/components/Modules'
 import { Price } from '@/hooks'
 
@@ -73,7 +73,7 @@ export default function MyPage() {
           total.outstandingDebt += call * getPrice('want')
           total.depostBalance += call * getPrice('bond')
           total.receivables += receivables
-          total.rewards += earned * Price['COLLAR']
+          total.rewards += earned * Price[poolConfig.collar]
         })
         setData((_data) =>
           signer || INIT === _data || (INIT !== data && total.outstandingDebt + total.receivables == 0)

@@ -5,9 +5,11 @@ import { FloatMessage2 } from '@/components/Modules'
 import { textInfo, tokenList } from '@/config'
 import { Price } from '@/hooks'
 import { useSnackbar } from 'notistack'
+import { balanceMax, balanceMaxDisabled } from '@/assets/svg'
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    fontFamily: 'Frutiger',
     '&>div:first-child': {
       margin: '5px 0',
       height: '25px',
@@ -23,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     position: 'relative',
     '& input': {
-      fontFamily: 'Frutiger',
       padding: '0',
       margin: '0 5px 0 0',
       fontSize: ({ fontSize }) => `${fontSize}px`,
@@ -31,25 +32,6 @@ const useStyles = makeStyles((theme) => ({
       border: 'none',
       width: '100%',
       color: '#30384B',
-    },
-    '& button': {
-      fontFamily: 'Frutiger',
-      fontSize: '0.8em',
-      color: 'white',
-      background: '#30384B',
-      border: 'none',
-      padding: '2px 5px',
-      position: 'relative',
-      '&[disabled]': {
-        background: '#d4d4d4',
-      },
-      '&>span': {
-        fontFamily: 'Helvetica',
-        position: 'absolute',
-        transform: 'translate(-32px,-16px)',
-        color: '#30384B',
-        fontSize: '10px',
-      },
     },
   },
   amount: {
@@ -66,7 +48,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   token: {
-    fontFamily: 'Frutiger',
     fontSize: '12px',
     fontWeight: 'bold',
     color: '#30384B',
@@ -76,7 +57,6 @@ const useStyles = makeStyles((theme) => ({
     color: '#99A8C9',
     margin: '5px',
     fontWeight: 'bold',
-    fontFamily: 'Frutiger',
     fontSize: '12px',
   },
 }))
@@ -118,14 +98,7 @@ export default function AmountInput({ State, title, style }) {
     () => (
       <div className={classes.root}>
         <div>
-          <span
-            style={{
-              fontFamily: 'Helvetica',
-              fontSize: '14px',
-            }}
-          >
-            {title.toUpperCase()}
-          </span>
+          <span style={{ fontFamily: 'Helvetica', fontSize: '14px' }}>{title.toUpperCase()}</span>
           <span
             style={{
               fontFamily: 'Material Icons Outlined',
@@ -149,20 +122,23 @@ export default function AmountInput({ State, title, style }) {
               placeholder="0.00"
               InputProps={{
                 endAdornment: (
-                  <button
-                    onClick={() => {
-                      setState({
-                        I: {
-                          ...state.I,
-                          [title]: `${format(max, token.decimals)}`,
-                        },
-                      })
-                    }}
-                    disabled={!if_max}
-                  >
-                    MAX
-                    <span>Balance</span>
-                  </button>
+                  <img
+                    alt=""
+                    src={if_max ? balanceMax : balanceMaxDisabled}
+                    onClick={
+                      if_max
+                        ? () => {
+                            setState({
+                              I: {
+                                ...state.I,
+                                [title]: `${format(max, token.decimals)}`,
+                              },
+                            })
+                          }
+                        : () => {}
+                    }
+                    style={{ width: '60px' }}
+                  />
                 ),
               }}
             ></TextField>

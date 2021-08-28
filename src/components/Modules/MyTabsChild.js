@@ -22,6 +22,7 @@ const timer = (time) => {
 }
 const Timer = withStyles({
   root: {
+    fontFamily: 'Frutiger',
     [STYLE.MOBILE]: {
       display: 'none',
     },
@@ -29,7 +30,6 @@ const Timer = withStyles({
       display: 'flex',
       width: 'max-content',
       fontSize: '18px',
-      fontFamily: 'Frutiger',
       color: '#303848',
       marginRight: '10px',
       '&>div': {

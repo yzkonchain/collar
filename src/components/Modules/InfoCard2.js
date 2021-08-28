@@ -3,6 +3,7 @@ import DynamicFont from 'react-dynamic-font'
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    fontFamily: 'Frutiger',
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -18,7 +19,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   title: {
-    fontFamily: 'Frutiger',
     fontSize: '0.9em',
     color: 'white',
     display: 'flex',
@@ -27,7 +27,6 @@ const useStyles = makeStyles((theme) => ({
     margin: '5px 0',
   },
   data: {
-    fontFamily: 'Frutiger',
     alignSelf: 'flex-start',
     color: 'white',
     fontSize: '1.4em',
@@ -36,7 +35,6 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: '10px',
   },
   info: {
-    fontFamily: 'Frutiger',
     textAlign: 'start',
     fontSize: '10px',
     color: 'white',

@@ -4,6 +4,7 @@ import buttonDisabledImg from '@/assets/svg//button/buttonDisabled.svg'
 
 const useStyles = makeStyles((theme) => ({
   button: {
+    fontFamily: 'Frutiger',
     padding: '0',
     background: 'none',
     border: 'none',
@@ -28,7 +29,6 @@ const useStyles = makeStyles((theme) => ({
       position: 'absolute',
       display: 'flex',
       '& span': {
-        fontFamily: 'Frutiger',
         fontSize: '1.1em',
         margin: 'auto',
       },

@@ -169,7 +169,7 @@ export default function Mobile({ pool, val, handleClick }) {
                 <div>{parseFloat(val.clpt).toFixed(dec.balance)}</div>
                 <div className={classes.price}>~${parseFloat(val.receivables).toFixed(dec.price)}</div>
               </TableCell>
-              <TableCell align="center">{parseFloat(val.clpt_apy).toFixed(dec.apy)}%</TableCell>
+              <TableCell align="center">{(val.clpt_apy * 100).toFixed(dec.apy)}%</TableCell>
               <TableCell className={classes.button}>
                 <MyButtonWhite name={'Withdraw'} onClick={() => handleClick('withdrawAll', pool)} />
               </TableCell>
@@ -182,7 +182,7 @@ export default function Mobile({ pool, val, handleClick }) {
         <div>
           <div style={{ marginTop: 0 }}>
             <span>APR</span>
-            <span>{parseFloat(val.clpt_apr).toFixed(dec.apr)}%</span>
+            <span>{(val.clpt_apr * 100).toFixed(dec.apr)}%</span>
           </div>
           <div>
             <span>Share of Pool</span>

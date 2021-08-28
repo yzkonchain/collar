@@ -82,7 +82,7 @@ export default function Withdraw() {
           </div>
         </div>
         <ApyFloatMessage
-          apy={`todo`}
+          apy={data.farm_apy.toFixed(1)}
           info={
             <div>
               <div>Exchange Rate: {`1CLPT = ${state.tip.rate.want} ${want.symbol} + ${state.tip.rate.coll} COLL`}</div>

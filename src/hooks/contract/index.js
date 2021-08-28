@@ -2,6 +2,7 @@ import { ethers } from 'ethers'
 import { pools, tokenList, poolConfig } from '@/config'
 import { useSnackbar } from 'notistack'
 import { Price } from '@/hooks'
+import callbackInfo from './callbackInfo'
 
 const ZERO = ethers.constants.Zero
 const collar_ct = tokenList[poolConfig.collar].ct
@@ -45,184 +46,6 @@ const calc_collar_price = async () => {
     .then((data) => data[0])
     .then((sqrtPrice) => sqrtPrice ** 2 / 2 ** 192)
     .then((res) => 1 / res)
-}
-
-const callbackInfo = (method, status) => {
-  const failed = {
-    type: 'failed',
-    title: 'Fail.',
-    message: 'Your transaction failed.',
-  }
-  switch (method) {
-    case 'balance':
-      switch (status) {
-        case 'insufficient':
-          return {
-            type: 'failed',
-            title: 'Fail.',
-            message: 'Maximum range exceeded.',
-          }
-        default:
-          return failed
-      }
-    case 'approve':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Approved!',
-            message: 'You have successfully approved your asset.',
-          }
-        default:
-          return failed
-      }
-    case 'borrow':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Deposited and Borrowed.',
-            message: 'You have successfully borrowed asset.',
-          }
-        default:
-          return failed
-      }
-    case 'repay':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Repaid.',
-            message: 'You have successfully repaid your loan.',
-          }
-        default:
-          return failed
-      }
-    case 'deposit':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Deposited.',
-            message: 'You have successfully deposited your asset.',
-          }
-        default:
-          return failed
-      }
-    case 'withdraw':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Withdrawn.',
-            message: 'You have successfully withdraw your liquidity.',
-          }
-        default:
-          return failed
-      }
-    case 'claim':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Claimed.',
-            message: 'You have successfully claimed your reward.',
-          }
-        default:
-          return failed
-      }
-    case 'lend':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Lent.',
-            message: 'You have successfully lent your assset.',
-          }
-        default:
-          return failed
-      }
-    case 'redeem':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Redeemed.',
-            message: 'You have successfully redeem your loan.',
-          }
-        default:
-          return failed
-      }
-    case 'mint':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'mint.',
-            message: 'You have successfully mint.',
-          }
-        default:
-          return failed
-      }
-    case 'faucet':
-      switch (status) {
-        case 1:
-          return {
-            type: 'success',
-            title: 'Faucet.',
-            message: 'You have successfully get test token.',
-          }
-        case 'empty':
-          return {
-            type: 'failed',
-            title: 'Fail.',
-            message: 'The amount of ETH is necessary.',
-          }
-        case 'insufficient':
-          return {
-            type: 'failed',
-            title: 'Fail.',
-            message: `You dont't have enough ETH to exchange.`,
-          }
-        default:
-          return failed
-      }
-    case 'cancel':
-      return {
-        type: 'failed',
-        title: 'Fail.',
-        message: 'User denied transaction signature.',
-      }
-    case 'support':
-      return {
-        type: 'failed',
-        title: 'Fail.',
-        message: 'Not support yet!',
-      }
-    case 'noaccount':
-      return {
-        type: 'failed',
-        title: 'Fail.',
-        message: 'No Account!',
-      }
-    case 'network':
-      switch (true) {
-        case status instanceof Object:
-          return {
-            type: 'failed',
-            title: 'Fail.',
-            message: `not support this network, chainId: ${status.chainId}`,
-          }
-        default:
-          return {
-            type: 'failed',
-            title: 'Fail.',
-            message: 'Connect error, please refresh the page!',
-          }
-      }
-    default:
-      return failed
-  }
 }
 
 export default function contract() {
@@ -301,7 +124,8 @@ export default function contract() {
         pool.ct.reward_rate(),
       ])
       init.clpt_price = format(init.swap.sx.add(init.swap.sy)) / format(init.swap.sk)
-      init.farm_apy = (format(init.reward_rate) / format(init.swap.sk)) * (collar_price / init.clpt_price) * 3153600000
+      init.farm_apr = (format(init.reward_rate) / format(init.swap.sk)) * (collar_price / init.clpt_price) * 31536000
+      init.farm_apy = ((init.farm_apr / 365 + 1) ** 365 - 1) * 100
       init.apy = calc_apy(init, [null, null], pool)
       Price[poolConfig.collar] = init.collar_price
       return init
@@ -339,7 +163,7 @@ export default function contract() {
               pool.call.ct.totalSupply(),
             ])
               .then((data) => formatMap(data, [pool.bond.decimals, pool.want.decimals]))
-              .catch(() => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+              .catch(() => Array(11).fill(0))
             let [clpt_coll, clpt_want] =
               clpt === 0
                 ? [0, 0]
@@ -348,6 +172,8 @@ export default function contract() {
                     .then((data) => formatMap(data, [null, pool.want.decimals]))
                     .catch(() => [0, 0])
             let clpt_price = (coll_total + want_total) / clpt_total
+            let clpt_apr = (reward_rate / clpt_total) * (collar_price / clpt_price) * 31536000
+            let clpt_apy = (clpt_apr / 365 + 1) ** 365 - 1
             res.push({
               pool,
               coll_total,
@@ -363,88 +189,14 @@ export default function contract() {
               shareOfPoll: clpt_total ? (clpt / clpt_total) * 100 : 0,
               coll_apy: 0,
               call_apy: 0,
-              clpt_apr: 0,
-              clpt_apy: (reward_rate / clpt_total) * (collar_price / clpt_price) * 3153600000,
+              clpt_apr,
+              clpt_apy,
             })
           }
         }
       }
       Price[poolConfig.collar] = collar_price
       return res
-    },
-    approve: async (token, pool) => {
-      const method = 'approve'
-      const args = [pool.addr, ethers.constants.MaxUint256]
-      const gasLimit = await token.ct.estimateGas[method](...args).then((e) => e.mul(poolConfig.gasAdjustment).div(100))
-      return await token.ct.populateTransaction[method](...args)
-        .then((tx) => ({ ...tx, gasLimit }))
-        .then((tx) => pool.ct.signer.sendTransaction(tx))
-        .then(callback(true)('approve'))
-        .catch(callback(false))
-    },
-    borrow: async (bond, want, pool) => {
-      const method = 'borrow_want'
-      const args = [bond, with_loss(want)]
-      const cb = 'borrow'
-      return await exchange(pool, method, args, cb)
-    },
-    repay: async (want, coll, pool) => {
-      let method = '',
-        args = []
-      switch (true) {
-        case want.eq(ZERO):
-          method = 'burn_dual'
-          args = [coll]
-          break
-        case coll.eq(ZERO):
-          method = 'burn_call'
-          args = [want]
-          break
-        default:
-          method = 'repay_both'
-          args = [want, coll]
-          break
-      }
-      return await exchange(pool, method, args, 'repay')
-    },
-    deposit: async (want, coll, clpt, pool) => {
-      return await pool.ct.mint(coll, want, with_loss(clpt)).then(callback(true)('deposit')).catch(callback(false))
-    },
-    withdraw: async (clpt, pool) => {
-      const method = 'withdraw_both'
-      const args = [clpt]
-      const cb = 'withdraw'
-      return await exchange(pool, method, args, cb)
-    },
-    claim: async (pool) => {
-      const method = 'claim_reward'
-      const args = []
-      const cb = 'claim'
-      return await exchange(pool, method, args, cb)
-    },
-    burn_and_claim: async (clpt, pool) => {
-      const method = 'burn_and_claim'
-      const args = [clpt]
-      const cb = 'withdraw'
-      return await exchange(pool, method, args, cb)
-    },
-    lend: async (want, coll, pool) => {
-      const method = 'swap_want_to_min_coll'
-      const args = [with_loss(coll), want]
-      const cb = 'lend'
-      return await exchange(pool, method, args, cb)
-    },
-    redeem: async (want, coll, pool) => {
-      const method = 'swap_coll_to_min_want'
-      const args = [coll, with_loss(want)]
-      const cb = 'redeem'
-      return await exchange(pool, method, args, cb)
-    },
-    mint: async (n, pool) => {
-      const method = 'mint_dual'
-      const args = [n]
-      const cb = 'mint'
-      return await exchange(pool, method, args, cb)
     },
     mypage_check: async (type, pool) => {
       const me = await pool.ct.signer.getAddress()
@@ -468,7 +220,7 @@ export default function contract() {
             enqueueSnackbar({
               type: 'failed',
               title: 'Fail.',
-              message: 'COLL must larger than CALL!',
+              message: 'COLL balance must exceed CALL balance!',
             })
             return false
           }
@@ -524,6 +276,80 @@ export default function contract() {
         default:
           return false
       }
+    },
+    approve: async (token, pool) => {
+      const method = 'approve'
+      const args = [pool.addr, ethers.constants.MaxUint256]
+      const gasLimit = await token.ct.estimateGas[method](...args).then((e) => e.mul(poolConfig.gasAdjustment).div(100))
+      return await token.ct.populateTransaction[method](...args)
+        .then((tx) => ({ ...tx, gasLimit }))
+        .then((tx) => pool.ct.signer.sendTransaction(tx))
+        .then(callback(true)('approve'))
+        .catch(callback(false))
+    },
+    borrow: async (bond, want, pool) => {
+      const method = 'borrow_want'
+      const args = [bond, with_loss(want)]
+      const cb = 'borrow'
+      return await exchange(pool, method, args, cb)
+    },
+    repay: async (want, coll, pool) => {
+      let method = '',
+        args = []
+      switch (true) {
+        case want.eq(ZERO):
+          method = 'burn_dual'
+          args = [coll]
+          break
+        case coll.eq(ZERO):
+          method = 'burn_call'
+          args = [want]
+          break
+        default:
+          method = 'repay_both'
+          args = [want, coll]
+          break
+      }
+      return await exchange(pool, method, args, 'repay')
+    },
+    deposit: async (want, coll, clpt, pool) => {
+      return await exchange(pool, 'mint', [coll, want, with_loss(clpt)], 'deposit')
+    },
+    withdraw: async (clpt, pool) => {
+      const method = 'withdraw_both'
+      const args = [clpt]
+      const cb = 'withdraw'
+      return await exchange(pool, method, args, cb)
+    },
+    claim: async (pool) => {
+      const method = 'claim_reward'
+      const args = []
+      const cb = 'claim'
+      return await exchange(pool, method, args, cb)
+    },
+    burn_and_claim: async (clpt, pool) => {
+      const method = 'burn_and_claim'
+      const args = [clpt]
+      const cb = 'withdraw'
+      return await exchange(pool, method, args, cb)
+    },
+    lend: async (want, coll, pool) => {
+      const method = 'swap_want_to_min_coll'
+      const args = [with_loss(coll), want]
+      const cb = 'lend'
+      return await exchange(pool, method, args, cb)
+    },
+    redeem: async (want, coll, pool) => {
+      const method = 'swap_coll_to_min_want'
+      const args = [coll, with_loss(want)]
+      const cb = 'redeem'
+      return await exchange(pool, method, args, cb)
+    },
+    mint: async (n, pool) => {
+      const method = 'mint_dual'
+      const args = [n]
+      const cb = 'mint'
+      return await exchange(pool, method, args, cb)
     },
     redeemAll: async function (pool) {
       const checked = await this.mypage_check('redeemAll', pool)

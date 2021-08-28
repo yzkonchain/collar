@@ -8,6 +8,7 @@ import DynamicFont from 'react-dynamic-font'
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    fontFamily: 'Frutiger',
     '&>div:first-child': {
       margin: '5px 0',
       height: '25px',
@@ -22,13 +23,10 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     color: '#30384B',
-    fontFamily: 'Frutiger',
     fontWeight: 'bold',
     '&>div': {
       maxWidth: 'calc(50vw - 85.5px)',
-      '&>span': {
-        fontSize: '2em',
-      },
+      '&>span': { fontSize: '2em' },
     },
     '&>span': {
       fontSize: '12px',

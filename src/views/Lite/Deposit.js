@@ -91,7 +91,7 @@ export default function Repay() {
           </div>
         </div>
         <ApyFloatMessage
-          apy={`todo`}
+          apy={data.farm_apy.toFixed(1)}
           info={
             <div>
               <div>Share of Pool: {state.tip.share} %</div>

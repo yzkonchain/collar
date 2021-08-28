@@ -2,6 +2,7 @@ import { makeStyles } from '@material-ui/core'
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    fontFamily: 'Frutiger',
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -17,7 +18,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   title: {
-    fontFamily: 'Frutiger',
     fontSize: '0.9em',
     color: 'white',
     display: 'flex',
@@ -26,7 +26,6 @@ const useStyles = makeStyles((theme) => ({
     margin: '5px 0',
   },
   data: {
-    fontFamily: 'Frutiger',
     alignSelf: 'flex-start',
     color: 'white',
     fontSize: '0.8em',

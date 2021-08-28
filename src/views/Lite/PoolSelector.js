@@ -26,9 +26,7 @@ const useStyles = makeStyles({
   },
   formControl: {
     width: '50%',
-    '& span': {
-      fontFamily: 'Frutiger',
-    },
+    '& span': { fontFamily: 'Frutiger' },
   },
   icon: {
     margin: '0 10px',

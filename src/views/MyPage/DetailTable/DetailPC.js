@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   makeStyles,
   withStyles,
@@ -10,7 +11,7 @@ import {
 } from '@material-ui/core'
 import { Price } from '@/hooks'
 import { poolConfig } from '@/config'
-import { MyButtonWhite } from '@/components/Modules'
+import { MyButtonWhite, FloatMessage2 } from '@/components/Modules'
 
 const useStyles = makeStyles({
   root: {
@@ -65,6 +66,28 @@ const useStyles = makeStyles({
 
 const TableCell = withStyles({ root: { lineHeight: 'unset' } })((props) => <OldTableCell {...props} />)
 
+const TableCellInfo = ({ title, info }) => {
+  const [anchorEl, setAnchorEl] = useState(null)
+  return (
+    <TableCell align="center">
+      <span>{title}</span>
+      <span
+        style={{
+          fontFamily: 'Material Icons Outlined',
+          fontSize: '16px',
+          marginLeft: '5px',
+          color: '#B2B2B2',
+        }}
+        onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
+        onMouseLeave={() => setAnchorEl(null)}
+      >
+        info
+      </span>
+      <FloatMessage2 anchorEl={anchorEl} info={info} />
+    </TableCell>
+  )
+}
+
 const dec = {
   apy: 2,
   apr: 2,
@@ -84,7 +107,7 @@ export default function PC({ pool, val, handleClick }) {
             <TableRow>
               <TableCell>Token</TableCell>
               <TableCell align="center">Balance</TableCell>
-              <TableCell align="center">APY</TableCell>
+              <TableCellInfo title="APY" info="1x daily compound" />
               <TableCell align="center">APR</TableCell>
               <TableCell align="center">
                 Share of
@@ -113,8 +136,8 @@ export default function PC({ pool, val, handleClick }) {
                 <div>{parseFloat(val.clpt).toFixed(dec.balance)}</div>
                 <div className={classes.price}>~${parseFloat(val.receivables).toFixed(dec.price)}</div>
               </TableCell>
-              <TableCell align="center">{parseFloat(val.clpt_apy).toFixed(dec.apy)}%</TableCell>
-              <TableCell align="center">{parseFloat(val.clpt_apr).toFixed(dec.apr)}%</TableCell>
+              <TableCell align="center">{(val.clpt_apy * 100).toFixed(dec.apy)}%</TableCell>
+              <TableCell align="center">{(val.clpt_apr * 100).toFixed(dec.apr)}%</TableCell>
               <TableCell align="center">{parseFloat(val.shareOfPoll).toFixed(dec.sop)}%</TableCell>
               <TableCell align="center">
                 <div>{parseFloat(val.earned).toFixed(dec.earned)}</div>

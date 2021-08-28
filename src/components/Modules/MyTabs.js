@@ -8,8 +8,8 @@ const MyTab = withStyles({
     boxSizing: 'content-box',
     border: '#c1c1c1 2px solid',
     borderBottom: '#4c4c4c 2px solid',
+    fontFamily: 'Frutiger',
     '&>span': {
-      fontFamily: 'Frutiger',
       color: '#fff',
       alignItems: 'start',
     },

@@ -2,6 +2,8 @@ import buttonAble from './button/buttonAble.svg'
 import buttonDisabled from './button/buttonDisabled.svg'
 import buttonWhite from './button/buttonWhite.svg'
 import buttonWhiteHover from './button/buttonWhiteHover.svg'
+import balanceMax from './button/balanceMax.svg'
+import balanceMaxDisabled from './button/balanceMaxDisabled.svg'
 
 import LiteIcon from './navigator/liteIcon.svg'
 import TermIcon from './navigator/termIcon.svg'
@@ -20,6 +22,8 @@ export {
   buttonDisabled,
   buttonWhite,
   buttonWhiteHover,
+  balanceMax,
+  balanceMaxDisabled,
   LiteIcon,
   TermIcon,
   ProIcon,

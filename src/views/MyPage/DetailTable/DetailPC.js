@@ -86,7 +86,7 @@ export default function PC({ pool, val, handleClick }) {
               <TableCell align="center">Balance</TableCell>
               <TableCell align="center">APY</TableCell>
               <TableCell align="center">APR</TableCell>
-              <TableCell align="center" style={{ padding: '15px 0' }}>
+              <TableCell align="center">
                 Share of
                 <br />
                 Pool

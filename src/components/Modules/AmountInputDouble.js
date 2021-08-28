@@ -152,7 +152,7 @@ const MyInput = ({ state, setState, title, max, if_max, token, style }) => {
   useEffect(() => {
     const [_new, _old] = [state.I[title], state.old[title]]
     const { offsetWidth: o, scrollWidth: s } = inputRef.current
-    if (_new.length > (_old || '').length && o < s && fontSize >= 8) setFontSize(fontSize * 0.91)
+    if (_new.length > (_old || '').length && o < s - 1 && fontSize >= 8) setFontSize(fontSize * 0.91)
     else if (_new.length < (_old || '').length && o >= s && fontSize < 35) setFontSize(fontSize * 1.1)
   }, [fontSize, state.I, title])
 

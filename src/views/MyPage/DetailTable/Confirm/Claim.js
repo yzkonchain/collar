@@ -27,7 +27,7 @@ export default function Claim({ data, pool, checked, classes }) {
             <TableCell align="center">
               <div className={classes.amount}>
                 <span>{`${format(checked.earned)}`}</span>
-                <span>{` ${pool.symbol}`}</span>
+                <span>{` COLLAR`}</span>
               </div>
             </TableCell>
           </TableRow>

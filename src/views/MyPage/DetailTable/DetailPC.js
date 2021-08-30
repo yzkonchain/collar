@@ -34,7 +34,6 @@ const useStyles = makeStyles({
   },
   token: {
     margin: '15px 0',
-    textAlign: 'center',
     width: 'fit-content',
     '& img': {
       width: '40px',

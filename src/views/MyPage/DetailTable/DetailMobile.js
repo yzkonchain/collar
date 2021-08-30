@@ -71,7 +71,6 @@ const useStyles = makeStyles({
   token: {
     fontSize: '12px',
     margin: '15px 0',
-    textAlign: 'center',
     width: 'fit-content',
     '& img': {
       width: '30px',

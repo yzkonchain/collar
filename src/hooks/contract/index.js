@@ -125,7 +125,7 @@ export default function contract() {
       ])
       init.clpt_price = format(init.swap.sx.add(init.swap.sy)) / format(init.swap.sk)
       init.farm_apr = (format(init.reward_rate) / format(init.swap.sk)) * (collar_price / init.clpt_price) * 31536000
-      init.farm_apy = ((init.farm_apr / 365 + 1) ** 365 - 1) * 100
+      init.farm_apy = (init.farm_apr / 365 + 1) ** 365 - 1
       init.apy = calc_apy(init, [null, null], pool)
       Price[poolConfig.collar] = init.collar_price
       return init

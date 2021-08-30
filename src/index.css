@@ -10,10 +10,10 @@
   font-family: 'Avenir';
   src: url('@/assets/fonts/Avenir.otf');
 }
-/* @font-face {
-  font-family: "Gillsans";
-  src: url("@/assets/fonts/Gillsans.otf");
-} */
+@font-face {
+  font-family: 'Gillsans';
+  src: url('@/assets/fonts/gillsans.otf');
+}
 
 body {
   margin: 0;

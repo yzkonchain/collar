@@ -63,7 +63,7 @@ export default function Info() {
             data={`${parseFloat(data.apy).toFixed(2)} %`}
             info="FOR BOTH LENDING AND BORROWING"
           />
-          <InfoCard2 title="Farm APY" data={`${parseFloat(data.farm_apy).toFixed(3)} %`} info="CLPT'S farming APY" />
+          <InfoCard2 title="Farm APY" data={`${(data.farm_apy * 100).toFixed(3)} %`} info="CLPT'S farming APY" />
         </div>
         <div>
           <InfoCard2

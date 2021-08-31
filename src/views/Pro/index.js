@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState, useMemo, useReducer } from 'react'
 import { makeStyles } from '@material-ui/core'
-import { context, STYLE } from '@/config'
-
+import { context, proContext, STYLE } from '@/config'
 import Overview from './Overview'
 import AllMarkets from './AllMarkets'
 
@@ -23,11 +22,19 @@ export default function Pro() {
   const {
     state: { signer, controller },
   } = useContext(context)
+  const [proState, setProState] = useReducer((o, n) => (typeof n === 'function' ? n(o) : { ...o, ...n }), {
+    totalLockedValue: {},
+    totalLiquidity: {},
+    totalCollateral: {},
+    historicalInterestRate: {},
+  })
 
   return (
-    <div className={classes.root}>
-      <Overview />
-      <AllMarkets />
-    </div>
+    <proContext.Provider value={{ proState, setProState }}>
+      <div className={classes.root}>
+        <Overview />
+        <AllMarkets />
+      </div>
+    </proContext.Provider>
   )
 }

@@ -1,13 +1,6 @@
-import { useContext, useEffect, useState, useMemo, useReducer } from 'react'
+import { useContext, useEffect, useState, useMemo, useReducer, Suspense, lazy, useCallback } from 'react'
 import { makeStyles } from '@material-ui/core'
-import { context, STYLE } from '@/config'
-
-import TotalLockedValue from './TotalLockedValue'
-import TotalLiquidity from './TotalLiquidity'
-import Volume from './Volume'
-import TotalCollateral from './TotalCollateral'
-import TotalDebt from './TotalDebt'
-import HistoricalInterestRate from './HistoricalInterestRate'
+import { context, proContext, STYLE } from '@/config'
 
 const useStyles = makeStyles({
   root: {},
@@ -23,32 +16,41 @@ const useStyles = makeStyles({
     justifyContent: 'space-between',
     [STYLE.PC]: {
       '&>div': {
-        width: '31%',
+        width: '48%',
       },
     },
   },
 })
+
+const echartsContent = ['TotalLockedValue', 'TotalLiquidity', 'TotalCollateral', 'HistoricalInterestRate'].map((item) =>
+  lazy(() => import(`./${item}`)),
+)
+
 export default function Overview() {
   const classes = useStyles()
   const {
     state: { signer, controller },
   } = useContext(context)
+  const { proState, setProState } = useContext(proContext)
+  const [period, setPeriod] = useState({
+    totalLockedValue: '12h',
+    totalLiquidity: '12h',
+    totalCollateral: '12h',
+    historicalInterestRate: '12h',
+  })
+
+  const handleChange = (p, key) => controller.pro_data(p, key).then((data) => setProState(data))
+  useEffect(() => handleChange('12h'), [])
 
   return (
     <div className={classes.root}>
       <div className={classes.title}>Market Overview</div>
       <div className={classes.content}>
-        <TotalLockedValue />
-        <TotalLockedValue />
-        <TotalLockedValue />
-        <TotalLockedValue />
-        <TotalLockedValue />
-        <TotalLockedValue />
-        {/* <TotalLiquidity />
-        <Volume />
-        <TotalCollateral />
-        <TotalDebt />
-        <HistoricalInterestRate /> */}
+        <Suspense fallback={<div />}>
+          {echartsContent.map((Item, key) => (
+            <Item key={key} {...{ period, setPeriod, handleChange }} />
+          ))}
+        </Suspense>
       </div>
     </div>
   )

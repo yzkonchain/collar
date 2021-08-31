@@ -89,11 +89,7 @@ const getOtion = {
       data: [1500, 2300, 2240, 2180, 1350, 1407, 2600],
       type: 'line',
       symbol: 'none',
-      itemStyle: {
-        normal: {
-          lineStyle: { color: '#59FFAD' },
-        },
-      },
+      lineStyle: { color: '#59FFAD' },
       areaStyle: {
         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
           {
@@ -110,17 +106,16 @@ const getOtion = {
   ],
 }
 
-export default function TotalDebt() {
+export default function TotalLiquidity() {
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState(null)
-
-  const [age, setAge] = useState('')
+  const [time, setTime] = useState('')
 
   return (
     <div className={classes.root}>
       <div className={classes.title}>
         <div>
-          <span style={{ marginRight: '5px' }}>Total Debt</span>
+          <span style={{ marginRight: '5px' }}>Total Liquidity</span>
           <span
             className={classes.symbol}
             onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
@@ -128,11 +123,11 @@ export default function TotalDebt() {
           >
             info
           </span>
-          <FloatMessage2 anchorEl={anchorEl} info={'Total Debt'} />
+          <FloatMessage2 anchorEl={anchorEl} info={'Total Liquidity'} />
         </div>
 
         <FormControl className={classes.time}>
-          <NativeSelect value={age} onChange={({ target: { value: e } }) => setAge(e)} input={<BootstrapInput />}>
+          <NativeSelect value={time} onChange={({ target: { value: e } }) => setTime(e)} input={<BootstrapInput />}>
             <option value={1}>12 hours</option>
             <option value={2}>24 hours</option>
             <option value={3}>Weekly</option>

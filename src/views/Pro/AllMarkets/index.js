@@ -1,6 +1,7 @@
+import { ethers } from 'ethers'
 import { useContext, useEffect, useState, useMemo, useReducer } from 'react'
 import { makeStyles } from '@material-ui/core'
-import { context, STYLE } from '@/config'
+import { context, STYLE, signerNoAccount } from '@/config'
 import PoolInfo from './PoolInfo'
 
 const useStyles = makeStyles({
@@ -23,7 +24,19 @@ const useStyles = makeStyles({
   },
 })
 
-const tableHead = ['160px', '120px', '270px', '120px', '210px', '80px']
+const tableHead = [
+  'Pool',
+  'Expiry',
+  'Price',
+  'Collateral',
+  'Liquidity',
+  'Fixed APY',
+  'Historical Borrow APY',
+  'Staking APY',
+  'COLLAR Reward',
+  '',
+]
+const tableHeadWidth = ['100px', '90px', '90px', '90px', '140px', '90px', '130px', '110px', '90px', '30px']
 
 export default function AllMarkets() {
   const classes = useStyles()
@@ -31,19 +44,29 @@ export default function AllMarkets() {
     state: { signer, controller },
   } = useContext(context)
   const [onOff, setOnOff] = useState(0)
+
   return (
     <div className={classes.root}>
       <div className={classes.title}>All Markets</div>
       <div className={classes.header}>
-        <div style={{ width: tableHead[0], textAlign: 'left' }}>Pool</div>
-        <div style={{ width: tableHead[1] }}>Fixed APY</div>
-        <div style={{ width: tableHead[2] }}>Historical Borrow APY</div>
-        <div style={{ width: tableHead[3] }}>Staking APY</div>
-        <div style={{ width: tableHead[4] }}>COLLAR Reward</div>
-        <div style={{ width: tableHead[5] }}></div>
+        {tableHead.map((head, key) => {
+          return (
+            <div
+              key={key}
+              style={{
+                width: tableHeadWidth[key],
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: key === 0 ? 'start' : 'center',
+              }}
+            >
+              <span>{head}</span>
+            </div>
+          )
+        })}
       </div>
       {[1, 2, 3].map((val, key) => {
-        return <PoolInfo key={key} val={val} onOff={{ setOnOff, onOff }} tableHead={tableHead} />
+        return <PoolInfo key={key} val={val} onOff={{ setOnOff, onOff }} tableHeadWidth={tableHeadWidth} />
       })}
     </div>
   )

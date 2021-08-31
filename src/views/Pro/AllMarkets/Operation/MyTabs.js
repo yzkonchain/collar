@@ -6,13 +6,14 @@ const MyTab = withStyles({
     padding: '0 15px',
     marginRight: '0',
     boxSizing: 'content-box',
-    border: '#c1c1c1 2px solid',
+    border: '#c1c1c1 1px solid',
     borderBottom: '#4c4c4c 2px solid',
-    fontFamily: 'Frutiger',
-    backgroundColor: '#c1c1c1',
+    fontFamily: 'Gillsans',
+    backgroundColor: '#344B90',
     '&>span': {
       color: '#fff',
-      alignItems: 'start',
+      alignItems: 'center',
+      fontSize: '17px',
     },
     '&:first-child': {
       borderLeft: '#4c4c4c 2px solid',
@@ -26,7 +27,7 @@ const MyTab = withStyles({
   },
   selected: {
     backgroundColor: 'white',
-    border: '#4c4c4c 2px solid',
+    border: '#c1c1c1 2px solid',
     borderBottom: 'none',
     '&>span': {
       color: '#30384b',
@@ -40,9 +41,7 @@ const MyTabs = withStyles({
   flexContainer: {
     height: '35px',
   },
-  indicator: {
-    display: 'none',
-  },
+  indicator: { display: 'none' },
 })((props) => {
   return (
     <div style={{ position: 'relative' }}>

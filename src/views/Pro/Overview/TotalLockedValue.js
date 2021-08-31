@@ -1,10 +1,11 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
-import { makeStyles, withStyles, FormControl, NativeSelect, InputBase } from '@material-ui/core'
+import { useState, useCallback, useMemo, useRef, useEffect, useContext } from 'react'
+import ReactEcharts from 'echarts-for-react'
+import { makeStyles, withStyles, FormControl, NativeSelect, InputBase, CircularProgress } from '@material-ui/core'
+import { proContext } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
 
 const useStyles = makeStyles({
   root: {
-    marginBottom: '30px',
     width: '100%',
   },
   title: {
@@ -13,7 +14,6 @@ const useStyles = makeStyles({
     fontSize: '21px',
     display: 'flex',
     alignItems: 'center',
-    marginBottom: '30px',
     justifyContent: 'space-between',
   },
   symbol: {
@@ -28,8 +28,11 @@ const useStyles = makeStyles({
     },
   },
   content: {
-    height: '200px',
-    background: '#fff',
+    height: '300px',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })
 
@@ -49,11 +52,17 @@ const BootstrapInput = withStyles({
   },
 })(InputBase)
 
-export default function TotalLockedValue() {
+export default function TotalLockedValue({ period, setPeriod, handleChange }) {
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const {
+    proState: { totalLockedValue },
+  } = useContext(proContext)
 
-  const [age, setAge] = useState('')
+  useEffect(() => {
+    if (totalLockedValue.series) setLoading(false)
+  }, [totalLockedValue])
 
   return (
     <div className={classes.root}>
@@ -69,17 +78,30 @@ export default function TotalLockedValue() {
           </span>
           <FloatMessage2 anchorEl={anchorEl} info={'Total Locked Value'} />
         </div>
-
         <FormControl className={classes.time}>
-          <NativeSelect value={age} onChange={({ target: { value: e } }) => setAge(e)} input={<BootstrapInput />}>
-            <option value={1}>12 hours</option>
-            <option value={2}>24 hours</option>
-            <option value={3}>Weekly</option>
-            <option value={4}>Monthly</option>
+          <NativeSelect
+            value={period['totalLockedValue']}
+            onChange={({ target: { value: e } }) => {
+              setPeriod({ ...period, totalLockedValue: e })
+              setLoading(true)
+              handleChange(e, 'totalLockedValue')
+            }}
+            input={<BootstrapInput />}
+          >
+            <option value={'12h'}>12 hours</option>
+            <option value={'24h'}>24 hours</option>
+            <option value={'7d'}>Weekly</option>
+            <option value={'1m'}>Monthly</option>
           </NativeSelect>
         </FormControl>
       </div>
-      <div className={classes.content}></div>
+      <div className={classes.content}>
+        {loading ? (
+          <CircularProgress color="primary" size={80} />
+        ) : (
+          <ReactEcharts option={totalLockedValue} style={{ height: '100%', width: '100%' }} />
+        )}
+      </div>
     </div>
   )
 }

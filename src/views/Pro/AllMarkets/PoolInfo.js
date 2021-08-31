@@ -8,7 +8,7 @@ const useStyles = makeStyles({
   table: {
     color: '#fff',
     display: 'flex',
-    fontSize: '16px',
+    fontSize: '15px',
     fontFamily: 'Frutiger',
   },
   info: {
@@ -37,7 +37,7 @@ const useStyles = makeStyles({
   },
 })
 
-export default function PoolInfo({ val, onOff: { onOff, setOnOff }, tableHead }) {
+export default function PoolInfo({ val, onOff: { onOff, setOnOff }, tableHeadWidth }) {
   const classes = useStyles()
   return useMemo(
     () => (
@@ -45,7 +45,7 @@ export default function PoolInfo({ val, onOff: { onOff, setOnOff }, tableHead })
         <div className={classes.table}>
           <div
             style={{
-              width: tableHead[0],
+              width: tableHeadWidth[0],
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -67,11 +67,15 @@ export default function PoolInfo({ val, onOff: { onOff, setOnOff }, tableHead })
               backgroundImage: onOff === val ? 'none' : 'linear-gradient(to right,rgba(0,0,0,0.2),rgba(255,255,255,0))',
             }}
           >
-            <div style={{ width: tableHead[1], color: '#FF5252' }}>3.12%</div>
-            <div style={{ width: tableHead[2] }}>---</div>
-            <div style={{ width: tableHead[3], color: '#59FFAD' }}>3.12%</div>
-            <div style={{ width: tableHead[4] }}>712465 / BLOCK</div>
-            <div style={{ width: tableHead[5], justifyContent: 'flex-end' }}>
+            <div style={{ width: tableHeadWidth[1] }}>Oct 1st 2021</div>
+            <div style={{ width: tableHeadWidth[2] }}>COLL</div>
+            <div style={{ width: tableHeadWidth[3] }}>71200USDT</div>
+            <div style={{ width: tableHeadWidth[4] }}>71200USDT</div>
+            <div style={{ width: tableHeadWidth[5] }}>3.12%</div>
+            <div style={{ width: tableHeadWidth[6] }}>---</div>
+            <div style={{ width: tableHeadWidth[7] }}>3.12%</div>
+            <div style={{ width: tableHeadWidth[8] }}>71200/BLOCK</div>
+            <div style={{ width: tableHeadWidth[9], justifyContent: 'flex-end' }}>
               {
                 <span className={classes.button} onClick={() => setOnOff(onOff === val ? 0 : val)}>
                   {onOff === val ? 'remove' : 'add'}

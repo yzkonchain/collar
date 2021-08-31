@@ -31,4 +31,24 @@ const abi = [
   'function allowance(address, address) external view returns (uint256)',
 ]
 
-export default abi
+const abiCoder = {
+  sx: ['uint256'],
+  sy: ['uint256'],
+  sk: ['uint256'],
+  swap_sqp: ['uint256'],
+  calc_k: ['uint256'],
+  get_dx: ['uint256'],
+  get_dy: ['uint256'],
+  get_dk: ['uint256'],
+  earned: ['uint256'],
+  swap_fee: ['uint256'],
+  balanceOf: ['uint256'],
+  totalSupply: ['uint256'],
+  reward_rate: ['uint256'],
+  allowance: ['uint256'],
+  getPool: ['address'],
+  get_dxdy: ['uint256', 'uint256'],
+  slot0: ['uint160', 'int24', 'uint16', 'uint16', 'uint16', 'uint8', 'bool'],
+}
+
+export { abi, abiCoder }

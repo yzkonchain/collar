@@ -102,7 +102,7 @@ export default function DetailTable({ pools }) {
           onClose={() => set({ confirm: false })}
           handleClick={async () => {
             set({ confirm: false })
-            ;(await controller[type].call(controller, pool)) && set({ update: {} })
+            ;(await controller[type](pool)) && set({ update: {} })
           }}
         />
       </div>

@@ -61,9 +61,9 @@ Object.keys(wantList).forEach((val) => {
   wantList[val] = Array.from(wantList[val])
 })
 
-export { default as abi } from './abi'
 export { default as textInfo } from './textInfo'
 export { default as signerNoAccount } from './signerNoAccount'
 export { STYLE } from './style'
+export { abi, abiCoder } from './abi'
 export { context, liteContext, mypageContext, proContext } from './store'
 export { poolConfig, pools, tokenList, poolList, bondList, wantList, poolSelect, mypageDetailInit, mypageDetail }

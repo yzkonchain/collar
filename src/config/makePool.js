@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import abi from '@/config/abi'
+import { abi } from '@/config/abi'
 import signerNoAccount from '@/config/signerNoAccount'
 import { COLLAR, COLL, CALL } from '@/assets/svg/token'
 

@@ -1,8 +1,10 @@
 import { ethers } from 'ethers'
-import { pools, tokenList, poolConfig } from '@/config'
+import { pools, tokenList, poolConfig, signerNoAccount, abiCoder, STYLE } from '@/config'
 import { useSnackbar } from 'notistack'
 import { Price } from '@/hooks'
+import { echartsData } from './dataInit'
 import callbackInfo from './callbackInfo'
+import _ from 'lodash'
 
 const ZERO = ethers.constants.Zero
 const collar_ct = tokenList[poolConfig.collar].ct
@@ -19,6 +21,8 @@ const format = (num, n, fixed) => {
 }
 const unformat = (num, n) => ethers.utils.parseUnits(String(num) || '', n || 18)
 const formatMap = (data, n) => (n ? data.map((v, k) => format(v, n[k] || 18)) : data.map((v) => format(v)))
+const decode = (method, data) => ethers.utils.defaultAbiCoder.decode(abiCoder[method], data)
+const toHex = (num) => `0x${num.toString(16)}`
 
 const calc_apy_basic = ([sx, sy, sk], [bond, want], swap_sqp) => {
   const one = ethers.utils.parseEther('1')
@@ -47,6 +51,13 @@ const calc_collar_price = async () => {
     .then((sqrtPrice) => sqrtPrice ** 2 / 2 ** 192)
     .then((res) => 1 / res)
 }
+const queryBlock = (ct, method, args, blockNumber, decimal) =>
+  ct.populateTransaction[method](...args)
+    .then((tx) => signerNoAccount.send('eth_call', [tx, { blockNumber }]))
+    .then((data) => decode(method, data))
+    .then((data) => data.map((v) => format(v, decimal)))
+    .then((data) => (data.length === 1 ? data[0] : data))
+    .catch(() => (abiCoder[method].length === 1 ? 0 : Array(abiCoder[method].length).fill(0)))
 
 export default function contract() {
   const { enqueueSnackbar } = useSnackbar()
@@ -79,8 +90,7 @@ export default function contract() {
     if (!ct.signer) return false
     const gasLimit = await ct.estimateGas[method](...args).then((e) => e.mul(poolConfig.gasAdjustment).div(100))
     return await ct.populateTransaction[method](...args)
-      .then((tx) => ({ ...tx, gasLimit }))
-      .then((tx) => ct.signer.sendTransaction(tx))
+      .then((tx) => ct.signer.sendTransaction({ ...tx, gasLimit }))
       .then(callback(true)(cb))
       .catch(callback(false))
   }
@@ -88,7 +98,7 @@ export default function contract() {
     calc_apy,
     calc_slip,
     notify,
-    fetch_state: async (pool) => {
+    async fetch_state(pool) {
       const init = { balance: {}, allowance: {}, earned: {}, swap: {} }
       const me = pool.ct.signer ? pool.ct.signer.getAddress() : null
       const collar_price = await calc_collar_price()
@@ -130,7 +140,7 @@ export default function contract() {
       Price[poolConfig.collar] = init.collar_price
       return init
     },
-    mypage_data: async () => {
+    async mypage_data() {
       const res = []
       const collar_price = await calc_collar_price()
       for (let { r1, r2 } of pools) {
@@ -198,7 +208,111 @@ export default function contract() {
       Price[poolConfig.collar] = collar_price
       return res
     },
-    mypage_check: async (type, pool) => {
+    async pro_data(period, type) {
+      const blockNumber = await signerNoAccount.getBlockNumber()
+      const now = new Date()
+      let promise = [],
+        poolList = []
+      const TimeSet = {
+        '12h': [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+        '7d': [6 * 24, 5 * 24, 4 * 24, 3 * 24, 2 * 24, 1 * 24, 0],
+        get '24h'() {
+          return this['12h'].map((v) => v * 2)
+        },
+        get '1m'() {
+          return this['7d'].map((v) => v * 5)
+        },
+      }
+      const timeset = TimeSet[period]
+      const len = timeset.length
+      for (let { r1, r2 } of pools) {
+        for (let pool of [r1, r2]) {
+          if (pool) {
+            for (let time of timeset) {
+              let queryBlockNumber = toHex(blockNumber - time * 225)
+              promise.push(
+                queryBlock(pool.ct, 'sx', [], queryBlockNumber),
+                queryBlock(pool.ct, 'sy', [], queryBlockNumber, pool.want.decimals),
+                queryBlock(pool.ct, 'reward_rate', [], queryBlockNumber),
+                queryBlock(pool.bond.ct, 'balanceOf', [pool.addr], queryBlockNumber, pool.bond.decimals),
+              )
+            }
+            poolList.push(pool)
+          }
+        }
+      }
+      const res = await Promise.all(promise)
+      const collar_price = await calc_collar_price()
+      const queryBatch = 4
+      const DATA = {
+        totalLockedValue: Array(len).fill(0),
+        totalLiquidity: Array(len).fill(0),
+        totalCollateral: {},
+        historicalInterestRate: {},
+      }
+      poolList.forEach((pool, index) => {
+        const _res = res.slice(index * len * queryBatch, (index + 1) * len * queryBatch)
+        const _poolName = `${pool.bond.symbol}-${pool.want.symbol}`
+        const poolName = DATA['historicalInterestRate'][`${_poolName}-1`] ? `${_poolName}-2` : `${_poolName}-1`
+        DATA['historicalInterestRate'][poolName] = []
+        if (!DATA['totalCollateral'][pool.bond.symbol]) {
+          DATA['totalCollateral'][pool.bond.symbol] = Array(len).fill(0)
+        }
+        for (let i = 0; i < len; i++) {
+          const [sx, sy, reward_rate, bond_total] = _res.slice(i * queryBatch, (i + 1) * queryBatch)
+          const liquidity = sx * Price[pool.coll.addr] + sy * Price[pool.want.addr]
+          const collateral = bond_total * Price[pool.bond.addr]
+          DATA['totalLockedValue'][i] += liquidity + collateral
+          DATA['totalLiquidity'][i] += liquidity
+          DATA['totalCollateral'][pool.bond.symbol][i] += collateral
+          DATA['historicalInterestRate'][poolName].push(((reward_rate * collar_price) / (sx + sy)) * 3153600000)
+        }
+      })
+      const _result = _.cloneDeep(echartsData)
+      _result.xAxis.data = timeset.map((val) => new Date(now - val * 3600000).toLocaleString())
+      _result.xAxis.axisLabel.interval = len - 2
+      const singleLine = (type) => {
+        const result = _.cloneDeep(_result)
+        result.series[0] = {
+          data: DATA[type],
+          type: 'line',
+          showSymbol: false,
+        }
+        return result
+      }
+      const multiLine = (type) => {
+        const result = _.cloneDeep(_result)
+        result.series = Object.entries(DATA[type]).map(([name, data], index) => ({
+          name,
+          data,
+          type: 'line',
+          showSymbol: false,
+        }))
+        if (type == 'historicalInterestRate') {
+          result.yAxis.axisLabel.formatter = '{value}%'
+        }
+        return result
+      }
+      const echartsRes = (type) => {
+        switch (type) {
+          case 'totalLockedValue':
+          case 'totalLiquidity':
+            return { [type]: singleLine(type) }
+          case 'totalCollateral':
+          case 'historicalInterestRate':
+            return { [type]: multiLine(type) }
+          default:
+            return {
+              ...echartsRes('totalLockedValue'),
+              ...echartsRes('totalLiquidity'),
+              ...echartsRes('totalCollateral'),
+              ...echartsRes('historicalInterestRate'),
+            }
+        }
+      }
+      return echartsRes(type)
+    },
+    async mypage_check(type, pool) {
       const me = await pool.ct.signer.getAddress()
       const [coll, call, want] = await Promise.all([
         pool.coll.ct.balanceOf(me),
@@ -277,7 +391,7 @@ export default function contract() {
           return false
       }
     },
-    approve: async (token, pool) => {
+    async approve(token, pool) {
       const method = 'approve'
       const args = [pool.addr, ethers.constants.MaxUint256]
       const gasLimit = await token.ct.estimateGas[method](...args).then((e) => e.mul(poolConfig.gasAdjustment).div(100))
@@ -287,13 +401,13 @@ export default function contract() {
         .then(callback(true)('approve'))
         .catch(callback(false))
     },
-    borrow: async (bond, want, pool) => {
+    async borrow(bond, want, pool) {
       const method = 'borrow_want'
       const args = [bond, with_loss(want)]
       const cb = 'borrow'
       return await exchange(pool, method, args, cb)
     },
-    repay: async (want, coll, pool) => {
+    async repay(want, coll, pool) {
       let method = '',
         args = []
       switch (true) {
@@ -312,46 +426,46 @@ export default function contract() {
       }
       return await exchange(pool, method, args, 'repay')
     },
-    deposit: async (want, coll, clpt, pool) => {
+    async deposit(want, coll, clpt, pool) {
       return await exchange(pool, 'mint', [coll, want, with_loss(clpt)], 'deposit')
     },
-    withdraw: async (clpt, pool) => {
+    async withdraw(clpt, pool) {
       const method = 'withdraw_both'
       const args = [clpt]
       const cb = 'withdraw'
       return await exchange(pool, method, args, cb)
     },
-    claim: async (pool) => {
+    async claim(pool) {
       const method = 'claim_reward'
       const args = []
       const cb = 'claim'
       return await exchange(pool, method, args, cb)
     },
-    burn_and_claim: async (clpt, pool) => {
+    async burn_and_claim(clpt, pool) {
       const method = 'burn_and_claim'
       const args = [clpt]
       const cb = 'withdraw'
       return await exchange(pool, method, args, cb)
     },
-    lend: async (want, coll, pool) => {
+    async lend(want, coll, pool) {
       const method = 'swap_want_to_min_coll'
       const args = [with_loss(coll), want]
       const cb = 'lend'
       return await exchange(pool, method, args, cb)
     },
-    redeem: async (want, coll, pool) => {
+    async redeem(want, coll, pool) {
       const method = 'swap_coll_to_min_want'
       const args = [coll, with_loss(want)]
       const cb = 'redeem'
       return await exchange(pool, method, args, cb)
     },
-    mint: async (n, pool) => {
+    async mint(n, pool) {
       const method = 'mint_dual'
       const args = [n]
       const cb = 'mint'
       return await exchange(pool, method, args, cb)
     },
-    redeemAll: async function (pool) {
+    async redeemAll(pool) {
       const checked = await this.mypage_check('redeemAll', pool)
       if (checked) {
         const { coll, want } = checked
@@ -361,7 +475,7 @@ export default function contract() {
         return await exchange(pool, method, args, cb)
       } else return false
     },
-    repayAll: async function (pool) {
+    async repayAll(pool) {
       const checked = await this.mypage_check('repayAll', pool)
       if (checked) {
         const method = 'burn_dual'
@@ -370,7 +484,7 @@ export default function contract() {
         return await exchange(pool, method, args, cb)
       } else return false
     },
-    withdrawAll: async function (pool) {
+    async withdrawAll(pool) {
       const checked = await this.mypage_check('withdrawAll', pool)
       if (checked) {
         const method = 'withdraw_both'
@@ -379,12 +493,12 @@ export default function contract() {
         return await exchange(pool, method, args, cb)
       } else return false
     },
-    settle: async function (pool) {
+    async settle(pool) {
       const checked = await this.mypage_check('settle', pool)
       if (checked) return true
       else return false
     },
-    faucet: async (to, value, signer) => {
+    async faucet(to, value, signer) {
       const gasLimit = (await signer.estimateGas()).mul(poolConfig.gasAdjustment).div(100)
       await signer
         .getBalance()

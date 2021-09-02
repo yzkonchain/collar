@@ -2,8 +2,8 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core'
 import { MyButton } from '@/components/Modules'
-import { tokenList } from '@/config'
-
+import { context, proContext } from '@/config'
+import { parse, format } from '@/utils/format'
 import AmountInput from './AmountInput'
 import AmountShow from './AmountShow'
 import ContractLink from './ContractLink'
@@ -14,9 +14,9 @@ const INIT = {
     bond: ZERO,
   },
   output: {
-    want: ZERO,
+    coll: ZERO,
+    call: ZERO,
   },
-  tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
   I: { bond: '' },
   old: { bond: '' },
 }
@@ -70,9 +70,21 @@ const useStyles = makeStyles({
   },
 })
 
-export default function Mint() {
+export default function Mint({ data }) {
   const classes = useStyles()
+  const {
+    state: { controller },
+  } = useContext(context)
+  const { handleClick } = useContext(proContext)
   const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
+  const { pool } = data
+
+  useEffect(() => {
+    const bond = parse(state.I.bond, pool.bond.decimals)
+    if (!bond.eq(state.input.bond)) {
+      setState({ input: { bond }, output: { coll: bond, call: bond } })
+    }
+  }, [state.I])
 
   return (
     <div className={classes.root}>
@@ -83,26 +95,34 @@ export default function Mint() {
             State={{
               state,
               setState,
-              token: tokenList['0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0'],
-              max: ZERO,
-              if_max: false,
+              token: pool.bond,
+              max: data.bond_balance,
+              if_max: data.bond_allowance.gt('100000000000000000000000000000000'),
             }}
           />
         </div>
         <div className={classes.button}>
-          <MyButton name="Approve" onClick={() => {}} disabled={false} />
-          <MyButton name="Deposit" onClick={() => {}} disabled={false} />
+          <MyButton
+            name="Approve"
+            onClick={() => handleClick('approve', pool.bond, pool)}
+            disabled={!pool.ct.signer || data.bond_allowance.gt('100000000000000000000000000000000')}
+          />
+          <MyButton
+            name="Mint"
+            onClick={() => handleClick('mint', state.input.bond, pool)}
+            disabled={ZERO.eq(state.output.coll) || parse(state.I.bond, pool.bond.decimals).gt(data.bond_balance)}
+          />
         </div>
       </div>
       <span className={classes.icon_arrow}>navigate_next</span>
       <div className={classes.show}>
         <div style={{ marginBottom: '20px' }}>
-          <AmountShow title="want" state={{ state, token: tokenList['0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0'] }} />
-          <ContractLink token="USDT" link="XXXXXXXX" />
+          <AmountShow title="coll" state={{ state, token: pool.coll }} />
+          <ContractLink token={pool.coll.symbol} contract={pool.coll.addr} />
         </div>
         <div>
-          <AmountShow title="want" state={{ state, token: tokenList['0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0'] }} />
-          <ContractLink token="USDT" link="XXXXXXXX" />
+          <AmountShow title="call" state={{ state, token: pool.call }} />
+          <ContractLink token={pool.call.symbol} contract={pool.call.addr} />
         </div>
       </div>
     </div>

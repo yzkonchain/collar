@@ -1,10 +1,6 @@
 import { useContext, useReducer, useEffect, useMemo, useState, useCallback, Suspense, lazy } from 'react'
 import { makeStyles } from '@material-ui/core'
 import MyTabs from './MyTabs'
-import Mint from './Mint'
-import Burn from './Burn'
-import Swap from './Swap'
-import Liquidity from './Liquidity'
 
 const useStyles = makeStyles({
   root: {
@@ -41,7 +37,7 @@ const useStyles = makeStyles({
   },
 })
 
-export default function Operation() {
+export default function Operation({ data }) {
   const classes = useStyles()
   const [tabs, setTabs] = useState(0)
   const tabsList = ['Mint', 'Burn', 'Swap', 'Liquidity']
@@ -54,8 +50,8 @@ export default function Operation() {
     <div className={classes.root}>
       <MyTabs value={tabs} onChange={(_, v) => setTabs(v)} labels={tabsList} />
       <div>
-        <Suspense fallback={<div />}>
-          <Content />
+        <Suspense fallback={<div style={{ height: '200px' }} />}>
+          <Content data={data} />
         </Suspense>
       </div>
       <div></div>

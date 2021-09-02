@@ -40,6 +40,7 @@ const Pool = ({ bond, want, r1, r2 }, list) => {
         call: list[call],
         swap_sqp: swap_sqp || 992187500,
         symbol: symbol || 'CLPT',
+        icon: COLLAR,
         ct: new ethers.Contract(addr, abi, signerNoAccount),
       }
     } else return null

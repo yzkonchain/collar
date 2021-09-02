@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { useContext, useEffect, useState, useMemo, useReducer } from 'react'
-import { makeStyles } from '@material-ui/core'
-import { context, STYLE, signerNoAccount } from '@/config'
+import { makeStyles, CircularProgress } from '@material-ui/core'
+import { context, proContext, STYLE, signerNoAccount } from '@/config'
 import PoolInfo from './PoolInfo'
 
 const useStyles = makeStyles({
@@ -32,18 +32,31 @@ const tableHead = [
   'Liquidity',
   'Fixed APY',
   'Historical Borrow APY',
-  'Staking APY',
+  'Farm APY',
   'COLLAR Reward',
   '',
 ]
-const tableHeadWidth = ['100px', '90px', '90px', '90px', '140px', '90px', '130px', '110px', '90px', '30px']
+const tableHeadWidth = ['80px', '100px', '80px', '90px', '150px', '90px', '140px', '110px', '90px', '30px']
 
 export default function AllMarkets() {
   const classes = useStyles()
   const {
     state: { signer, controller },
   } = useContext(context)
-  const [onOff, setOnOff] = useState(0)
+  const {
+    proState: { historicalInterestRate },
+  } = useContext(proContext)
+  const [onOff, setOnOff] = useState(-1)
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (historicalInterestRate.series) setLoading(false)
+  }, [historicalInterestRate])
+
+  useEffect(() => {
+    controller.pro_data().then((data) => setData(data))
+  }, [])
 
   return (
     <div className={classes.root}>
@@ -57,7 +70,8 @@ export default function AllMarkets() {
                 width: tableHeadWidth[key],
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: key === 0 ? 'start' : 'center',
+                justifyContent: 'center',
+                fontFamily: 'Frutiger',
               }}
             >
               <span>{head}</span>
@@ -65,9 +79,24 @@ export default function AllMarkets() {
           )
         })}
       </div>
-      {[1, 2, 3].map((val, key) => {
-        return <PoolInfo key={key} val={val} onOff={{ setOnOff, onOff }} tableHeadWidth={tableHeadWidth} />
-      })}
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '500px' }}>
+          <CircularProgress color="primary" size={80} />
+        </div>
+      ) : (
+        data.map((data, index) => {
+          return (
+            <PoolInfo
+              key={index}
+              index={index}
+              data={data}
+              diagram={historicalInterestRate.series[index].data}
+              onOff={{ setOnOff, onOff }}
+              tableHeadWidth={tableHeadWidth}
+            />
+          )
+        })
+      )}
     </div>
   )
 }

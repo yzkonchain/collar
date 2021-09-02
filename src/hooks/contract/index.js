@@ -38,6 +38,11 @@ const calc_apy_basic = ([sx, sy, sk], [bond, want], swap_sqp) => {
 }
 const calc_apy = ({ swap: { sx, sy, sk } }, [bond, want], { swap_sqp, expiry_time }) =>
   (format(calc_apy_basic([sx, sy, sk], [bond, want], swap_sqp)) * 3155692600000) / (expiry_time * 1000 - new Date())
+const calc_apy_format = ([sx, sy, sk], { swap_sqp, expiry_time }, time) => {
+  const basic = sk == 0 ? 0 : (sx + sk) / (sy + (sk * swap_sqp) / 1000000000) - 1
+  return (basic * 3155692600000) / (expiry_time * 1000 - (time || new Date()))
+}
+
 const calc_slip = ({ swap: { sx, sy, sk } }, [bond, want], { swap_sqp, expiry_time }) =>
   (format(
     calc_apy_basic([sx, sy, sk], [bond, want], swap_sqp).sub(calc_apy_basic([sx, sy, sk], [null, null], swap_sqp)),
@@ -51,13 +56,16 @@ const calc_collar_price = async () => {
     .then((sqrtPrice) => sqrtPrice ** 2 / 2 ** 192)
     .then((res) => 1 / res)
 }
-const queryBlock = (ct, method, args, blockNumber, decimal) =>
+const queryBlock = (ct, method, args = [], blockNumber = 'latest', decimal = 18) =>
   ct.populateTransaction[method](...args)
     .then((tx) => signerNoAccount.send('eth_call', [tx, { blockNumber }]))
     .then((data) => decode(method, data))
     .then((data) => data.map((v) => format(v, decimal)))
     .then((data) => (data.length === 1 ? data[0] : data))
     .catch(() => (abiCoder[method].length === 1 ? 0 : Array(abiCoder[method].length).fill(0)))
+
+const queryBlockBasic = (ct, method, args = []) =>
+  ct[method](...args).catch(() => (abiCoder[method].length === 1 ? ZERO : Array(abiCoder[method].length).fill(ZERO)))
 
 export default function contract() {
   const { enqueueSnackbar } = useSnackbar()
@@ -208,7 +216,7 @@ export default function contract() {
       Price[poolConfig.collar] = collar_price
       return res
     },
-    async pro_data(period, type) {
+    async pro_echarts(period, type) {
       const blockNumber = await signerNoAccount.getBlockNumber()
       const now = new Date()
       let promise = [],
@@ -224,6 +232,7 @@ export default function contract() {
         },
       }
       const timeset = TimeSet[period]
+      const timeSetOld = timeset.map((val) => new Date(now - val * 3600000))
       const len = timeset.length
       for (let { r1, r2 } of pools) {
         for (let pool of [r1, r2]) {
@@ -233,6 +242,7 @@ export default function contract() {
               promise.push(
                 queryBlock(pool.ct, 'sx', [], queryBlockNumber),
                 queryBlock(pool.ct, 'sy', [], queryBlockNumber, pool.want.decimals),
+                queryBlock(pool.ct, 'sk', [], queryBlockNumber),
                 queryBlock(pool.ct, 'reward_rate', [], queryBlockNumber),
                 queryBlock(pool.bond.ct, 'balanceOf', [pool.addr], queryBlockNumber, pool.bond.decimals),
               )
@@ -243,7 +253,7 @@ export default function contract() {
       }
       const res = await Promise.all(promise)
       const collar_price = await calc_collar_price()
-      const queryBatch = 4
+      const queryBatch = 5
       const DATA = {
         totalLockedValue: Array(len).fill(0),
         totalLiquidity: Array(len).fill(0),
@@ -259,17 +269,19 @@ export default function contract() {
           DATA['totalCollateral'][pool.bond.symbol] = Array(len).fill(0)
         }
         for (let i = 0; i < len; i++) {
-          const [sx, sy, reward_rate, bond_total] = _res.slice(i * queryBatch, (i + 1) * queryBatch)
+          const [sx, sy, sk, reward_rate, bond_total] = _res.slice(i * queryBatch, (i + 1) * queryBatch)
           const liquidity = sx * Price[pool.coll.addr] + sy * Price[pool.want.addr]
           const collateral = bond_total * Price[pool.bond.addr]
           DATA['totalLockedValue'][i] += liquidity + collateral
           DATA['totalLiquidity'][i] += liquidity
           DATA['totalCollateral'][pool.bond.symbol][i] += collateral
-          DATA['historicalInterestRate'][poolName].push(((reward_rate * collar_price) / (sx + sy)) * 3153600000)
+          // DATA['historicalInterestRate'][poolName].push(((reward_rate * collar_price) / (sx + sy)) * 3153600000)
+          DATA['historicalInterestRate'][poolName].push(calc_apy_format([sx, sy, sk], pool, timeSetOld[i]))
         }
       })
       const _result = _.cloneDeep(echartsData)
-      _result.xAxis.data = timeset.map((val) => new Date(now - val * 3600000).toLocaleString())
+      // _result.xAxis.data = timeSetOld.map((t) => t.toLocaleString())
+      _result.xAxis.data = timeSetOld
       _result.xAxis.axisLabel.interval = len - 2
       const singleLine = (type) => {
         const result = _.cloneDeep(_result)
@@ -277,6 +289,7 @@ export default function contract() {
           data: DATA[type],
           type: 'line',
           showSymbol: false,
+          lineStyle: { color: '#59FFAD' },
         }
         return result
       }
@@ -288,9 +301,9 @@ export default function contract() {
           type: 'line',
           showSymbol: false,
         }))
-        if (type == 'historicalInterestRate') {
-          result.yAxis.axisLabel.formatter = '{value}%'
-        }
+        // if (type == 'historicalInterestRate') {
+        //   result.yAxis.axisLabel.formatter = (v) => [v.toFixed(1) + '%']
+        // }
         return result
       }
       const echartsRes = (type) => {
@@ -311,6 +324,65 @@ export default function contract() {
         }
       }
       return echartsRes(type)
+    },
+    async pro_data() {
+      const res = []
+      const collar_price = await calc_collar_price()
+      for (let { r1, r2 } of pools) {
+        for (let pool of [r1, r2]) {
+          if (pool) {
+            const me = pool.ct.signer ? pool.ct.signer.getAddress() : null
+            let [
+              bond_total,
+              want_total,
+              coll_total,
+              clpt_total,
+              reward_rate,
+              clpt,
+              coll,
+              call,
+              bond_balance,
+              want_balance,
+              bond_allowance,
+              want_allowance,
+            ] = await Promise.all([
+              queryBlockBasic(pool.bond.ct, 'balanceOf', [pool.addr]),
+              queryBlockBasic(pool.ct, 'sy'),
+              queryBlockBasic(pool.ct, 'sx'),
+              queryBlockBasic(pool.ct, 'sk'),
+              queryBlockBasic(pool.ct, 'reward_rate'),
+              queryBlockBasic(pool.ct, 'balanceOf'),
+              queryBlockBasic(pool.coll.ct, 'balanceOf', [me]),
+              queryBlockBasic(pool.call.ct, 'balanceOf', [me]),
+              queryBlockBasic(pool.bond.ct, 'balanceOf', [me]),
+              queryBlockBasic(pool.want.ct, 'balanceOf', [me]),
+              queryBlockBasic(pool.bond.ct, 'allowance', [me, pool.addr]),
+              queryBlockBasic(pool.want.ct, 'allowance', [me, pool.addr]),
+            ])
+            res.push({
+              pool,
+              bond_total,
+              want_total,
+              coll_total,
+              clpt_total,
+              reward_rate,
+              clpt,
+              coll,
+              call,
+              bond_balance,
+              want_balance,
+              bond_allowance,
+              want_allowance,
+              clpt_price: format(coll_total.add(want_total)) / format(clpt_total),
+              apy: calc_apy({ swap: { sx: coll_total, sy: want_total, sk: clpt_total } }, [null, null], pool),
+              farm_apy:
+                ((format(reward_rate) * collar_price) / (format(coll_total) + format(want_total, pool.want.decimals))) *
+                3153600000,
+            })
+          }
+        }
+      }
+      return res
     },
     async mypage_check(type, pool) {
       const me = await pool.ct.signer.getAddress()

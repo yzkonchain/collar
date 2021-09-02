@@ -3,10 +3,15 @@ import ReactEcharts from 'echarts-for-react'
 import { makeStyles, withStyles, FormControl, NativeSelect, InputBase, CircularProgress } from '@material-ui/core'
 import { proContext } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
+import { formatUnits } from '@/utils/format'
 
 const useStyles = makeStyles({
   root: {
     width: '100%',
+    padding: '15px',
+    backgroundColor: '#263C7E',
+    borderRadius: '20px',
+    marginBottom: '40px',
   },
   title: {
     color: '#7B96EB',
@@ -28,7 +33,7 @@ const useStyles = makeStyles({
     },
   },
   content: {
-    height: '300px',
+    height: '250px',
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
@@ -68,7 +73,7 @@ export default function TotalLockedValue({ period, setPeriod, handleChange }) {
     <div className={classes.root}>
       <div className={classes.title}>
         <div>
-          <span style={{ marginRight: '5px' }}>Total Locked Value</span>
+          <span style={{ marginRight: '5px' }}>Total Value Locked</span>
           <span
             className={classes.symbol}
             onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
@@ -76,7 +81,7 @@ export default function TotalLockedValue({ period, setPeriod, handleChange }) {
           >
             info
           </span>
-          <FloatMessage2 anchorEl={anchorEl} info={'Total Locked Value'} />
+          <FloatMessage2 anchorEl={anchorEl} info={'Total asset value locked in protocol.'} />
         </div>
         <FormControl className={classes.time}>
           <NativeSelect
@@ -99,7 +104,12 @@ export default function TotalLockedValue({ period, setPeriod, handleChange }) {
         {loading ? (
           <CircularProgress color="primary" size={80} />
         ) : (
-          <ReactEcharts option={totalLockedValue} style={{ height: '100%', width: '100%' }} />
+          <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+            <span style={{ margin: '10px 0 25px 25px', fontSize: '35px', color: '#fff', fontFamily: 'Frutiger' }}>
+              $ {formatUnits(totalLockedValue.series[0].data.slice(-1)[0], 1)}
+            </span>
+            <ReactEcharts option={totalLockedValue} style={{ width: '100%' }} />
+          </div>
         )}
       </div>
     </div>

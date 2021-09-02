@@ -8,7 +8,7 @@ module.exports = function override(config, env) {
   // config.devtool = false
   // config.optimization.minimizer.push(new UglifyJsPlugin())
   // config.externals = {
-  //   // web3: 'Web3',
+  //   web3: 'Web3',
   //   ethers: 'ethers',
   //   react: 'React',
   //   'react-dom': 'ReactDOM',

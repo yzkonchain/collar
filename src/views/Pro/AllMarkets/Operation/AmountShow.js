@@ -51,7 +51,7 @@ export default function AmountShow({ state: { state, token }, title, contract })
         <span>{token.symbol}</span>
       </div>
       <div className={classes.main}>
-        <div style={{ fontSize: '35px' }}>{parseFloat(format(state.output[title], token.decimals)).toFixed(3)}</div>
+        <div style={{ fontSize: '35px' }}>{format(state.output[title], token.decimals)}</div>
         <span className={classes.dollar}>
           ~$
           {(token.symbol == 'CLPT'

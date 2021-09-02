@@ -2,8 +2,8 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core'
 import { MyButton } from '@/components/Modules'
-import { tokenList } from '@/config'
-
+import { context, proContext } from '@/config'
+import { parse, format } from '@/utils/format'
 import AmountInput from './AmountInput'
 import AmountShow from './AmountShow'
 import ContractLink from './ContractLink'
@@ -11,14 +11,15 @@ import ContractLink from './ContractLink'
 const ZERO = ethers.constants.Zero
 const INIT = {
   input: {
-    bond: ZERO,
-  },
-  output: {
+    coll: ZERO,
+    call: ZERO,
     want: ZERO,
   },
-  tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
-  I: { bond: '' },
-  old: { bond: '' },
+  output: {
+    bond: ZERO,
+  },
+  I: { coll: '', call: '', want: '' },
+  old: { coll: '', call: '', want: '' },
 }
 
 const useStyles = makeStyles({
@@ -70,46 +71,73 @@ const useStyles = makeStyles({
   },
 })
 
-export default function Burn() {
+export default function Burn({ data }) {
   const classes = useStyles()
+  const {
+    state: { controller },
+  } = useContext(context)
+  const { handleClick } = useContext(proContext)
   const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
+  const { pool } = data
+
+  // useEffect(() => {
+  //   const coll = parse(state.I.coll)
+  //   const call = parse(state.I.call)
+  //   if (!bond.eq(state.input.bond)) {
+  //     setState({ input: { bond }, output: { coll: bond, call: bond } })
+  //   }
+  // }, [state.I])
 
   return (
     <div className={classes.root}>
       <div className={classes.main}>
         <div className={classes.input}>
           <AmountInput
-            title="bond"
+            title="call"
             State={{
               state,
               setState,
-              token: tokenList['0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0'],
-              max: ZERO,
-              if_max: false,
+              token: pool.call,
+              max: data.call,
+              if_max: data.call.gt('0'),
             }}
           />
           <AmountInput
-            title="bond"
+            title="coll"
             State={{
               state,
               setState,
-              token: tokenList['0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0'],
-              max: ZERO,
-              if_max: false,
+              token: pool.coll,
+              max: data.coll,
+              if_max: data.coll.gt('0'),
             }}
           />
         </div>
         <div className={classes.button}>
-          <MyButton name="Approve" onClick={() => {}} disabled={false} />
-          <MyButton name="Deposit" onClick={() => {}} disabled={false} />
+          <MyButton
+            name="Approve"
+            onClick={() => handleClick('approve', pool.want, pool)}
+            disabled={true}
+            // disabled={!pool.ct.signer || data.want_allowance.gt('100000000000000000000000000000000')}
+          />
+          <MyButton
+            name="Burn"
+            onClick={() => handleClick('approve', pool.want, pool)}
+            disabled={true}
+            // disabled={
+            //   ZERO.eq(state.output.bond)
+            //   // parse(state.I.bond, pool.bond.decimals).gt(data.bond_balance) ||
+            //   // !parse(state.I.bond, pool.bond.decimals).eq(state.input.bond)
+            // }
+          />
         </div>
       </div>
       <span className={classes.icon_arrow}>navigate_next</span>
       <div className={classes.show}>
         <div>
-          <AmountShow title="want" state={{ state, token: tokenList['0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0'] }} />
-          <ContractLink token="COLL" link="XXXXXXXX" />
-          <ContractLink token="CALL" link="XXXXXXXX" />
+          <AmountShow title="bond" state={{ state, token: pool.bond }} />
+          <ContractLink token={pool.coll.symbol} contract={pool.coll.addr} />
+          <ContractLink token={pool.call.symbol} contract={pool.call.addr} />
         </div>
       </div>
     </div>

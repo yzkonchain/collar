@@ -3,10 +3,15 @@ import ReactEcharts from 'echarts-for-react'
 import { makeStyles, withStyles, FormControl, NativeSelect, InputBase, CircularProgress } from '@material-ui/core'
 import { proContext } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
+import { formatUnits } from '@/utils/format'
 
 const useStyles = makeStyles({
   root: {
     width: '100%',
+    padding: '15px',
+    backgroundColor: '#263C7E',
+    borderRadius: '20px',
+    marginBottom: '40px',
   },
   title: {
     color: '#7B96EB',
@@ -28,7 +33,7 @@ const useStyles = makeStyles({
     },
   },
   content: {
-    height: '300px',
+    height: '250px',
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
@@ -76,7 +81,7 @@ export default function TotalCollateral({ period, setPeriod, handleChange }) {
           >
             info
           </span>
-          <FloatMessage2 anchorEl={anchorEl} info={'Total Collateral'} />
+          <FloatMessage2 anchorEl={anchorEl} info={'Global deposit asset value as collateral.'} />
         </div>
 
         <FormControl className={classes.time}>
@@ -100,7 +105,16 @@ export default function TotalCollateral({ period, setPeriod, handleChange }) {
         {loading ? (
           <CircularProgress color="primary" size={80} />
         ) : (
-          <ReactEcharts option={totalCollateral} style={{ height: '100%', width: '100%' }} />
+          <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+            <span style={{ margin: '10px 0 25px 25px', fontSize: '35px', color: '#fff', fontFamily: 'Frutiger' }}>
+              ${' '}
+              {formatUnits(
+                totalCollateral.series.reduce((total, cur) => total + cur.data.slice(-1)[0], 0),
+                1,
+              )}
+            </span>
+            <ReactEcharts option={totalCollateral} style={{ width: '100%' }} />
+          </div>
         )}
       </div>
     </div>

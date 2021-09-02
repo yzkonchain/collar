@@ -16,7 +16,7 @@ const useStyles = makeStyles({
     justifyContent: 'space-between',
     [STYLE.PC]: {
       '&>div': {
-        width: '48%',
+        width: '45%',
       },
     },
   },
@@ -39,7 +39,7 @@ export default function Overview() {
     historicalInterestRate: '12h',
   })
 
-  const handleChange = (p, key) => controller.pro_data(p, key).then((data) => setProState(data))
+  const handleChange = (p, key) => controller.pro_echarts(p, key).then((data) => setProState(data))
   useEffect(() => handleChange('12h'), [])
 
   return (

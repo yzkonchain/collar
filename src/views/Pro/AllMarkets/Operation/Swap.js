@@ -11,14 +11,15 @@ import ContractLink from './ContractLink'
 const ZERO = ethers.constants.Zero
 const INIT = {
   input: {
-    bond: ZERO,
-  },
-  output: {
+    coll: ZERO,
     want: ZERO,
   },
-  tip: { fee: '0.0000', min: '0.000', slip: '0.00' },
-  I: { bond: '' },
-  old: { bond: '' },
+  output: {
+    coll: ZERO,
+    want: ZERO,
+  },
+  I: { coll: '', want: '' },
+  old: { coll: '', want: '' },
 }
 
 const useStyles = makeStyles({
@@ -70,36 +71,37 @@ const useStyles = makeStyles({
   },
 })
 
-export default function Swap() {
+export default function Swap({ data }) {
   const classes = useStyles()
   const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
+  const { pool } = data
 
   return (
     <div className={classes.root}>
       <div className={classes.main}>
         <div className={classes.input}>
           <AmountInput
-            title="bond"
+            title="coll"
             State={{
               state,
               setState,
-              token: tokenList['0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0'],
+              token: pool.coll,
               max: ZERO,
               if_max: false,
             }}
           />
         </div>
         <div className={classes.button}>
-          <MyButton name="Approve" onClick={() => {}} disabled={false} />
-          <MyButton name="Deposit" onClick={() => {}} disabled={false} />
+          <MyButton name="Approve" onClick={() => {}} disabled={true} />
+          <MyButton name="Swap" onClick={() => {}} disabled={true} />
         </div>
       </div>
       <span className={classes.icon_arrow}>navigate_next</span>
       <div className={classes.show}>
         <div>
-          <AmountShow title="want" state={{ state, token: tokenList['0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0'] }} />
-          <ContractLink token="COLL" link="XXXXXXXX" />
-          <ContractLink token="CALL" link="XXXXXXXX" />
+          <AmountShow title="want" state={{ state, token: pool.want }} />
+          <ContractLink token={pool.coll.symbol} contract={pool.coll.addr} />
+          <ContractLink token={pool.call.symbol} contract={pool.call.addr} />
         </div>
       </div>
     </div>

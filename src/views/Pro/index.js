@@ -29,8 +29,14 @@ export default function Pro() {
     historicalInterestRate: {},
   })
 
+  const handleClick = (type, ...args) => {
+    controller[type](...args)
+      .then(() => console.log('success'))
+      .catch(() => console.log('fail'))
+  }
+
   return (
-    <proContext.Provider value={{ proState, setProState }}>
+    <proContext.Provider value={{ proState, setProState, handleClick }}>
       <div className={classes.root}>
         <Overview />
         <AllMarkets />

@@ -3,10 +3,15 @@ import ReactEcharts from 'echarts-for-react'
 import { makeStyles, withStyles, FormControl, NativeSelect, InputBase, CircularProgress } from '@material-ui/core'
 import { proContext } from '@/config'
 import { FloatMessage2 } from '@/components/Modules'
+import { formatUnits } from '@/utils/format'
 
 const useStyles = makeStyles({
   root: {
     width: '100%',
+    padding: '15px',
+    backgroundColor: '#263C7E',
+    borderRadius: '20px',
+    marginBottom: '40px',
   },
   title: {
     color: '#7B96EB',
@@ -28,7 +33,7 @@ const useStyles = makeStyles({
     },
   },
   content: {
-    height: '300px',
+    height: '250px',
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
@@ -76,7 +81,7 @@ export default function HistoricalInterestRate({ period, setPeriod, handleChange
           >
             info
           </span>
-          <FloatMessage2 anchorEl={anchorEl} info={'Historical Interest Rate'} />
+          <FloatMessage2 anchorEl={anchorEl} info={'History borrowing and lending rate of each pairs.'} />
         </div>
 
         <FormControl className={classes.time}>
@@ -100,7 +105,12 @@ export default function HistoricalInterestRate({ period, setPeriod, handleChange
         {loading ? (
           <CircularProgress color="primary" size={80} />
         ) : (
-          <ReactEcharts option={historicalInterestRate} style={{ height: '100%', width: '100%' }} />
+          <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+            <span style={{ margin: '10px 0 25px 25px', fontSize: '35px', color: '#fff', fontFamily: 'Frutiger' }}>
+              {historicalInterestRate.series[0].data.slice(-1)[0].toFixed(1)} %
+            </span>
+            <ReactEcharts option={historicalInterestRate} style={{ width: '100%' }} />
+          </div>
         )}
       </div>
     </div>

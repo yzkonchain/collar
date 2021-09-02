@@ -12,6 +12,7 @@ const poolConfig = {
   pricePool: '0x5BBBE4Da8b5AF36482F75747Ee38ddFDf3F6e4D9',
   collar: '0xe405bD3C4876D1Ea0af92BaCF5831c9FCbDD78aE',
   stablecoin: '0x08f5F253fb2080660e9a4E3882Ef4458daCd52b0',
+  browser: 'https://etherscan.io',
   gasAdjustment: 120,
 }
 

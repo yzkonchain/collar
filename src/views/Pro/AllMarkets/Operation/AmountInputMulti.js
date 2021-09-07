@@ -61,7 +61,7 @@ const useStyles = makeStyles({
 const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 const parse = (num, n) => ethers.utils.parseUnits(num || '0', n || 18)
 
-export default function AmountInput({ State, title }) {
+export default function AmountInput({ State, title, setTokenSelected }) {
   const [fontSize, setFontSize] = useState(35)
   const classes = useStyles({ fontSize })
   const { state, setState, token, max, if_max } = State
@@ -104,6 +104,25 @@ export default function AmountInput({ State, title }) {
             }
           />
           <span>{token.symbol}</span>
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#275BFF',
+              color: 'white',
+              textTransform: 'none',
+              fontFamily: 'Material Icons',
+              fontSize: '18px',
+              margin: '0 8px',
+              height: '14px',
+              width: '24px',
+              borderRadius: '8px',
+            }}
+            onClick={setTokenSelected}
+          >
+            expand_more
+          </span>
         </div>
         <div className={classes.main}>
           <div className={classes.amount}>

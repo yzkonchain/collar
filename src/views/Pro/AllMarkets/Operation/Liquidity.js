@@ -2,8 +2,8 @@ import { ethers } from 'ethers'
 import { useContext, useReducer, useMemo, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core'
 import { MyButton } from '@/components/Modules'
-import { tokenList } from '@/config'
-
+import { context, proContext } from '@/config'
+import { parse, format } from '@/utils/format'
 import AmountInput from './AmountInput'
 import AmountShow from './AmountShow'
 import ContractLink from './ContractLink'
@@ -72,8 +72,32 @@ const useStyles = makeStyles({
 
 export default function Liquidity({ data }) {
   const classes = useStyles()
+  const {
+    state: { controller },
+  } = useContext(context)
+  const { handleClick } = useContext(proContext)
   const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
   const { pool } = data
+
+  useEffect(() => {
+    const want = parse(state.I.want, pool.want.decimals)
+    const coll = parse(state.I.coll)
+    if (!want.eq(state.input.want) || !coll.eq(state.input.coll)) {
+      pool.ct
+        .get_dk(coll, want)
+        .then((clpt) => {
+          setState({ input: { want, coll }, output: { clpt } })
+        })
+        .catch(() => {
+          if (
+            (state.I.want.length > state.old.want.length && state.I.want.length < format(state.input.want).length) ||
+            (state.I.coll.length > state.old.coll.length && state.I.coll.length < format(state.input.coll).length)
+          ) {
+            controller.notify('balance', 'insufficient')
+          }
+        })
+    }
+  }, [state.I])
 
   return (
     <div className={classes.root}>
@@ -85,8 +109,8 @@ export default function Liquidity({ data }) {
               state,
               setState,
               token: pool.want,
-              max: ZERO,
-              if_max: false,
+              max: data.want_balance,
+              if_max: data.want_allowance.gt('100000000000000000000000000000000'),
             }}
           />
           <AmountInput
@@ -95,20 +119,34 @@ export default function Liquidity({ data }) {
               state,
               setState,
               token: pool.coll,
-              max: ZERO,
-              if_max: false,
+              max: data.coll,
+              if_max: data.coll.gt('0'),
             }}
           />
         </div>
         <div className={classes.button}>
-          <MyButton name="Approve" onClick={() => {}} disabled={true} />
-          <MyButton name="Deposit" onClick={() => {}} disabled={true} />
+          <MyButton
+            name="Approve"
+            onClick={() => handleClick('approve', pool.want, pool)}
+            disabled={!pool.ct.signer || data.want_allowance.gt('100000000000000000000000000000000')}
+          />
+          <MyButton
+            name="Deposit"
+            onClick={() => handleClick('deposit', state.input.want, state.input.coll, state.output.clpt, pool)}
+            disabled={
+              ZERO.eq(state.output.clpt) ||
+              parse(state.I.want, pool.want.decimals).gt(data.want_balance) ||
+              parse(state.I.coll).gt(data.coll) ||
+              !parse(state.I.want, pool.want.decimals).eq(state.input.want) ||
+              !parse(state.I.coll).eq(state.input.coll)
+            }
+          />
         </div>
       </div>
       <span className={classes.icon_arrow}>navigate_next</span>
       <div className={classes.show}>
         <div>
-          <AmountShow title="clpt" state={{ state, token: pool }} />
+          <AmountShow title="clpt" state={{ state, token: pool }} fixed={3} />
           <ContractLink token={pool.coll.symbol} contract={pool.coll.addr} />
           <ContractLink token={pool.call.symbol} contract={pool.call.addr} />
           <ContractLink token={pool.symbol} contract={pool.addr} />

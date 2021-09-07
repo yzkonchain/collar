@@ -41,17 +41,29 @@ const useStyles = makeStyles({
 
 const format = (num, n) => ethers.utils.formatUnits(num, n || 18)
 
-export default function AmountShow({ state: { state, token }, title, contract }) {
+export default function AmountShow({ state: { state, token }, title, contract, fixed }) {
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState(null)
   return (
     <div className={classes.root}>
       <div className={classes.token}>
-        <img alt="" src={token.icon} style={{ width: '35px' }} />
+        <img
+          alt=""
+          src={token.icon}
+          style={
+            ['coll', 'call', 'clpt'].includes(title)
+              ? { width: '35px', borderRadius: '50%', border: '#DCDCDC 2px solid' }
+              : { width: '35px' }
+          }
+        />
         <span>{token.symbol}</span>
       </div>
       <div className={classes.main}>
-        <div style={{ fontSize: '35px' }}>{format(state.output[title], token.decimals)}</div>
+        <div style={{ fontSize: '35px' }}>
+          {fixed
+            ? (format(state.output[title], token.decimals) * 1).toFixed(fixed)
+            : format(state.output[title], token.decimals)}
+        </div>
         <span className={classes.dollar}>
           ~$
           {(token.symbol == 'CLPT'

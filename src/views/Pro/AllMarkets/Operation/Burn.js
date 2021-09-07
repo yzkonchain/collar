@@ -1,9 +1,10 @@
 import { ethers } from 'ethers'
-import { useContext, useReducer, useMemo, useEffect } from 'react'
+import { useContext, useReducer, useMemo, useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core'
 import { MyButton } from '@/components/Modules'
 import { context, proContext } from '@/config'
 import { parse, format } from '@/utils/format'
+import AmountInputMulti from './AmountInputMulti'
 import AmountInput from './AmountInput'
 import AmountShow from './AmountShow'
 import ContractLink from './ContractLink'
@@ -78,15 +79,19 @@ export default function Burn({ data }) {
   } = useContext(context)
   const { handleClick } = useContext(proContext)
   const [state, setState] = useReducer((o, n) => ({ ...o, ...n }), INIT)
+  const [tokenSelected, setTokenSelected] = useState(0)
   const { pool } = data
 
-  // useEffect(() => {
-  //   const coll = parse(state.I.coll)
-  //   const call = parse(state.I.call)
-  //   if (!bond.eq(state.input.bond)) {
-  //     setState({ input: { bond }, output: { coll: bond, call: bond } })
-  //   }
-  // }, [state.I])
+  useEffect(() => {
+    const coll = parse(state.I.coll)
+    const call = parse(state.I.call)
+    const want = parse(state.I.want, pool.want.decimals)
+    if (!coll.eq(state.input.coll)) {
+      setState({ input: { ...state.input, coll }, output: { bond: coll } })
+    } else if (!want.eq(state.input.want)) {
+      setState({ input: { ...state.input, want }, output: { bond: want } })
+    }
+  }, [state.I])
 
   return (
     <div className={classes.root}>
@@ -102,14 +107,18 @@ export default function Burn({ data }) {
               if_max: data.call.gt('0'),
             }}
           />
-          <AmountInput
-            title="coll"
+          <AmountInputMulti
+            title={['coll', 'want'][tokenSelected]}
             State={{
               state,
               setState,
-              token: pool.coll,
-              max: data.coll,
-              if_max: data.coll.gt('0'),
+              token: [pool.coll, pool.want][tokenSelected],
+              max: [data.coll, data.want_balance][tokenSelected],
+              if_max: [data.coll.gt('0'), data.want_balance.gt('0')][tokenSelected],
+            }}
+            setTokenSelected={() => {
+              setTokenSelected(tokenSelected > 0 ? 0 : 1)
+              setState(INIT)
             }}
           />
         </div>
@@ -117,18 +126,16 @@ export default function Burn({ data }) {
           <MyButton
             name="Approve"
             onClick={() => handleClick('approve', pool.want, pool)}
-            disabled={true}
-            // disabled={!pool.ct.signer || data.want_allowance.gt('100000000000000000000000000000000')}
+            disabled={!pool.ct.signer || data.want_allowance.gt('100000000000000000000000000000000')}
           />
           <MyButton
             name="Burn"
-            onClick={() => handleClick('approve', pool.want, pool)}
-            disabled={true}
-            // disabled={
-            //   ZERO.eq(state.output.bond)
-            //   // parse(state.I.bond, pool.bond.decimals).gt(data.bond_balance) ||
-            //   // !parse(state.I.bond, pool.bond.decimals).eq(state.input.bond)
-            // }
+            onClick={() => handleClick('repay', state.input.want, state.input.coll, pool)}
+            disabled={
+              ZERO.eq(state.output.bond) ||
+              (tokenSelected === 0 && parse(state.I.coll).gt(data.coll)) ||
+              (tokenSelected === 1 && parse(state.I.want, pool.want.decimals).gt(data.want_balance))
+            }
           />
         </div>
       </div>

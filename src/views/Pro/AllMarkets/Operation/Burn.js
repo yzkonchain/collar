@@ -83,13 +83,27 @@ export default function Burn({ data }) {
   const { pool } = data
 
   useEffect(() => {
-    const coll = parse(state.I.coll)
     const call = parse(state.I.call)
+    const coll = parse(state.I.coll)
     const want = parse(state.I.want, pool.want.decimals)
-    if (!coll.eq(state.input.coll)) {
-      setState({ input: { ...state.input, coll }, output: { bond: coll } })
+    if (!call.eq(state.input.call)) {
+      setState({
+        I: { call: state.I.call, coll: state.I.call, want: state.I.call },
+        input: { call, coll: call, want: call },
+        output: { bond: call },
+      })
+    } else if (!coll.eq(state.input.coll)) {
+      setState({
+        I: { call: state.I.coll, coll: state.I.coll, want: state.I.coll },
+        input: { call: coll, coll, want: coll },
+        output: { bond: coll },
+      })
     } else if (!want.eq(state.input.want)) {
-      setState({ input: { ...state.input, want }, output: { bond: want } })
+      setState({
+        I: { call: state.I.want, coll: state.I.want, want: state.I.want },
+        input: { call: want, coll: want, want },
+        output: { bond: want },
+      })
     }
   }, [state.I])
 
@@ -103,7 +117,14 @@ export default function Burn({ data }) {
               state,
               setState,
               token: pool.call,
-              max: data.call,
+              max:
+                tokenSelected === 0
+                  ? data.coll.lt(data.call)
+                    ? data.coll
+                    : data.call
+                  : data.want_balance.lt(data.call)
+                  ? data.want_balance
+                  : data.call,
               if_max: data.call.gt('0'),
             }}
           />
@@ -113,7 +134,10 @@ export default function Burn({ data }) {
               state,
               setState,
               token: [pool.coll, pool.want][tokenSelected],
-              max: [data.coll, data.want_balance][tokenSelected],
+              max: [
+                data.coll.lt(data.call) ? data.coll : data.call,
+                data.want_balance.lt(data.call) ? data.want_balance : data.call,
+              ][tokenSelected],
               if_max: [data.coll.gt('0'), data.want_balance.gt('0')][tokenSelected],
             }}
             setTokenSelected={() => {
@@ -133,6 +157,7 @@ export default function Burn({ data }) {
             onClick={() => handleClick('repay', state.input.want, state.input.coll, pool)}
             disabled={
               ZERO.eq(state.output.bond) ||
+              parse(state.I.call).gt(data.call) ||
               (tokenSelected === 0 && parse(state.I.coll).gt(data.coll)) ||
               (tokenSelected === 1 && parse(state.I.want, pool.want.decimals).gt(data.want_balance))
             }

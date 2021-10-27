@@ -447,6 +447,14 @@ export default function contract() {
           }
           return { clpt, pair: await pool.ct.get_dxdy(clpt).catch(() => [ZERO, ZERO]) }
         case 'settle':
+          if (rate.gte(ethers.utils.parseEther('1'))) {
+            enqueueSnackbar({
+              type: 'failed',
+              title: 'Fail.',
+              message: `The expire function has not been executed.`,
+            })
+            return false
+          }
           return {
             coll,
             bond: coll.sub(coll.mul(rate).div(ethers.utils.parseEther('1'))),

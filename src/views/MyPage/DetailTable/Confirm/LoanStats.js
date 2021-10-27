@@ -27,7 +27,7 @@ export default function LoanStats({ data, pool, classes }) {
             <TableCell>{`${data.call_total_supply.toFixed(2)} ${pool.want.symbol}`}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Collateral deposit amount:</TableCell>
+            <TableCell>Collateral Deposit Amount:</TableCell>
             <TableCell>{`${data.bond_total.toFixed(2)} ${pool.bond.symbol}`}</TableCell>
           </TableRow>
         </TableBody>

@@ -11,6 +11,7 @@ const abi = [
   'function get_dxdy(uint256) external view returns (uint256, uint256)',
   'function borrow_want(uint256, uint256) external',
   'function burn_call(uint256) external',
+  'function burn_coll(uint256) external',
   'function burn_dual(uint256) external',
   'function repay_both(uint256, uint256) external',
   'function mint(uint256, uint256, uint256) external',
@@ -29,12 +30,14 @@ const abi = [
   'function transfer(address, uint256) external',
   'function approve(address, uint256) external',
   'function allowance(address, address) external view returns (uint256)',
+  'function rate() external view returns (uint256)',
 ]
 
 const abiCoder = {
   sx: ['uint256'],
   sy: ['uint256'],
   sk: ['uint256'],
+  rate: ['uint256'],
   swap_sqp: ['uint256'],
   calc_k: ['uint256'],
   get_dx: ['uint256'],

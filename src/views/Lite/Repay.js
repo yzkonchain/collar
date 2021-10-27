@@ -41,7 +41,7 @@ export default function Repay() {
         const tip = {
           fee: (format(want, pool.want.decimals) * (1 - format(data.swap.fee))).toFixed(4),
           min: (format(bond, pool.bond.decimals) * 0.995).toFixed(3),
-          slip: controller.calc_slip(data, [bond, null], pool).toPrecision(3),
+          slip: ZERO.eq(want) ? '0.000' : controller.calc_slip(data, [ZERO.sub(bond), want], pool).toPrecision(3),
           apy: data.apy.toPrecision(3),
         }
         setState({ input: { want, coll }, output: { bond }, tip })

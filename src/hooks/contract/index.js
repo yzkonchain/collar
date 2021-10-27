@@ -151,8 +151,8 @@ export default function contract() {
     async mypage_data() {
       const res = []
       const collar_price = await calc_collar_price()
-      for (let { r1, r2 } of pools) {
-        for (let pool of [r1, r2]) {
+      for (let { r1, r2, r0 } of pools) {
+        for (let pool of [r1, r2, ...r0]) {
           if (pool) {
             const me = pool.ct.signer ? pool.ct.signer.getAddress() : null
             let [
@@ -234,8 +234,8 @@ export default function contract() {
       const timeset = TimeSet[period]
       const timeSetOld = timeset.map((val) => new Date(now - val * 3600000))
       const len = timeset.length
-      for (let { r1, r2 } of pools) {
-        for (let pool of [r1, r2]) {
+      for (let { r1, r2, r0 } of pools) {
+        for (let pool of [r1, r2, ...r0]) {
           if (pool) {
             for (let time of timeset) {
               let queryBlockNumber = toHex(blockNumber - time * 225)
@@ -328,8 +328,8 @@ export default function contract() {
     async pro_data() {
       const res = []
       const collar_price = await calc_collar_price()
-      for (let { r1, r2 } of pools) {
-        for (let pool of [r1, r2]) {
+      for (let { r1, r2, r0 } of pools) {
+        for (let pool of [r1, r2, ...r0]) {
           if (pool) {
             const me = pool.ct.signer ? pool.ct.signer.getAddress() : null
             let [
@@ -386,11 +386,12 @@ export default function contract() {
     },
     async mypage_check(type, pool) {
       const me = await pool.ct.signer.getAddress()
-      const [coll, call, want] = await Promise.all([
+      const [coll, call, want, rate] = await Promise.all([
         pool.coll.ct.balanceOf(me),
         pool.call.ct.balanceOf(me),
         pool.want.ct.balanceOf(me),
-      ]).catch(() => [ZERO, ZERO, ZERO])
+        pool.ct.rate(),
+      ]).catch(() => [ZERO, ZERO, ZERO, ZERO])
       let clpt, earned
       switch (type) {
         case 'redeemAll':
@@ -446,8 +447,11 @@ export default function contract() {
           }
           return { clpt, pair: await pool.ct.get_dxdy(clpt).catch(() => [ZERO, ZERO]) }
         case 'settle':
-          notify('support', false)
-          return false
+          return {
+            coll,
+            bond: coll.sub(coll.mul(rate).div(ethers.utils.parseEther('1'))),
+            want: coll.mul(rate).div(ethers.utils.parseEther('1')),
+          }
         case 'claim':
           earned = await pool.ct.earned(me)
           if (earned.eq(ZERO)) {
@@ -567,8 +571,12 @@ export default function contract() {
     },
     async settle(pool) {
       const checked = await this.mypage_check('settle', pool)
-      if (checked) return true
-      else return false
+      if (checked) {
+        const method = 'burn_coll'
+        const args = [checked.coll]
+        const cb = 'settle'
+        return await exchange(pool, method, args, cb)
+      } else return false
     },
     async faucet(to, value, signer) {
       const gasLimit = (await signer.estimateGas()).mul(poolConfig.gasAdjustment).div(100)

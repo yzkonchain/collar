@@ -104,6 +104,17 @@ const callbackInfo = (method, status) => {
         default:
           return failed
       }
+    case 'settle':
+      switch (status) {
+        case 1:
+          return {
+            type: 'success',
+            title: 'Settle.',
+            message: 'Settle.',
+          }
+        default:
+          return failed
+      }
     case 'mint':
       switch (status) {
         case 1:

@@ -28,6 +28,7 @@ pools = [
     {
       bond: '0xF3d7FdB3395CeAba7856A273178f009389C6582d',
       want: '0x67C9a0830d922C80A96408EEdF606c528836880C',
+      r0: [],
       r1: {
         addr: '0xf7187fD2FE5E1d01f4C0e9dC91ccF96a2a93A931',
         coll: '0xF9176bFDe0fDF7D8B9B57e668Fbd8E2cee3072E5',

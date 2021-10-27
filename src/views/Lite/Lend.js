@@ -45,7 +45,7 @@ export default function Lend() {
           const tip = {
             fee: (format(coll) * (1 - format(data.swap.fee))).toFixed(4),
             min: (format(coll) * 0.995).toFixed(3),
-            slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+            slip: controller.calc_slip(data, [ZERO.sub(coll), want], pool).toPrecision(3),
             apy: data.apy.toPrecision(3),
           }
           setState({ input: { want }, output: { coll }, tip })

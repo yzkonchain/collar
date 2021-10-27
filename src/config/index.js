@@ -42,8 +42,8 @@ switch (window.location.host) {
     break
 }
 
-pools.forEach(({ r1, r2 }) =>
-  [r1, r2].forEach((pool, key) => {
+pools.forEach(({ r1, r2, r0 }) =>
+  [r1, r2, ...r0].forEach((pool, key) => {
     if (pool) {
       poolSelect[`${pool.bond.addr}-${pool.want.addr}-${key}`] = poolList[pool.addr] = pool
       bondSet.add(pool.bond)

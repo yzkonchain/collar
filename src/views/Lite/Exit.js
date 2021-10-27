@@ -45,7 +45,7 @@ export default function Exit() {
           const tip = {
             fee: (format(want, pool.want.decimals) * (1 - format(data.swap.fee))).toFixed(4),
             min: (format(want, pool.want.decimals) * 0.995).toFixed(3),
-            slip: controller.calc_slip(data, [null, want], pool).toPrecision(3),
+            slip: controller.calc_slip(data, [coll, ZERO.sub(want)], pool).toPrecision(3),
             apy: data.apy.toPrecision(3),
           }
           setState({ input: { coll }, output: { want }, tip })

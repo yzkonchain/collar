@@ -24,8 +24,8 @@ const Token = (symbol, addr, icon, decimals) => {
   return { [addr]: token }
 }
 
-const Pool = ({ bond, want, r1, r2 }, list) => {
-  const r = [r1, r2].map((pool) => {
+const Pool = ({ bond, want, r0, r1, r2 }, list) => {
+  const r = [r1, r2, ...r0].map((pool) => {
     if (pool) {
       const { addr, coll, call, swap_sqp, expiry_time, symbol } = pool
       list[addr] = Token('CLPT', addr)[addr]
@@ -45,7 +45,7 @@ const Pool = ({ bond, want, r1, r2 }, list) => {
       }
     } else return null
   })
-  return { r1: r[0], r2: r[1] }
+  return { r1: r[0], r2: r[1], r0: r.slice(2) }
 }
 
 export { Token, Pool }
